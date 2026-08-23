@@ -152,8 +152,8 @@ body {
    ============================================================ */
 .glass {
   background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
@@ -164,8 +164,8 @@ body {
 
 .glass-card {
   background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(16px) saturate(150%);
   -webkit-backdrop-filter: blur(16px) saturate(150%);
+  backdrop-filter: blur(16px) saturate(150%);
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: var(--radius-xl);
 }
@@ -177,8 +177,8 @@ body {
 
 .glass-modal {
   background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(24px) saturate(200%);
   -webkit-backdrop-filter: blur(24px) saturate(200%);
+  backdrop-filter: blur(24px) saturate(200%);
   border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
