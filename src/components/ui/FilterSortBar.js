@@ -3,25 +3,27 @@
 import { useState } from 'react';
 import { SlidersHorizontal, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const SORT_OPTIONS = [
-  { value: 'newest', label: 'ใหม่ล่าสุด' },
-  { value: 'price-asc', label: 'ราคา: ต่ำ → สูง' },
-  { value: 'price-desc', label: 'ราคา: สูง → ต่ำ' },
-  { value: 'rating', label: 'คะแนนสูงสุด' },
-  { value: 'popular', label: 'ยอดนิยม' },
-];
-
-const PRICE_RANGES = [
-  { value: 'all', label: 'ทุกราคา' },
-  { value: '0-5000', label: 'ต่ำกว่า ฿5,000' },
-  { value: '5000-15000', label: '฿5,000 — ฿15,000' },
-  { value: '15000-35000', label: '฿15,000 — ฿35,000' },
-  { value: '35000-999999', label: 'มากกว่า ฿35,000' },
-];
+import { useTranslation } from '@/context/LanguageContext';
 
 export default function FilterSortBar({ sortBy, priceRange, onSortChange, onPriceChange }) {
   const [showFilters, setShowFilters] = useState(false);
+  const { t } = useTranslation();
+
+  const SORT_OPTIONS = [
+    { value: 'newest', label: t('filter.sortNewest') },
+    { value: 'price-asc', label: t('filter.sortPriceAsc') },
+    { value: 'price-desc', label: t('filter.sortPriceDesc') },
+    { value: 'rating', label: t('filter.sortRating') },
+    { value: 'popular', label: t('filter.sortPopular') },
+  ];
+
+  const PRICE_RANGES = [
+    { value: 'all', label: t('filter.allPrices') },
+    { value: '0-5000', label: t('filter.under5k') },
+    { value: '5000-15000', label: t('filter.range5to15') },
+    { value: '15000-35000', label: t('filter.range15to35') },
+    { value: '35000-999999', label: t('filter.above35k') },
+  ];
 
   return (
     <div className="space-y-3">
@@ -34,7 +36,7 @@ export default function FilterSortBar({ sortBy, priceRange, onSortChange, onPric
             text-surface-700 dark:text-surface-300"
         >
           <SlidersHorizontal className="w-4 h-4" />
-          กรอง
+          {t('filter.filter')}
         </button>
 
         {/* Sort dropdown */}
@@ -69,7 +71,7 @@ export default function FilterSortBar({ sortBy, priceRange, onSortChange, onPric
           >
             <div className="glass-card p-4 rounded-xl space-y-3">
               <p className="text-sm font-semibold text-surface-700 dark:text-surface-300">
-                ช่วงราคา
+                {t('filter.priceRange')}
               </p>
               <div className="flex flex-wrap gap-2">
                 {PRICE_RANGES.map((range) => (

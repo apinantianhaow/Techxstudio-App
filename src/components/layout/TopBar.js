@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Search, ShoppingBag, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ThemeToggle from '@/components/ui/ThemeToggle';
+import LanguageToggle from '@/components/ui/LanguageToggle';
 import SearchOverlay from '@/components/layout/SearchOverlay';
 import { useCartTotalItems } from '@/stores/useCartStore';
 
@@ -27,7 +28,7 @@ export default function TopBar() {
           </Link>
 
           {/* Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {/* Search */}
             <motion.button
               whileTap={{ scale: 0.9 }}
@@ -35,10 +36,13 @@ export default function TopBar() {
               className="w-10 h-10 flex items-center justify-center rounded-full
                 bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700
                 transition-colors"
-              aria-label="ค้นหา"
+              aria-label="Search"
             >
               <Search className="w-5 h-5 text-surface-600 dark:text-surface-300" />
             </motion.button>
+
+            {/* Language */}
+            <LanguageToggle />
 
             {/* Theme */}
             <ThemeToggle />

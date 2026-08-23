@@ -2,24 +2,25 @@ import './globals.css';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from 'sonner';
 import { AuthProvider } from '@/context/AuthContext';
+import { LanguageProvider } from '@/context/LanguageContext';
 import TopBar from '@/components/layout/TopBar';
 import BottomNav from '@/components/layout/BottomNav';
 import ComparePanel from '@/components/product/ComparePanel';
 
 export const metadata = {
   title: 'TechXStudio — Apple Premium Store',
-  description: 'ร้าน Apple Premium Store ออนไลน์ครบวงจร iPhone iPad AirPods Mac อุปกรณ์เสริม ของแท้ 100% ราคาพิเศษ',
-  keywords: ['Apple', 'iPhone', 'iPad', 'AirPods', 'TechXStudio', 'Apple Store Thailand'],
+  description: 'Your one-stop online Apple Premium Store — iPhone, iPad, AirPods, Mac & accessories. 100% genuine products at special prices.',
+  keywords: ['Apple', 'iPhone', 'iPad', 'AirPods', 'TechXStudio', 'Apple Store'],
   openGraph: {
     title: 'TechXStudio — Apple Premium Store',
-    description: 'ร้าน Apple Premium Store ออนไลน์ครบวงจร',
+    description: 'Your one-stop online Apple Premium Store',
     type: 'website',
   },
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="th" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
@@ -28,24 +29,26 @@ export default function RootLayout({ children }) {
       </head>
       <body className="antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <AuthProvider>
-            <TopBar />
-            <main className="pt-14 pb-safe min-h-screen">
-              {children}
-            </main>
-            <BottomNav />
-            <ComparePanel />
-            <Toaster
-              position="top-center"
-              toastOptions={{
-                style: {
-                  borderRadius: '12px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                },
-              }}
-            />
-          </AuthProvider>
+          <LanguageProvider>
+            <AuthProvider>
+              <TopBar />
+              <main className="pt-14 pb-safe min-h-screen">
+                {children}
+              </main>
+              <BottomNav />
+              <ComparePanel />
+              <Toaster
+                position="top-center"
+                toastOptions={{
+                  style: {
+                    borderRadius: '12px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                  },
+                }}
+              />
+            </AuthProvider>
+          </LanguageProvider>
         </ThemeProvider>
       </body>
     </html>

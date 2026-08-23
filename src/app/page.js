@@ -8,6 +8,7 @@ import ProductCard from '@/components/product/ProductCard';
 import ProductQuickView from '@/components/product/ProductQuickView';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import LoadingSkeleton from '@/components/ui/LoadingSkeleton';
+import { useTranslation } from '@/context/LanguageContext';
 import { Zap, TrendingUp, Headphones } from 'lucide-react';
 
 export default function HomePage() {
@@ -16,6 +17,7 @@ export default function HomePage() {
   const [accessories, setAccessories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [quickViewProduct, setQuickViewProduct] = useState(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     async function fetchData() {
@@ -40,6 +42,13 @@ export default function HomePage() {
     fetchData();
   }, []);
 
+  const features = [
+    { icon: '🛡️', ...t('home.features.authentic') },
+    { icon: '🚚', ...t('home.features.freeShipping') },
+    { icon: '🔄', ...t('home.features.returns') },
+    { icon: '💳', ...t('home.features.installment') },
+  ];
+
   return (
     <div className="max-w-7xl mx-auto px-4 space-y-8 py-4">
       {/* Hero Banner */}
@@ -59,7 +68,7 @@ export default function HomePage() {
             <div className="flex items-center gap-2">
               <Zap className="w-5 h-5 text-error fill-current" />
               <h2 className="font-bold text-lg section-title text-surface-800 dark:text-surface-200">
-                Flash Sale
+                {t('home.flashSale')}
               </h2>
             </div>
             <FlashSaleTimer />
@@ -70,12 +79,7 @@ export default function HomePage() {
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
               {flashSale.map((product, i) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  index={i}
-                  onQuickView={setQuickViewProduct}
-                />
+                <ProductCard key={product.id} product={product} index={i} onQuickView={setQuickViewProduct} />
               ))}
             </div>
           )}
@@ -88,7 +92,7 @@ export default function HomePage() {
           <div className="flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-primary-600" />
             <h2 className="font-bold text-lg section-title text-surface-800 dark:text-surface-200">
-              สินค้ายอดนิยม
+              {t('home.popular')}
             </h2>
           </div>
 
@@ -97,12 +101,7 @@ export default function HomePage() {
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
               {popular.map((product, i) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  index={i}
-                  onQuickView={setQuickViewProduct}
-                />
+                <ProductCard key={product.id} product={product} index={i} onQuickView={setQuickViewProduct} />
               ))}
             </div>
           )}
@@ -115,7 +114,7 @@ export default function HomePage() {
           <div className="flex items-center gap-2">
             <Headphones className="w-5 h-5 text-accent-600" />
             <h2 className="font-bold text-lg section-title text-surface-800 dark:text-surface-200">
-              อุปกรณ์เสริม
+              {t('home.accessories')}
             </h2>
           </div>
 
@@ -124,12 +123,7 @@ export default function HomePage() {
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
               {accessories.map((product, i) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  index={i}
-                  onQuickView={setQuickViewProduct}
-                />
+                <ProductCard key={product.id} product={product} index={i} onQuickView={setQuickViewProduct} />
               ))}
             </div>
           )}
@@ -139,26 +133,17 @@ export default function HomePage() {
       {/* Features */}
       <ScrollReveal delay={0.3}>
         <section className="grid grid-cols-2 md:grid-cols-4 gap-3 py-4">
-          {[
-            { icon: '🛡️', label: 'ของแท้ 100%', desc: 'สินค้า Apple แท้ทุกชิ้น' },
-            { icon: '🚚', label: 'จัดส่งฟรี', desc: 'เมื่อสั่งซื้อครบ ฿3,000' },
-            { icon: '🔄', label: 'เปลี่ยนคืน 14 วัน', desc: 'ไม่พอใจ เปลี่ยนคืนได้' },
-            { icon: '💳', label: 'ผ่อน 0%', desc: 'นานสูงสุด 10 เดือน' },
-          ].map((feat) => (
-            <div key={feat.label} className="glass-card p-4 text-center">
+          {features.map((feat) => (
+            <div key={feat.title} className="glass-card p-4 text-center">
               <div className="text-2xl mb-2">{feat.icon}</div>
-              <p className="text-xs font-bold text-surface-700 dark:text-surface-300">{feat.label}</p>
+              <p className="text-xs font-bold text-surface-700 dark:text-surface-300">{feat.title}</p>
               <p className="text-[10px] text-surface-400 mt-0.5">{feat.desc}</p>
             </div>
           ))}
         </section>
       </ScrollReveal>
 
-      <ProductQuickView
-        product={quickViewProduct}
-        isOpen={!!quickViewProduct}
-        onClose={() => setQuickViewProduct(null)}
-      />
+      <ProductQuickView product={quickViewProduct} isOpen={!!quickViewProduct} onClose={() => setQuickViewProduct(null)} />
     </div>
   );
 }

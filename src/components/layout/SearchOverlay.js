@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Search, X, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatPrice, calcDiscountedPrice } from '@/lib/utils';
+import { useTranslation } from '@/context/LanguageContext';
 
 export default function SearchOverlay({ isOpen, onClose }) {
   const [query, setQuery] = useState('');
@@ -12,6 +13,7 @@ export default function SearchOverlay({ isOpen, onClose }) {
   const [loading, setLoading] = useState(false);
   const inputRef = useRef(null);
   const timerRef = useRef(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (isOpen) {
@@ -77,7 +79,7 @@ export default function SearchOverlay({ isOpen, onClose }) {
                   type="text"
                   value={query}
                   onChange={handleChange}
-                  placeholder="ค้นหาสินค้า..."
+                  placeholder={t('search.placeholder')}
                   className="w-full pl-10 pr-4 py-3 rounded-xl bg-surface-100 dark:bg-surface-800
                     border border-surface-200 dark:border-surface-700
                     focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
@@ -147,7 +149,7 @@ export default function SearchOverlay({ isOpen, onClose }) {
             {/* No results */}
             {query.length >= 2 && !loading && results.length === 0 && (
               <p className="text-center text-surface-400 dark:text-surface-500 py-8">
-                ไม่พบสินค้าที่ค้นหา
+                {t('search.noResults')}
               </p>
             )}
           </motion.div>
