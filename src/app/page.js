@@ -1,69 +1,164 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState, useEffect } from 'react';
+import HighlightBanner from '@/components/home/HighlightBanner';
+import FlashSaleTimer from '@/components/home/FlashSaleTimer';
+import CategoryGrid from '@/components/home/CategoryGrid';
+import ProductCard from '@/components/product/ProductCard';
+import ProductQuickView from '@/components/product/ProductQuickView';
+import ScrollReveal from '@/components/ui/ScrollReveal';
+import LoadingSkeleton from '@/components/ui/LoadingSkeleton';
+import { Zap, TrendingUp, Headphones } from 'lucide-react';
+
+export default function HomePage() {
+  const [flashSale, setFlashSale] = useState([]);
+  const [popular, setPopular] = useState([]);
+  const [accessories, setAccessories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [fsRes, popRes, accRes] = await Promise.all([
+          fetch('/api/products/curated/flash_sale'),
+          fetch('/api/products/curated/popular'),
+          fetch('/api/products/curated/accessories'),
+        ]);
+        const [fsData, popData, accData] = await Promise.all([
+          fsRes.json(), popRes.json(), accRes.json(),
+        ]);
+        setFlashSale(fsData.products || []);
+        setPopular(popData.products || []);
+        setAccessories(accData.products || []);
+      } catch (err) {
+        console.error('Home fetch error:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.js
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="max-w-7xl mx-auto px-4 space-y-8 py-4">
+      {/* Hero Banner */}
+      <ScrollReveal>
+        <HighlightBanner />
+      </ScrollReveal>
+
+      {/* Category Grid */}
+      <ScrollReveal delay={0.1}>
+        <CategoryGrid />
+      </ScrollReveal>
+
+      {/* Flash Sale Section */}
+      <ScrollReveal delay={0.15}>
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Zap className="w-5 h-5 text-error fill-current" />
+              <h2 className="font-bold text-lg section-title text-surface-800 dark:text-surface-200">
+                Flash Sale
+              </h2>
+            </div>
+            <FlashSaleTimer />
+          </div>
+
+          {loading ? (
+            <LoadingSkeleton count={4} type="card" />
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {flashSale.map((product, i) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  index={i}
+                  onQuickView={setQuickViewProduct}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      </ScrollReveal>
+
+      {/* Popular Section */}
+      <ScrollReveal delay={0.2}>
+        <section className="space-y-4">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-primary-600" />
+            <h2 className="font-bold text-lg section-title text-surface-800 dark:text-surface-200">
+              สินค้ายอดนิยม
+            </h2>
+          </div>
+
+          {loading ? (
+            <LoadingSkeleton count={4} type="card" />
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {popular.map((product, i) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  index={i}
+                  onQuickView={setQuickViewProduct}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      </ScrollReveal>
+
+      {/* Accessories Section */}
+      <ScrollReveal delay={0.25}>
+        <section className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Headphones className="w-5 h-5 text-accent-600" />
+            <h2 className="font-bold text-lg section-title text-surface-800 dark:text-surface-200">
+              อุปกรณ์เสริม
+            </h2>
+          </div>
+
+          {loading ? (
+            <LoadingSkeleton count={4} type="card" />
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {accessories.map((product, i) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  index={i}
+                  onQuickView={setQuickViewProduct}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      </ScrollReveal>
+
+      {/* Features */}
+      <ScrollReveal delay={0.3}>
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-3 py-4">
+          {[
+            { icon: '🛡️', label: 'ของแท้ 100%', desc: 'สินค้า Apple แท้ทุกชิ้น' },
+            { icon: '🚚', label: 'จัดส่งฟรี', desc: 'เมื่อสั่งซื้อครบ ฿3,000' },
+            { icon: '🔄', label: 'เปลี่ยนคืน 14 วัน', desc: 'ไม่พอใจ เปลี่ยนคืนได้' },
+            { icon: '💳', label: 'ผ่อน 0%', desc: 'นานสูงสุด 10 เดือน' },
+          ].map((feat) => (
+            <div key={feat.label} className="glass-card p-4 text-center">
+              <div className="text-2xl mb-2">{feat.icon}</div>
+              <p className="text-xs font-bold text-surface-700 dark:text-surface-300">{feat.label}</p>
+              <p className="text-[10px] text-surface-400 mt-0.5">{feat.desc}</p>
+            </div>
+          ))}
+        </section>
+      </ScrollReveal>
+
+      <ProductQuickView
+        product={quickViewProduct}
+        isOpen={!!quickViewProduct}
+        onClose={() => setQuickViewProduct(null)}
+      />
     </div>
   );
 }
