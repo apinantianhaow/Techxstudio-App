@@ -59,7 +59,7 @@ export function AuthProvider({ children }) {
     });
 
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'เข้าสู่ระบบไม่สำเร็จ');
+    if (!res.ok) throw new Error(data.error || 'Login failed');
 
     setUser(data.user);
     setToken(data.token);
@@ -75,7 +75,7 @@ export function AuthProvider({ children }) {
     });
 
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'สมัครสมาชิกไม่สำเร็จ');
+    if (!res.ok) throw new Error(data.error || 'Signup failed');
 
     setUser(data.user);
     setToken(data.token);
