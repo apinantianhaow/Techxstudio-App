@@ -22,7 +22,7 @@ export async function GET(request, { params }) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      return NextResponse.json({ error: 'ไม่สามารถดึงข้อมูลได้' }, { status: 500 });
+      return NextResponse.json({ error: 'Unable to fetch data' }, { status: 500 });
     }
 
     products?.forEach(p => {
@@ -33,6 +33,6 @@ export async function GET(request, { params }) {
     return NextResponse.json({ products });
   } catch (err) {
     console.error('Curated list error:', err);
-    return NextResponse.json({ error: 'เกิดข้อผิดพลาด' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }
 }

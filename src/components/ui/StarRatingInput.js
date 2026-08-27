@@ -27,7 +27,7 @@ export default function StarRatingInput({ value = 0, onChange, size = 'md' }) {
           onMouseLeave={() => setHovered(0)}
           onClick={() => onChange?.(star)}
           className="focus:outline-none cursor-pointer"
-          aria-label={`${star} ดาว`}
+          aria-label={`${star} stars`}
         >
           <Star
             className={`${starSize} transition-colors duration-150 ${

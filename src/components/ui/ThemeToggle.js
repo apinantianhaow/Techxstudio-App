@@ -22,7 +22,7 @@ export default function ThemeToggle() {
       className="relative w-10 h-10 flex items-center justify-center rounded-full
         bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700
         transition-colors duration-300"
-      aria-label="สลับธีม"
+      aria-label="Toggle theme"
     >
       <AnimatePresence mode="wait">
         {theme === 'dark' ? (

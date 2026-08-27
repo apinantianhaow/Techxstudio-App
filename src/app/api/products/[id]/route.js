@@ -18,7 +18,7 @@ export async function GET(request, { params }) {
       .single();
 
     if (!product || error) {
-      return NextResponse.json({ error: 'ไม่พบสินค้า' }, { status: 404 });
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
     // Sort nested arrays
@@ -29,6 +29,6 @@ export async function GET(request, { params }) {
     return NextResponse.json({ product });
   } catch (err) {
     console.error('Product detail error:', err);
-    return NextResponse.json({ error: 'เกิดข้อผิดพลาด' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }
 }

@@ -5,9 +5,9 @@ import { supabaseAdmin } from '@/lib/supabase/server';
 import { signToken } from '@/lib/auth';
 
 const signupSchema = z.object({
-  email: z.string().email('อีเมลไม่ถูกต้อง'),
-  password: z.string().min(6, 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร'),
-  full_name: z.string().min(1, 'กรุณากรอกชื่อ'),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  full_name: z.string().min(1, 'Please enter your name'),
 });
 
 export async function POST(request) {
@@ -33,7 +33,7 @@ export async function POST(request) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: 'อีเมลนี้ถูกใช้งานแล้ว' },
+        { error: 'This email is already in use' },
         { status: 409 }
       );
     }
@@ -49,7 +49,7 @@ export async function POST(request) {
       .single();
 
     if (error) {
-      return NextResponse.json({ error: 'ไม่สามารถสร้างบัญชีได้' }, { status: 500 });
+      return NextResponse.json({ error: 'Unable to create account' }, { status: 500 });
     }
 
     // Generate JWT
@@ -58,6 +58,6 @@ export async function POST(request) {
     return NextResponse.json({ user, token }, { status: 201 });
   } catch (err) {
     console.error('Signup error:', err);
-    return NextResponse.json({ error: 'เกิดข้อผิดพลาด' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }
 }

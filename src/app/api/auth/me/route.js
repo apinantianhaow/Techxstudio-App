@@ -16,12 +16,12 @@ export async function GET(request) {
       .single();
 
     if (!user || error) {
-      return NextResponse.json({ error: 'ไม่พบผู้ใช้' }, { status: 404 });
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     return NextResponse.json({ user });
   } catch (err) {
     console.error('Me error:', err);
-    return NextResponse.json({ error: 'เกิดข้อผิดพลาด' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }
 }

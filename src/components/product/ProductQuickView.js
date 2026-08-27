@@ -7,6 +7,7 @@ import StarRating from '@/components/ui/StarRating';
 import useCartStore from '@/stores/useCartStore';
 import useWishlistStore from '@/stores/useWishlistStore';
 import { formatPrice, calcDiscountedPrice } from '@/lib/utils';
+import { useTranslation } from '@/context/LanguageContext';
 import { toast } from 'sonner';
 
 export default function ProductQuickView({ product, isOpen, onClose }) {
@@ -14,6 +15,7 @@ export default function ProductQuickView({ product, isOpen, onClose }) {
   const [selectedOption, setSelectedOption] = useState(0);
   const addToCart = useCartStore((s) => s.addToCart);
   const { isFavorite, toggleFavorite } = useWishlistStore();
+  const { t } = useTranslation();
 
   if (!product) return null;
 
@@ -35,7 +37,7 @@ export default function ProductQuickView({ product, isOpen, onClose }) {
       image_url: currentColor?.image_url || '',
       slug: product.slug,
     });
-    toast.success('เพิ่มลงตะกร้าแล้ว 🛒');
+    toast.success(t('product.addedToCart'));
     onClose();
   };
 
@@ -98,7 +100,7 @@ export default function ProductQuickView({ product, isOpen, onClose }) {
               {colors.length > 1 && (
                 <div>
                   <p className="text-xs font-medium text-surface-500 dark:text-surface-400 mb-2">
-                    สี: {currentColor?.name}
+                    {t('product.color')}: {currentColor?.name}
                   </p>
                   <div className="flex gap-2">
                     {colors.map((c, i) => (
@@ -120,7 +122,7 @@ export default function ProductQuickView({ product, isOpen, onClose }) {
               {/* Options */}
               {options.length > 1 && (
                 <div>
-                  <p className="text-xs font-medium text-surface-500 dark:text-surface-400 mb-2">ตัวเลือก</p>
+                  <p className="text-xs font-medium text-surface-500 dark:text-surface-400 mb-2">{t('product.options')}</p>
                   <div className="flex flex-wrap gap-2">
                     {options.map((opt, i) => (
                       <button
@@ -147,13 +149,13 @@ export default function ProductQuickView({ product, isOpen, onClose }) {
                     flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-shadow btn-ripple"
                 >
                   <ShoppingBag className="w-5 h-5" />
-                  เพิ่มลงตะกร้า
+                  {t('common.addToCart')}
                 </motion.button>
                 <motion.button
                   whileTap={{ scale: 0.8 }}
                   onClick={() => {
                     toggleFavorite(product.id);
-                    toast(liked ? 'ลบออกจาก Wishlist' : 'เพิ่มลง Wishlist ❤️');
+                    toast(liked ? t('product.removedFromWishlist') : t('product.addedToWishlist'));
                   }}
                   className="w-12 h-12 rounded-xl bg-surface-100 dark:bg-surface-700
                     flex items-center justify-center hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"

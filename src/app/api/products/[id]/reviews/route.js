@@ -24,13 +24,13 @@ export async function GET(request, { params }) {
       .limit(20);
 
     if (error) {
-      return NextResponse.json({ error: 'ไม่สามารถดึงรีวิวได้' }, { status: 500 });
+      return NextResponse.json({ error: 'Unable to fetch reviews' }, { status: 500 });
     }
 
     return NextResponse.json({ reviews: reviews || [] });
   } catch (err) {
     console.error('Reviews GET error:', err);
-    return NextResponse.json({ error: 'เกิดข้อผิดพลาด' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }
 }
 
@@ -38,7 +38,7 @@ export async function POST(request, { params }) {
   try {
     const authUser = getAuthUser(request);
     if (!authUser) {
-      return NextResponse.json({ error: 'กรุณาเข้าสู่ระบบ' }, { status: 401 });
+      return NextResponse.json({ error: 'Please log in' }, { status: 401 });
     }
 
     const { id } = await params;
@@ -62,7 +62,7 @@ export async function POST(request, { params }) {
 
     if (existing) {
       return NextResponse.json(
-        { error: 'คุณได้รีวิวสินค้านี้แล้ว' },
+        { error: 'You have already reviewed this product' },
         { status: 409 }
       );
     }
@@ -78,7 +78,7 @@ export async function POST(request, { params }) {
       .single();
 
     if (error) {
-      return NextResponse.json({ error: 'ไม่สามารถส่งรีวิวได้' }, { status: 500 });
+      return NextResponse.json({ error: 'Unable to submit review' }, { status: 500 });
     }
 
     // Update product rating and reviews_count
@@ -101,6 +101,6 @@ export async function POST(request, { params }) {
     return NextResponse.json({ review }, { status: 201 });
   } catch (err) {
     console.error('Review POST error:', err);
-    return NextResponse.json({ error: 'เกิดข้อผิดพลาด' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }
 }

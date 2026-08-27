@@ -16,7 +16,7 @@ export async function GET(request) {
   try {
     const authUser = getAuthUser(request);
     if (!authUser) {
-      return NextResponse.json({ error: 'กรุณาเข้าสู่ระบบ' }, { status: 401 });
+      return NextResponse.json({ error: 'Please log in' }, { status: 401 });
     }
 
     const { data: items, error } = await supabaseAdmin
@@ -29,13 +29,13 @@ export async function GET(request) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      return NextResponse.json({ error: 'ไม่สามารถดึงตะกร้าได้' }, { status: 500 });
+      return NextResponse.json({ error: 'Unable to fetch cart' }, { status: 500 });
     }
 
     return NextResponse.json({ items: items || [] });
   } catch (err) {
     console.error('Cart GET error:', err);
-    return NextResponse.json({ error: 'เกิดข้อผิดพลาด' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }
 }
 
@@ -43,7 +43,7 @@ export async function POST(request) {
   try {
     const authUser = getAuthUser(request);
     if (!authUser) {
-      return NextResponse.json({ error: 'กรุณาเข้าสู่ระบบ' }, { status: 401 });
+      return NextResponse.json({ error: 'Please log in' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -76,7 +76,7 @@ export async function POST(request) {
         .single();
 
       if (error) {
-        return NextResponse.json({ error: 'ไม่สามารถอัปเดตตะกร้าได้' }, { status: 500 });
+        return NextResponse.json({ error: 'Unable to update cart' }, { status: 500 });
       }
 
       return NextResponse.json({ item: updated });
@@ -95,12 +95,12 @@ export async function POST(request) {
       .single();
 
     if (error) {
-      return NextResponse.json({ error: 'ไม่สามารถเพิ่มลงตะกร้าได้' }, { status: 500 });
+      return NextResponse.json({ error: 'Unable to add to cart' }, { status: 500 });
     }
 
     return NextResponse.json({ item }, { status: 201 });
   } catch (err) {
     console.error('Cart POST error:', err);
-    return NextResponse.json({ error: 'เกิดข้อผิดพลาด' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }
 }

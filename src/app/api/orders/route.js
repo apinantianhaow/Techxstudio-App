@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase/server';
 import { getAuthUser } from '@/lib/auth';
 
 const createOrderSchema = z.object({
-  shipping_address: z.string().min(1, 'กรุณากรอกที่อยู่จัดส่ง'),
+  shipping_address: z.string().min(1, 'Please enter a shipping address'),
   payment_method: z.string().default('credit_card'),
   coupon_code: z.string().optional(),
 });
@@ -13,7 +13,7 @@ export async function GET(request) {
   try {
     const authUser = getAuthUser(request);
     if (!authUser) {
-      return NextResponse.json({ error: 'กรุณาเข้าสู่ระบบ' }, { status: 401 });
+      return NextResponse.json({ error: 'Please log in' }, { status: 401 });
     }
 
     const { data: orders, error } = await supabaseAdmin
@@ -26,13 +26,13 @@ export async function GET(request) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      return NextResponse.json({ error: 'ไม่สามารถดึงออเดอร์ได้' }, { status: 500 });
+      return NextResponse.json({ error: 'Unable to fetch orders' }, { status: 500 });
     }
 
     return NextResponse.json({ orders: orders || [] });
   } catch (err) {
     console.error('Orders GET error:', err);
-    return NextResponse.json({ error: 'เกิดข้อผิดพลาด' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }
 }
 
@@ -40,7 +40,7 @@ export async function POST(request) {
   try {
     const authUser = getAuthUser(request);
     if (!authUser) {
-      return NextResponse.json({ error: 'กรุณาเข้าสู่ระบบ' }, { status: 401 });
+      return NextResponse.json({ error: 'Please log in' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -60,7 +60,7 @@ export async function POST(request) {
       .eq('user_id', authUser.id);
 
     if (!cartItems || cartItems.length === 0) {
-      return NextResponse.json({ error: 'ตะกร้าว่างเปล่า' }, { status: 400 });
+      return NextResponse.json({ error: 'Cart is empty' }, { status: 400 });
     }
 
     // Calculate total
@@ -79,17 +79,17 @@ export async function POST(request) {
       if (coupon) {
         if (coupon.min_purchase && totalAmount < coupon.min_purchase) {
           return NextResponse.json(
-            { error: `ยอดขั้นต่ำ ฿${coupon.min_purchase.toLocaleString()}` },
+            { error: `Minimum purchase ฿${coupon.min_purchase.toLocaleString()}` },
             { status: 400 }
           );
         }
 
         if (coupon.max_uses && coupon.current_uses >= coupon.max_uses) {
-          return NextResponse.json({ error: 'คูปองหมดอายุแล้ว' }, { status: 400 });
+          return NextResponse.json({ error: 'Coupon has expired' }, { status: 400 });
         }
 
         if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
-          return NextResponse.json({ error: 'คูปองหมดอายุแล้ว' }, { status: 400 });
+          return NextResponse.json({ error: 'Coupon has expired' }, { status: 400 });
         }
 
         if (coupon.discount_percent > 0) {
@@ -126,7 +126,7 @@ export async function POST(request) {
       .single();
 
     if (orderError) {
-      return NextResponse.json({ error: 'ไม่สามารถสร้างออเดอร์ได้' }, { status: 500 });
+      return NextResponse.json({ error: 'Unable to create order' }, { status: 500 });
     }
 
     // Create order items
@@ -167,6 +167,6 @@ export async function POST(request) {
     return NextResponse.json({ order }, { status: 201 });
   } catch (err) {
     console.error('Orders POST error:', err);
-    return NextResponse.json({ error: 'เกิดข้อผิดพลาด' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }
 }

@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react';
 import ProductCard from '@/components/product/ProductCard';
 import ProductQuickView from '@/components/product/ProductQuickView';
+import { useTranslation } from '@/context/LanguageContext';
 
 export default function ProductRecommendations({ category, currentProductId }) {
   const [products, setProducts] = useState([]);
   const [quickViewProduct, setQuickViewProduct] = useState(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     async function fetchRecommendations() {
@@ -28,24 +30,14 @@ export default function ProductRecommendations({ category, currentProductId }) {
   return (
     <div className="space-y-4">
       <h3 className="font-bold text-lg section-title text-surface-800 dark:text-surface-200">
-        คุณอาจชอบ
+        {t('product.youMayLike')}
       </h3>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {products.map((product, i) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            index={i}
-            onQuickView={setQuickViewProduct}
-          />
+          <ProductCard key={product.id} product={product} index={i} onQuickView={setQuickViewProduct} />
         ))}
       </div>
-
-      <ProductQuickView
-        product={quickViewProduct}
-        isOpen={!!quickViewProduct}
-        onClose={() => setQuickViewProduct(null)}
-      />
+      <ProductQuickView product={quickViewProduct} isOpen={!!quickViewProduct} onClose={() => setQuickViewProduct(null)} />
     </div>
   );
 }

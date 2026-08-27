@@ -23,7 +23,7 @@ export async function GET(request) {
     const { data: products, error } = await query;
 
     if (error) {
-      return NextResponse.json({ error: 'ไม่สามารถดึงข้อมูลสินค้าได้' }, { status: 500 });
+      return NextResponse.json({ error: 'Unable to fetch products' }, { status: 500 });
     }
 
     // Sort nested arrays
@@ -35,6 +35,6 @@ export async function GET(request) {
     return NextResponse.json({ products });
   } catch (err) {
     console.error('Products error:', err);
-    return NextResponse.json({ error: 'เกิดข้อผิดพลาด' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }
 }

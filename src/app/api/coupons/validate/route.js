@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { supabaseAdmin } from '@/lib/supabase/server';
 
 const validateSchema = z.object({
-  code: z.string().min(1, 'กรุณากรอกรหัสคูปอง'),
+  code: z.string().min(1, 'Please enter a coupon code'),
   total: z.number().positive().optional(),
 });
 
@@ -29,23 +29,23 @@ export async function POST(request) {
       .single();
 
     if (!coupon || error) {
-      return NextResponse.json({ error: 'ไม่พบคูปองนี้' }, { status: 404 });
+      return NextResponse.json({ error: 'Coupon not found' }, { status: 404 });
     }
 
     // Check expiry
     if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
-      return NextResponse.json({ error: 'คูปองหมดอายุแล้ว' }, { status: 400 });
+      return NextResponse.json({ error: 'Coupon has expired' }, { status: 400 });
     }
 
     // Check usage limit
     if (coupon.max_uses && coupon.current_uses >= coupon.max_uses) {
-      return NextResponse.json({ error: 'คูปองถูกใช้ครบจำนวนแล้ว' }, { status: 400 });
+      return NextResponse.json({ error: 'Coupon fully redeemed' }, { status: 400 });
     }
 
     // Check minimum purchase
     if (total && coupon.min_purchase && total < coupon.min_purchase) {
       return NextResponse.json(
-        { error: `ยอดสั่งซื้อขั้นต่ำ ฿${coupon.min_purchase.toLocaleString()}` },
+        { error: `Minimum purchase ฿${coupon.min_purchase.toLocaleString()}` },
         { status: 400 }
       );
     }
@@ -74,6 +74,6 @@ export async function POST(request) {
     });
   } catch (err) {
     console.error('Coupon validate error:', err);
-    return NextResponse.json({ error: 'เกิดข้อผิดพลาด' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }
 }

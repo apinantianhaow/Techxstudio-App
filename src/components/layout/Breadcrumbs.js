@@ -2,8 +2,10 @@
 
 import Link from 'next/link';
 import { ChevronRight, Home } from 'lucide-react';
+import { useTranslation } from '@/context/LanguageContext';
 
 export default function Breadcrumbs({ items = [] }) {
+  const { t } = useTranslation();
   if (items.length === 0) return null;
 
   return (
@@ -13,7 +15,7 @@ export default function Breadcrumbs({ items = [] }) {
         className="flex items-center gap-1 text-surface-400 dark:text-surface-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors flex-shrink-0"
       >
         <Home className="w-3.5 h-3.5" />
-        <span>หน้าหลัก</span>
+        <span>{t('breadcrumbs.home')}</span>
       </Link>
 
       {items.map((item, i) => (

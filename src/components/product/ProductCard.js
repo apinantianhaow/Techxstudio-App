@@ -7,11 +7,13 @@ import StarRating from '@/components/ui/StarRating';
 import useWishlistStore from '@/stores/useWishlistStore';
 import useCompareStore from '@/stores/useCompareStore';
 import { formatPrice, calcDiscountedPrice } from '@/lib/utils';
+import { useTranslation } from '@/context/LanguageContext';
 import { toast } from 'sonner';
 
 export default function ProductCard({ product, index = 0, onQuickView }) {
   const { isFavorite, toggleFavorite } = useWishlistStore();
   const { isInCompare, toggleCompare } = useCompareStore();
+  const { t } = useTranslation();
   const liked = isFavorite(product.id);
   const compared = isInCompare(product.id);
 
@@ -24,7 +26,7 @@ export default function ProductCard({ product, index = 0, onQuickView }) {
     e.preventDefault();
     e.stopPropagation();
     toggleFavorite(product.id);
-    toast(liked ? 'ลบออกจาก Wishlist แล้ว' : 'เพิ่มลง Wishlist แล้ว ❤️');
+    toast(liked ? t('product.removedFromWishlist') : t('product.addedToWishlist'));
   };
 
   const handleCompare = (e) => {
@@ -32,7 +34,7 @@ export default function ProductCard({ product, index = 0, onQuickView }) {
     e.stopPropagation();
     toggleCompare(product);
     if (!compared) {
-      toast('เพิ่มในรายการเปรียบเทียบ');
+      toast(t('product.addedToCompare'));
     }
   };
 
@@ -93,7 +95,7 @@ export default function ProductCard({ product, index = 0, onQuickView }) {
                 onClick={handleQuickView}
                 className="w-9 h-9 rounded-full bg-white/90 dark:bg-surface-800/90 backdrop-blur-sm
                   flex items-center justify-center shadow-md hover:shadow-lg transition-all"
-                aria-label="ดูด่วน"
+                aria-label={t('product.quickView')}
               >
                 <Eye className="w-4 h-4 text-surface-700 dark:text-surface-200" />
               </motion.button>
@@ -102,7 +104,7 @@ export default function ProductCard({ product, index = 0, onQuickView }) {
                 onClick={handleCompare}
                 className={`w-9 h-9 rounded-full backdrop-blur-sm flex items-center justify-center shadow-md transition-all
                   ${compared ? 'bg-primary-600 text-white' : 'bg-white/90 dark:bg-surface-800/90'}`}
-                aria-label="เปรียบเทียบ"
+                aria-label={t('product.compare')}
               >
                 <GitCompareArrows className={`w-4 h-4 ${compared ? '' : 'text-surface-700 dark:text-surface-200'}`} />
               </motion.button>
@@ -119,7 +121,7 @@ export default function ProductCard({ product, index = 0, onQuickView }) {
                 whileTap={{ scale: 0.7 }}
                 onClick={handleFavorite}
                 className="flex-shrink-0 mt-0.5"
-                aria-label="ถูกใจ"
+                aria-label={t('nav.wishlist')}
               >
                 <Heart
                   className={`w-5 h-5 transition-colors ${

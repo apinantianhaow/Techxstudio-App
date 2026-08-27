@@ -6,7 +6,7 @@ export async function GET(request) {
   try {
     const authUser = getAuthUser(request);
     if (!authUser) {
-      return NextResponse.json({ error: 'กรุณาเข้าสู่ระบบ' }, { status: 401 });
+      return NextResponse.json({ error: 'Please log in' }, { status: 401 });
     }
 
     const { data: items, error } = await supabaseAdmin
@@ -22,13 +22,13 @@ export async function GET(request) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      return NextResponse.json({ error: 'ไม่สามารถดึง wishlist ได้' }, { status: 500 });
+      return NextResponse.json({ error: 'Unable to fetch wishlist' }, { status: 500 });
     }
 
     return NextResponse.json({ items: items || [] });
   } catch (err) {
     console.error('Wishlist GET error:', err);
-    return NextResponse.json({ error: 'เกิดข้อผิดพลาด' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }
 }
 
@@ -36,14 +36,14 @@ export async function POST(request) {
   try {
     const authUser = getAuthUser(request);
     if (!authUser) {
-      return NextResponse.json({ error: 'กรุณาเข้าสู่ระบบ' }, { status: 401 });
+      return NextResponse.json({ error: 'Please log in' }, { status: 401 });
     }
 
     const body = await request.json();
     const { product_id } = body;
 
     if (!product_id) {
-      return NextResponse.json({ error: 'กรุณาระบุสินค้า' }, { status: 400 });
+      return NextResponse.json({ error: 'Please specify a product' }, { status: 400 });
     }
 
     const { data: item, error } = await supabaseAdmin
@@ -54,15 +54,15 @@ export async function POST(request) {
 
     if (error) {
       if (error.code === '23505') {
-        return NextResponse.json({ error: 'สินค้าอยู่ใน wishlist แล้ว' }, { status: 409 });
+        return NextResponse.json({ error: 'Product already in wishlist' }, { status: 409 });
       }
-      return NextResponse.json({ error: 'ไม่สามารถเพิ่มได้' }, { status: 500 });
+      return NextResponse.json({ error: 'Unable to add' }, { status: 500 });
     }
 
     return NextResponse.json({ item }, { status: 201 });
   } catch (err) {
     console.error('Wishlist POST error:', err);
-    return NextResponse.json({ error: 'เกิดข้อผิดพลาด' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }
 }
 
@@ -70,14 +70,14 @@ export async function DELETE(request) {
   try {
     const authUser = getAuthUser(request);
     if (!authUser) {
-      return NextResponse.json({ error: 'กรุณาเข้าสู่ระบบ' }, { status: 401 });
+      return NextResponse.json({ error: 'Please log in' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
     const product_id = searchParams.get('product_id');
 
     if (!product_id) {
-      return NextResponse.json({ error: 'กรุณาระบุสินค้า' }, { status: 400 });
+      return NextResponse.json({ error: 'Please specify a product' }, { status: 400 });
     }
 
     const { error } = await supabaseAdmin
@@ -87,12 +87,12 @@ export async function DELETE(request) {
       .eq('product_id', product_id);
 
     if (error) {
-      return NextResponse.json({ error: 'ไม่สามารถลบได้' }, { status: 500 });
+      return NextResponse.json({ error: 'Unable to delete' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('Wishlist DELETE error:', err);
-    return NextResponse.json({ error: 'เกิดข้อผิดพลาด' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }
 }

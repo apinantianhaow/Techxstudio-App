@@ -5,8 +5,8 @@ import { supabaseAdmin } from '@/lib/supabase/server';
 import { signToken } from '@/lib/auth';
 
 const loginSchema = z.object({
-  email: z.string().email('อีเมลไม่ถูกต้อง'),
-  password: z.string().min(1, 'กรุณากรอกรหัสผ่าน'),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(1, 'Please enter your password'),
 });
 
 export async function POST(request) {
@@ -32,7 +32,7 @@ export async function POST(request) {
 
     if (!user || error) {
       return NextResponse.json(
-        { error: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' },
+        { error: 'Invalid email or password' },
         { status: 401 }
       );
     }
@@ -41,7 +41,7 @@ export async function POST(request) {
     const isValid = await bcrypt.compare(password, user.password_hash);
     if (!isValid) {
       return NextResponse.json(
-        { error: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' },
+        { error: 'Invalid email or password' },
         { status: 401 }
       );
     }
@@ -54,6 +54,6 @@ export async function POST(request) {
     return NextResponse.json({ user: safeUser, token });
   } catch (err) {
     console.error('Login error:', err);
-    return NextResponse.json({ error: 'เกิดข้อผิดพลาด' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }
 }

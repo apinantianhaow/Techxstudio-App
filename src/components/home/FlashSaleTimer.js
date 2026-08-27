@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Timer, Zap } from 'lucide-react';
+import { Zap } from 'lucide-react';
+import { useTranslation } from '@/context/LanguageContext';
 
 export default function FlashSaleTimer() {
   const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
+  const { t } = useTranslation();
 
   useEffect(() => {
-    // Set flash sale end to midnight tonight
     const getEndTime = () => {
       const end = new Date();
       end.setHours(23, 59, 59, 999);
@@ -18,12 +19,7 @@ export default function FlashSaleTimer() {
       const now = new Date();
       const end = getEndTime();
       const diff = end - now;
-
-      if (diff <= 0) {
-        setTimeLeft({ hours: 0, minutes: 0, seconds: 0 });
-        return;
-      }
-
+      if (diff <= 0) { setTimeLeft({ hours: 0, minutes: 0, seconds: 0 }); return; }
       setTimeLeft({
         hours: Math.floor(diff / (1000 * 60 * 60)),
         minutes: Math.floor((diff / (1000 * 60)) % 60),
@@ -42,21 +38,20 @@ export default function FlashSaleTimer() {
     <div className="flex items-center gap-3">
       <div className="flex items-center gap-1.5 text-error">
         <Zap className="w-4 h-4 fill-current" />
-        <span className="text-sm font-bold">Flash Sale</span>
+        <span className="text-sm font-bold">{t('home.flashSale')}</span>
       </div>
-
       <div className="flex items-center gap-1">
-        <TimeBlock value={pad(timeLeft.hours)} label="ชม." />
+        <TimeBlock value={pad(timeLeft.hours)} />
         <span className="text-error font-bold text-lg animate-pulse">:</span>
-        <TimeBlock value={pad(timeLeft.minutes)} label="นาที" />
+        <TimeBlock value={pad(timeLeft.minutes)} />
         <span className="text-error font-bold text-lg animate-pulse">:</span>
-        <TimeBlock value={pad(timeLeft.seconds)} label="วินาที" />
+        <TimeBlock value={pad(timeLeft.seconds)} />
       </div>
     </div>
   );
 }
 
-function TimeBlock({ value, label }) {
+function TimeBlock({ value }) {
   return (
     <div className="flex flex-col items-center">
       <div className="bg-surface-900 dark:bg-surface-100 text-white dark:text-surface-900

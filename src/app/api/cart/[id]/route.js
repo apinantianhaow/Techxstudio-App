@@ -11,7 +11,7 @@ export async function PATCH(request, { params }) {
   try {
     const authUser = getAuthUser(request);
     if (!authUser) {
-      return NextResponse.json({ error: 'กรุณาเข้าสู่ระบบ' }, { status: 401 });
+      return NextResponse.json({ error: 'Please log in' }, { status: 401 });
     }
 
     const { id } = await params;
@@ -34,13 +34,13 @@ export async function PATCH(request, { params }) {
       .single();
 
     if (!item || error) {
-      return NextResponse.json({ error: 'ไม่พบรายการ' }, { status: 404 });
+      return NextResponse.json({ error: 'Item not found' }, { status: 404 });
     }
 
     return NextResponse.json({ item });
   } catch (err) {
     console.error('Cart PATCH error:', err);
-    return NextResponse.json({ error: 'เกิดข้อผิดพลาด' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }
 }
 
@@ -48,7 +48,7 @@ export async function DELETE(request, { params }) {
   try {
     const authUser = getAuthUser(request);
     if (!authUser) {
-      return NextResponse.json({ error: 'กรุณาเข้าสู่ระบบ' }, { status: 401 });
+      return NextResponse.json({ error: 'Please log in' }, { status: 401 });
     }
 
     const { id } = await params;
@@ -60,12 +60,12 @@ export async function DELETE(request, { params }) {
       .eq('user_id', authUser.id);
 
     if (error) {
-      return NextResponse.json({ error: 'ไม่สามารถลบได้' }, { status: 500 });
+      return NextResponse.json({ error: 'Unable to delete' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('Cart DELETE error:', err);
-    return NextResponse.json({ error: 'เกิดข้อผิดพลาด' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }
 }

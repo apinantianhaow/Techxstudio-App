@@ -21,7 +21,7 @@ export async function GET(request) {
       .limit(8);
 
     if (error) {
-      return NextResponse.json({ error: 'ค้นหาไม่สำเร็จ' }, { status: 500 });
+      return NextResponse.json({ error: 'Search failed' }, { status: 500 });
     }
 
     products?.forEach(p => {
@@ -31,6 +31,6 @@ export async function GET(request) {
     return NextResponse.json({ products });
   } catch (err) {
     console.error('Search error:', err);
-    return NextResponse.json({ error: 'เกิดข้อผิดพลาด' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }
 }
