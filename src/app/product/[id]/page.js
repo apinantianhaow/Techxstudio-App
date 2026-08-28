@@ -54,7 +54,7 @@ export default function ProductPage({ params }) {
   if (loading) return <LoadingSkeleton type="detail" />;
   if (!product) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-20 text-center">
+      <div className="px-4 md:px-8 lg:px-12 py-20 max-w-6xl mx-auto text-center">
         <p className="text-surface-400 text-lg">{t('errors.productNotFound')}</p>
         <button onClick={() => router.push('/')} className="mt-4 text-primary-600 font-medium">{t('common.backToHome')}</button>
       </div>
@@ -95,7 +95,7 @@ export default function ProductPage({ params }) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-4 space-y-6">
+    <div className="px-4 md:px-8 lg:px-12 py-4 md:py-6 max-w-6xl mx-auto space-y-6">
       <div className="flex items-center gap-2">
         <motion.button whileTap={{ scale: 0.85 }} onClick={() => router.back()}
           className="w-9 h-9 rounded-full bg-surface-100 dark:bg-surface-800 flex items-center justify-center">

@@ -320,3 +320,58 @@ body {
   width: 24px !important;
   border-radius: var(--radius-full) !important;
 }
+
+/* ============================================================
+   Desktop Layout Improvements
+   ============================================================ */
+
+/* On desktop, remove bottom nav safe area padding */
+@media (min-width: 768px) {
+  .pb-safe {
+    padding-bottom: 2rem;
+  }
+}
+
+/* Desktop hero banner — bigger */
+@media (min-width: 768px) {
+  .swiper .swiper-slide > div {
+    min-height: 340px !important;
+    padding: 3rem 4rem !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  .swiper .swiper-slide > div {
+    min-height: 420px !important;
+    padding: 4rem 5rem !important;
+  }
+}
+
+/* Desktop top bar: subtle border */
+@media (min-width: 768px) {
+  header.glass {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .dark header.glass {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+}
+
+/* Glass card centering */
+.glass-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Improve empty state spacing on desktop */
+@media (min-width: 768px) {
+  .text-center.py-20 {
+    padding-top: 6rem;
+    padding-bottom: 6rem;
+  }
+}
+
+

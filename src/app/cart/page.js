@@ -44,7 +44,7 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-4 space-y-4">
+      <div className="px-4 md:px-8 lg:px-12 py-4 md:py-6 max-w-6xl mx-auto space-y-4">
         <Breadcrumbs items={[{ label: t('nav.cart') }]} />
         <div className="text-center py-20 space-y-4">
           <PackageOpen className="w-20 h-20 mx-auto text-surface-300 dark:text-surface-600" />
@@ -61,7 +61,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-4 space-y-4">
+    <div className="px-4 md:px-8 lg:px-12 py-4 md:py-6 max-w-6xl mx-auto space-y-4">
       <Breadcrumbs items={[{ label: t('nav.cart') }]} />
 
       <div className="flex items-center justify-between">

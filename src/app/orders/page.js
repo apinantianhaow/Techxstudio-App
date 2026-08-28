@@ -31,7 +31,7 @@ export default function OrdersPage() {
 
   if (!authLoading && !isLoggedIn) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-4 space-y-4">
+      <div className="px-4 md:px-8 lg:px-12 py-4 md:py-6 max-w-6xl mx-auto space-y-4">
         <Breadcrumbs items={[{ label: t('orders.title') }]} />
         <div className="text-center py-20 space-y-4">
           <Package className="w-20 h-20 mx-auto text-surface-300 dark:text-surface-600" />
@@ -48,7 +48,7 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-4 space-y-4">
+    <div className="px-4 md:px-8 lg:px-12 py-4 md:py-6 max-w-6xl mx-auto space-y-4">
       <Breadcrumbs items={[{ label: t('orders.title') }]} />
       <h1 className="text-xl font-bold section-title text-surface-800 dark:text-surface-200">{t('orders.title')}</h1>
 

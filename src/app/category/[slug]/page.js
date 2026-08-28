@@ -54,7 +54,7 @@ export default function CategoryPage({ params }) {
   }, [products, sortBy, priceRange]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-4 space-y-4">
+    <div className="px-4 md:px-8 lg:px-12 py-4 md:py-6 space-y-4">
       <Breadcrumbs items={[{ label }]} />
       <h1 className="text-2xl font-bold section-title text-surface-800 dark:text-surface-200">{label}</h1>
 

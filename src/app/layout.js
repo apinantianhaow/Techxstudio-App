@@ -32,7 +32,7 @@ export default function RootLayout({ children }) {
           <LanguageProvider>
             <AuthProvider>
               <TopBar />
-              <main className="pt-14 pb-safe min-h-screen">
+              <main className="pt-14 md:pt-16 pb-safe min-h-screen">
                 {children}
               </main>
               <BottomNav />
