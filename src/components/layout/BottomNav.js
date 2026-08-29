@@ -30,7 +30,7 @@ export default function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-[var(--z-sticky)] glass
-      shadow-bottom-nav md:hidden safe-area-bottom">
+      md:hidden safe-area-bottom">
       <div className="flex items-center justify-around h-16 px-2">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
@@ -42,9 +42,9 @@ export default function BottomNav() {
               <div className="relative">
                 <motion.div
                   whileTap={{ scale: 0.85 }}
-                  className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-200
+                  className={`w-10 h-10 flex items-center justify-center transition-all duration-200
                     ${isActive
-                      ? 'gradient-primary shadow-md'
+                      ? 'gradient-primary'
                       : 'hover:bg-surface-100 dark:hover:bg-surface-800'}`}
                 >
                   <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-surface-400'}`} />
@@ -54,7 +54,7 @@ export default function BottomNav() {
                   <motion.span
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="absolute -top-1 -right-1 w-4 h-4 bg-error rounded-full
+                    className="absolute -top-1 -right-1 w-4 h-4 bg-error
                       flex items-center justify-center text-[9px] font-bold text-white"
                   >
                     {badge > 9 ? '9+' : badge}
@@ -62,7 +62,7 @@ export default function BottomNav() {
                 )}
               </div>
 
-              <span className={`text-[10px] mt-0.5 font-medium transition-colors
+              <span className={`text-[10px] mt-1 font-medium transition-colors uppercase tracking-wide
                 ${isActive ? 'text-primary-600 dark:text-primary-400' : 'text-surface-400'}`}>
                 {t(item.key)}
               </span>

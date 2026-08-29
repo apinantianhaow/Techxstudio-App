@@ -51,14 +51,14 @@ export default function ProductCard({ product, index = 0, onQuickView }) {
       transition={{ duration: 0.4, delay: index * 0.05 }}
     >
       <Link href={`/product/${product.id}`}>
-        <div className="group relative glass-card overflow-hidden hover:shadow-card-hover
-          transform hover:-translate-y-1.5 hover:scale-[1.01] transition-all duration-300 cursor-pointer">
+        <div className="group relative glass-card overflow-hidden
+          hover:shadow-card-hover transition-all duration-300 cursor-pointer">
           {/* Badge */}
           {product.badge && (
-            <div className={`absolute top-3 left-3 z-10 px-2.5 py-1 rounded-full text-[10px] font-bold text-white
-              ${product.badge === 'HOT' ? 'bg-badge-hot animate-pulse-glow' :
+            <div className={`absolute top-0 left-0 z-10 px-3 py-1.5 text-[10px] font-bold text-white uppercase tracking-wider
+              ${product.badge === 'HOT' ? 'bg-badge-hot' :
                 product.badge === 'NEW' ? 'bg-badge-new' :
-                product.badge === 'SALE' ? 'gradient-sale animate-pulse-glow' : 'bg-primary-600'}`}
+                product.badge === 'SALE' ? 'gradient-sale' : 'bg-primary-600'}`}
             >
               {product.badge}
             </div>
@@ -66,35 +66,34 @@ export default function ProductCard({ product, index = 0, onQuickView }) {
 
           {/* Sale percent */}
           {product.sale_percent > 0 && (
-            <div className="absolute top-3 right-3 z-10 px-2 py-1 rounded-full gradient-sale text-[10px] font-bold text-white">
+            <div className="absolute top-0 right-0 z-10 px-3 py-1.5 gradient-sale text-[10px] font-bold text-white">
               -{product.sale_percent}%
             </div>
           )}
 
           {/* Image */}
-          <div className="relative aspect-square bg-gradient-to-br from-surface-50 to-surface-100
-            dark:from-surface-800 dark:to-surface-900 overflow-hidden">
+          <div className="relative aspect-square bg-surface-50 dark:bg-surface-900 overflow-hidden">
             {firstColor?.image_url ? (
               <img
                 src={firstColor.image_url}
                 alt={product.name}
-                className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-500"
+                className="w-full h-full object-contain p-6 group-hover:scale-105 transition-transform duration-500"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                <div className="w-24 h-24 rounded-2xl gradient-primary opacity-10" />
+                <div className="w-24 h-24 gradient-primary opacity-10" />
               </div>
             )}
 
             {/* Hover actions */}
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 dark:group-hover:bg-white/5
-              transition-colors duration-300 flex items-end justify-center pb-3 gap-2
+              transition-colors duration-300 flex items-end justify-center pb-4 gap-2
               opacity-0 group-hover:opacity-100">
               <motion.button
                 whileTap={{ scale: 0.85 }}
                 onClick={handleQuickView}
-                className="w-9 h-9 rounded-full bg-white/90 dark:bg-surface-800/90 backdrop-blur-sm
-                  flex items-center justify-center shadow-md hover:shadow-lg transition-all"
+                className="w-10 h-10 bg-white dark:bg-surface-800 shadow-md
+                  flex items-center justify-center hover:shadow-lg transition-all"
                 aria-label={t('product.quickView')}
               >
                 <Eye className="w-4 h-4 text-surface-700 dark:text-surface-200" />
@@ -102,8 +101,8 @@ export default function ProductCard({ product, index = 0, onQuickView }) {
               <motion.button
                 whileTap={{ scale: 0.85 }}
                 onClick={handleCompare}
-                className={`w-9 h-9 rounded-full backdrop-blur-sm flex items-center justify-center shadow-md transition-all
-                  ${compared ? 'bg-primary-600 text-white' : 'bg-white/90 dark:bg-surface-800/90'}`}
+                className={`w-10 h-10 shadow-md flex items-center justify-center transition-all
+                  ${compared ? 'bg-primary-600 text-white' : 'bg-white dark:bg-surface-800'}`}
                 aria-label={t('product.compare')}
               >
                 <GitCompareArrows className={`w-4 h-4 ${compared ? '' : 'text-surface-700 dark:text-surface-200'}`} />
@@ -112,9 +111,9 @@ export default function ProductCard({ product, index = 0, onQuickView }) {
           </div>
 
           {/* Content */}
-          <div className="p-3 space-y-1.5">
+          <div className="p-4 md:p-5 space-y-2">
             <div className="flex items-start justify-between gap-2">
-              <h3 className="font-semibold text-sm text-surface-800 dark:text-surface-200 leading-tight line-clamp-2">
+              <h3 className="font-medium text-sm md:text-base text-surface-800 dark:text-surface-200 leading-snug line-clamp-2 tracking-tight">
                 {product.name}
               </h3>
               <motion.button
@@ -134,8 +133,8 @@ export default function ProductCard({ product, index = 0, onQuickView }) {
             <StarRating rating={product.rating} reviews={product.reviews_count} size="xs" />
 
             {/* Price */}
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-base gradient-text">
+            <div className="flex items-baseline gap-2 pt-1">
+              <span className="font-bold text-lg gradient-text">
                 {formatPrice(salePrice)}
               </span>
               {product.sale_percent > 0 && (
@@ -147,17 +146,17 @@ export default function ProductCard({ product, index = 0, onQuickView }) {
 
             {/* Color dots */}
             {product.product_colors?.length > 1 && (
-              <div className="flex items-center gap-1 pt-1">
+              <div className="flex items-center gap-1.5 pt-1">
                 {product.product_colors.slice(0, 4).map((color) => (
                   <div
                     key={color.id}
-                    className="w-3.5 h-3.5 rounded-full border border-surface-200 dark:border-surface-600"
+                    className="w-4 h-4 border border-surface-200 dark:border-surface-600"
                     style={{ backgroundColor: color.hex }}
                     title={color.name}
                   />
                 ))}
                 {product.product_colors.length > 4 && (
-                  <span className="text-[10px] text-surface-400">
+                  <span className="text-[10px] text-surface-400 ml-1">
                     +{product.product_colors.length - 4}
                   </span>
                 )}

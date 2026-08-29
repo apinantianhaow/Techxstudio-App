@@ -11,8 +11,8 @@ export default function LanguageToggle() {
     <motion.button
       whileTap={{ scale: 0.85 }}
       onClick={toggleLanguage}
-      className="relative h-10 px-3 flex items-center gap-1.5 rounded-full
-        bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700
+      className="relative h-10 px-3 flex items-center gap-1.5
+        hover:bg-surface-100 dark:hover:bg-surface-800
         transition-colors duration-300"
       aria-label="Switch language"
     >
