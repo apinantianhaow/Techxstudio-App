@@ -38,13 +38,13 @@ export default function FlashSaleTimer() {
     <div className="flex items-center gap-3">
       <div className="flex items-center gap-1.5 text-error">
         <Zap className="w-4 h-4 fill-current" />
-        <span className="text-sm font-bold">{t('home.flashSale')}</span>
+        <span className="text-sm font-bold hidden sm:inline">{t('home.flashSale')}</span>
       </div>
       <div className="flex items-center gap-1">
         <TimeBlock value={pad(timeLeft.hours)} />
-        <span className="text-error font-bold text-lg animate-pulse">:</span>
+        <span className="text-surface-400 font-medium text-sm">:</span>
         <TimeBlock value={pad(timeLeft.minutes)} />
-        <span className="text-error font-bold text-lg animate-pulse">:</span>
+        <span className="text-surface-400 font-medium text-sm">:</span>
         <TimeBlock value={pad(timeLeft.seconds)} />
       </div>
     </div>
@@ -53,11 +53,10 @@ export default function FlashSaleTimer() {
 
 function TimeBlock({ value }) {
   return (
-    <div className="flex flex-col items-center">
-      <div className="bg-surface-900 dark:bg-surface-100 text-white dark:text-surface-900
-        px-2.5 py-1 text-sm font-bold font-mono min-w-[36px] text-center">
-        {value}
-      </div>
+    <div className="bg-surface-900 dark:bg-surface-100 text-white dark:text-surface-900
+      rounded-lg px-2.5 py-1 text-sm font-bold font-mono min-w-[36px] text-center
+      shadow-sm">
+      {value}
     </div>
   );
 }

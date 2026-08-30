@@ -2,17 +2,16 @@
 
 /* ============================================================
    TechXStudio — Design System (Tailwind CSS v4)
-   Modern Sharp E-Commerce Theme
+   Apple / Samsung-Inspired Premium Theme
    ============================================================ */
 
-/* Dark mode variant using next-themes .dark class */
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ============================================================
    Design Tokens
    ============================================================ */
 @theme inline {
-  /* Primary palette — Deep Purple */
+  /* Primary — Deep Violet to Blue gradient palette */
   --color-primary-50: #f5f3ff;
   --color-primary-100: #ede9fe;
   --color-primary-200: #ddd6fe;
@@ -34,7 +33,7 @@
   --color-accent-600: #2563eb;
   --color-accent-700: #1d4ed8;
 
-  /* Surface colors */
+  /* Surface — refined neutrals */
   --color-surface-50: #fafafa;
   --color-surface-100: #f5f5f5;
   --color-surface-200: #e5e5e5;
@@ -58,26 +57,26 @@
   --color-badge-hot: #f97316;
   --color-badge-new: #8b5cf6;
 
-  /* Shadows */
-  --shadow-glass: 0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.04);
-  --shadow-card-hover: 0 8px 30px rgba(0, 0, 0, 0.08);
-  --shadow-float: 0 16px 48px rgba(0, 0, 0, 0.1);
-  --shadow-bottom-nav: 0 -1px 12px rgba(0, 0, 0, 0.06);
+  /* Apple-style shadows — layered depth */
+  --shadow-glass: 0 4px 30px rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-card-hover: 0 20px 60px rgba(124, 58, 237, 0.12), 0 8px 20px rgba(0, 0, 0, 0.06);
+  --shadow-float: 0 24px 80px rgba(0, 0, 0, 0.12);
+  --shadow-bottom-nav: 0 -4px 24px rgba(0, 0, 0, 0.06);
 
-  /* Border radius — SHARP by default */
-  --radius-xs: 0px;
-  --radius-sm: 0px;
-  --radius-md: 0px;
-  --radius-lg: 0px;
-  --radius-xl: 0px;
-  --radius-2xl: 0px;
+  /* Apple-style border radius */
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --radius-2xl: 28px;
   --radius-full: 9999px;
 
-  /* Typography */
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  /* SF-style typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
 
-  /* Z-index layers */
+  /* Z-index */
   --z-dropdown: 50;
   --z-sticky: 100;
   --z-overlay: 200;
@@ -85,14 +84,15 @@
   --z-toast: 400;
   --z-top: 500;
 
-  /* Transitions */
+  /* Easing */
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-apple: cubic-bezier(0.25, 0.1, 0.25, 1);
 
-  /* Animation durations */
+  /* Durations */
   --duration-fast: 150ms;
-  --duration-base: 250ms;
-  --duration-slow: 400ms;
+  --duration-base: 300ms;
+  --duration-slow: 500ms;
 }
 
 /* ============================================================
@@ -109,29 +109,30 @@
 html {
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   font-family: var(--font-sans);
-  background: #f8f8f8;
+  background: linear-gradient(180deg, #f8f7ff 0%, #f2f0fc 30%, #eef2ff 60%, #f8f8fa 100%);
   color: var(--color-surface-900);
   min-height: 100dvh;
   overflow-x: hidden;
-  transition: background-color 0.3s var(--ease-smooth), color 0.3s var(--ease-smooth);
+  transition: background 0.5s var(--ease-apple), color 0.3s var(--ease-apple);
 }
 
-/* Dark mode body */
 .dark body {
-  background: #09090b;
+  background: linear-gradient(180deg, #0c0a14 0%, #0f0d1a 30%, #0a0e1a 60%, #09090b 100%);
   color: var(--color-surface-100);
 }
 
 /* ============================================================
-   Scrollbar
+   Scrollbar — thin Apple style
    ============================================================ */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -139,88 +140,118 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-surface-300);
-  border-radius: 0;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 100px;
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: var(--color-surface-600);
+  background: rgba(255, 255, 255, 0.12);
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
 
 /* ============================================================
-   Glass Utility Classes — SHARP edges
+   Glass — Apple frosted glass
    ============================================================ */
 .glass {
-  background: rgba(255, 255, 255, 0.85);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  backdrop-filter: blur(24px) saturate(180%);
+  background: rgba(255, 255, 255, 0.72);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  backdrop-filter: blur(40px) saturate(200%);
   border: none;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .dark .glass {
-  background: rgba(9, 9, 11, 0.9);
+  background: rgba(12, 10, 20, 0.78);
   border-bottom-color: rgba(255, 255, 255, 0.06);
 }
 
 .glass-card {
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.7);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  transition: all 0.4s var(--ease-apple);
 }
 
 .dark .glass-card {
-  background: #18181b;
+  background: rgba(24, 24, 36, 0.6);
   border-color: rgba(255, 255, 255, 0.06);
 }
 
+.glass-card:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-4px);
+}
+
 .glass-modal {
-  background: rgba(255, 255, 255, 0.95);
-  -webkit-backdrop-filter: blur(24px) saturate(200%);
-  backdrop-filter: blur(24px) saturate(200%);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-xl);
 }
 
 .dark .glass-modal {
-  background: rgba(24, 24, 27, 0.95);
+  background: rgba(20, 18, 30, 0.92);
   border-color: rgba(255, 255, 255, 0.08);
 }
 
 /* ============================================================
-   Gradient Utilities
+   Gradient Utilities — rich purple-blue shades
    ============================================================ */
 .gradient-primary {
-  background: linear-gradient(135deg, var(--color-primary-600), var(--color-accent-500));
+  background: linear-gradient(135deg, #7c3aed 0%, #6366f1 50%, #3b82f6 100%);
 }
 
 .gradient-hero {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 30%, #4f46e5 60%, #2563eb 100%);
 }
 
 .gradient-sale {
-  background: linear-gradient(135deg, #f43f5e, #ec4899);
+  background: linear-gradient(135deg, #f43f5e, #e11d48);
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, var(--color-primary-600), var(--color-accent-500));
+  background: linear-gradient(135deg, #7c3aed 0%, #6366f1 50%, #3b82f6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
+/* Subtle mesh gradient for feature sections */
+.gradient-mesh {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(124, 58, 237, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(59, 130, 246, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 40% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+}
+
+.dark .gradient-mesh {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(124, 58, 237, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 40% 80%, rgba(139, 92, 246, 0.06) 0%, transparent 50%);
+}
+
 /* ============================================================
-   Pulse Glow (sale badges)
+   Pulse Glow
    ============================================================ */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
-  50% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.7); }
+  0%, 100% { box-shadow: 0 0 8px rgba(239, 68, 68, 0.3); }
+  50% { box-shadow: 0 0 24px rgba(239, 68, 68, 0.5); }
 }
 
 .animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
+  animation: pulse-glow 2.5s ease-in-out infinite;
 }
 
 /* ============================================================
-   Shimmer (loading skeletons)
+   Shimmer
    ============================================================ */
 @keyframes shimmer {
   0% { background-position: -200% 0; }
@@ -228,13 +259,14 @@ body {
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, #f0eef5 25%, #e8e5f0 50%, #f0eef5 75%);
   background-size: 200% 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
+  animation: shimmer 1.8s ease-in-out infinite;
+  border-radius: var(--radius-sm);
 }
 
 .dark .animate-shimmer {
-  background: linear-gradient(90deg, #262626 25%, #333 50%, #262626 75%);
+  background: linear-gradient(90deg, #1a1830 25%, #252340 50%, #1a1830 75%);
   background-size: 200% 100%;
 }
 
@@ -250,7 +282,7 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle, rgba(255,255,255,0.3) 10%, transparent 70%);
+  background: radial-gradient(circle, rgba(255,255,255,0.25) 10%, transparent 70%);
   transform: scale(0);
   opacity: 0;
   transition: transform 0.5s, opacity 0.3s;
@@ -263,20 +295,20 @@ body {
 }
 
 /* ============================================================
-   Section Title Underline
+   Section Title
    ============================================================ */
 .section-title {
   position: relative;
   display: inline-block;
   padding-bottom: 0;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
 }
 
 /* ============================================================
    Bottom Nav Safe Area
    ============================================================ */
 .pb-safe {
-  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
 }
 
 /* ============================================================
@@ -292,22 +324,22 @@ body {
 }
 
 /* ============================================================
-   Swiper Custom Overrides
+   Swiper — Apple-style pagination dots
    ============================================================ */
 .swiper-pagination-bullet {
-  background: rgba(255, 255, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.4) !important;
   opacity: 1 !important;
   width: 8px !important;
-  height: 3px !important;
-  border-radius: 0 !important;
-  transition: all 0.3s !important;
+  height: 8px !important;
+  border-radius: 100px !important;
+  transition: all 0.4s var(--ease-apple) !important;
 }
 
 .swiper-pagination-bullet-active {
   background: #fff !important;
   opacity: 1 !important;
-  width: 32px !important;
-  border-radius: 0 !important;
+  width: 28px !important;
+  border-radius: 100px !important;
 }
 
 /* ============================================================
@@ -319,7 +351,7 @@ body {
   }
 }
 
-/* Glass card layout */
+/* Glass card default layout */
 .glass-card {
   display: flex;
   flex-direction: column;
