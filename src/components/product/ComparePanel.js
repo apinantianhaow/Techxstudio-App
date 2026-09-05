@@ -20,7 +20,7 @@ export default function ComparePanel() {
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="fixed bottom-16 md:bottom-0 left-0 right-0 z-[var(--z-overlay)] glass-modal rounded-t-2xl shadow-float"
+          className="fixed bottom-16 md:bottom-0 left-0 right-0 z-[var(--z-overlay)] glass-modal  shadow-float"
         >
           <div className="max-w-4xl mx-auto p-4">
             <div className="flex items-center justify-between mb-4">
@@ -34,7 +34,7 @@ export default function ComparePanel() {
                 <button onClick={clearCompare} className="text-xs text-surface-400 hover:text-error transition-colors">
                   {t('common.clearAll')}
                 </button>
-                <button onClick={closePanel} className="w-8 h-8 rounded-full bg-surface-100 dark:bg-surface-800 flex items-center justify-center">
+                <button onClick={closePanel} className="w-8 h-8  bg-surface-100 dark:bg-surface-800 flex items-center justify-center">
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -49,10 +49,10 @@ export default function ComparePanel() {
                       <th key={item.id} className="py-2 px-3 min-w-[140px]">
                         <div className="relative">
                           <button onClick={() => removeFromCompare(item.id)}
-                            className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-error/10 flex items-center justify-center">
+                            className="absolute -top-1 -right-1 w-5 h-5  bg-error/10 flex items-center justify-center">
                             <Trash2 className="w-3 h-3 text-error" />
                           </button>
-                          <div className="w-16 h-16 mx-auto bg-surface-100 dark:bg-surface-800 rounded-lg overflow-hidden mb-1">
+                          <div className="w-16 h-16 mx-auto bg-surface-100 dark:bg-surface-800  overflow-hidden mb-1">
                             {item.product_colors?.[0]?.image_url ? (
                               <img src={item.product_colors[0].image_url} alt={item.name} className="w-full h-full object-contain p-1" />
                             ) : (
@@ -96,7 +96,7 @@ export default function ComparePanel() {
                       <td key={item.id} className="py-2 px-3">
                         <div className="flex justify-center gap-1">
                           {item.product_colors?.slice(0, 4).map((c) => (
-                            <div key={c.id} className="w-4 h-4 rounded-full border border-surface-200" style={{ backgroundColor: c.hex }} />
+                            <div key={c.id} className="w-4 h-4  border border-surface-200" style={{ backgroundColor: c.hex }} />
                           ))}
                         </div>
                       </td>

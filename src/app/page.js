@@ -11,11 +11,18 @@ import LoadingSkeleton from '@/components/ui/LoadingSkeleton';
 import { useTranslation } from '@/context/LanguageContext';
 import { Zap, TrendingUp, Headphones, Shield, Truck, RotateCcw, CreditCard } from 'lucide-react';
 
+/* ── Consistent wrapper for all sections ── */
+const SectionWrapper = ({ children, className = '' }) => (
+  <div className={`max-w-[1200px] mx-auto px-5 md:px-8 lg:px-10 ${className}`}>
+    {children}
+  </div>
+);
+
 export default function HomePage() {
-  const [flashSale, setFlashSale] = useState([]);
-  const [popular, setPopular] = useState([]);
+  const [flashSale, setFlashSale]     = useState([]);
+  const [popular, setPopular]         = useState([]);
   const [accessories, setAccessories] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading]         = useState(true);
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const { t } = useTranslation();
 
@@ -31,7 +38,7 @@ export default function HomePage() {
           fsRes.json(), popRes.json(), accRes.json(),
         ]);
         setFlashSale(fsData.products || []);
-        setPopular(popData.products || []);
+        setPopular(popData.products   || []);
         setAccessories(accData.products || []);
       } catch (err) {
         console.error('Home fetch error:', err);
@@ -42,67 +49,64 @@ export default function HomePage() {
     fetchData();
   }, []);
 
-  const featureIcons = [Shield, Truck, RotateCcw, CreditCard];
-  const featureKeys = ['authentic', 'freeShipping', 'returns', 'installment'];
-  const featureColors = ['text-purple-500', 'text-blue-500', 'text-emerald-500', 'text-amber-500'];
+  const features = [
+    { Icon: Shield,    color: 'text-violet-600', bg: 'bg-violet-100 dark:bg-violet-900/30', key: 'authentic' },
+    { Icon: Truck,     color: 'text-blue-600',   bg: 'bg-blue-100 dark:bg-blue-900/30',     key: 'freeShipping' },
+    { Icon: RotateCcw, color: 'text-emerald-600',bg: 'bg-emerald-100 dark:bg-emerald-900/30',key: 'returns' },
+    { Icon: CreditCard,color: 'text-amber-600',  bg: 'bg-amber-100 dark:bg-amber-900/30',   key: 'installment' },
+  ];
 
-  const renderProductSection = (title, icon, products, sectionLoading, rightElement) => (
+  const renderSection = (title, icon, products, sectionLoading, rightEl) => (
     <section>
-      <div className="max-w-[1400px] mx-auto px-6 md:px-10">
-        <div className="flex items-center justify-between mb-6 md:mb-8">
-          <div className="flex items-center gap-3">
+      <SectionWrapper>
+        {/* Section heading — consistent alignment */}
+        <div className="flex items-center justify-between mb-5 md:mb-6 border-b border-surface-200 dark:border-surface-700 pb-3">
+          <div className="flex items-center gap-2">
             {icon}
-            <h2 className="font-bold text-xl md:text-2xl lg:text-[28px] tracking-tight text-surface-900 dark:text-surface-100">
+            <h2 className="font-bold text-base md:text-lg text-surface-900 dark:text-surface-100 uppercase tracking-wide">
               {title}
             </h2>
           </div>
-          {rightElement}
+          {rightEl}
         </div>
 
+        {/* Product grid */}
         {sectionLoading ? (
           <LoadingSkeleton count={4} type="card" />
         ) : products.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
             {products.map((product, i) => (
               <ProductCard key={product.id} product={product} index={i} onQuickView={setQuickViewProduct} />
             ))}
           </div>
         ) : (
-          <div className="glass-card !rounded-2xl p-14 md:p-20 text-center !items-center !justify-center">
-            <div className="w-16 h-16 rounded-2xl bg-surface-100 dark:bg-surface-800 flex items-center justify-center mx-auto mb-4">
-              {icon}
-            </div>
-            <p className="text-surface-400 text-sm md:text-base">No products available yet</p>
+          <div className="glass-card p-12 text-center">
+            <p className="text-surface-400 text-sm">No products available</p>
           </div>
         )}
-      </div>
+      </SectionWrapper>
     </section>
   );
 
   return (
-    <div className="pb-20 md:pb-28">
-      {/* Hero Banner */}
-      <ScrollReveal>
-        <div className="max-w-[1400px] mx-auto px-6 md:px-10 pt-6 md:pt-10">
-          <HighlightBanner />
-        </div>
-      </ScrollReveal>
+    <div className="pb-24 md:pb-10">
 
-      {/* Category Grid */}
-      <ScrollReveal delay={0.1}>
-        <div className="max-w-[1400px] mx-auto px-6 md:px-10 mt-10 md:mt-14">
+      {/* ── Hero Banner ── */}
+      <HighlightBanner />
+
+      {/* ── Category Grid ── */}
+      <ScrollReveal delay={0.05}>
+        <SectionWrapper className="mt-6 md:mt-10">
           <CategoryGrid />
-        </div>
+        </SectionWrapper>
       </ScrollReveal>
 
-      {/* Flash Sale */}
-      <ScrollReveal delay={0.15}>
-        <div className="mt-14 md:mt-20">
-          {renderProductSection(
+      {/* ── Flash Sale ── */}
+      <ScrollReveal delay={0.1}>
+        <div className="mt-10 md:mt-14">
+          {renderSection(
             t('home.flashSale'),
-            <div className="w-9 h-9 rounded-xl bg-red-500/10 flex items-center justify-center">
-              <Zap className="w-5 h-5 text-red-500 fill-current" />
-            </div>,
+            <Zap className="w-5 h-5 text-red-500 fill-current" />,
             flashSale,
             loading,
             <FlashSaleTimer />
@@ -110,63 +114,62 @@ export default function HomePage() {
         </div>
       </ScrollReveal>
 
-      {/* Popular */}
-      <ScrollReveal delay={0.2}>
-        <div className="mt-14 md:mt-20">
-          {renderProductSection(
+      {/* ── Popular / Trending ── */}
+      <ScrollReveal delay={0.15}>
+        <div className="mt-10 md:mt-14">
+          {renderSection(
             t('home.popular'),
-            <div className="w-9 h-9 rounded-xl bg-primary-500/10 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-primary-600" />
-            </div>,
+            <TrendingUp className="w-5 h-5 text-violet-600" />,
             popular,
             loading
           )}
         </div>
       </ScrollReveal>
 
-      {/* Accessories */}
-      <ScrollReveal delay={0.25}>
-        <div className="mt-14 md:mt-20">
-          {renderProductSection(
+      {/* ── Accessories ── */}
+      <ScrollReveal delay={0.2}>
+        <div className="mt-10 md:mt-14">
+          {renderSection(
             t('home.accessories'),
-            <div className="w-9 h-9 rounded-xl bg-accent-500/10 flex items-center justify-center">
-              <Headphones className="w-5 h-5 text-accent-600" />
-            </div>,
+            <Headphones className="w-5 h-5 text-indigo-600" />,
             accessories,
             loading
           )}
         </div>
       </ScrollReveal>
 
-      {/* Features — Apple Trust Section */}
-      <ScrollReveal delay={0.3}>
-        <div className="max-w-[1400px] mx-auto px-6 md:px-10 mt-16 md:mt-24">
-          <div className="gradient-mesh rounded-3xl p-8 md:p-12">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-              {featureKeys.map((key, i) => {
-                const Icon = featureIcons[i];
+      {/* ── Trust Features ── */}
+      <ScrollReveal delay={0.25}>
+        <SectionWrapper className="mt-12 md:mt-16 mb-4">
+          <div className="glass-card">
+            <div className="grid grid-cols-2 md:grid-cols-4 w-full">
+              {features.map(({ Icon, color, bg, key }, i) => {
                 const feat = t(`home.features.${key}`);
                 return (
-                  <div key={key} className="text-center">
-                    <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/80 dark:bg-surface-800/80
-                      backdrop-blur-sm flex items-center justify-center mx-auto mb-4 shadow-sm ${featureColors[i]}`}>
-                      <Icon className="w-6 h-6 md:w-7 md:h-7" />
+                  <div
+                    key={key}
+                    className={`flex flex-col items-center text-center p-6 md:p-8
+                      ${i < features.length - 1 ? 'border-r border-surface-100 dark:border-surface-700' : ''}
+                      ${i < 2 ? 'border-b md:border-b-0 border-surface-100 dark:border-surface-700' : ''}`}
+                  >
+                    <div className={`w-12 h-12 ${bg} flex items-center justify-center mb-3 ${color}`}>
+                      <Icon className="w-5 h-5" />
                     </div>
-                    <p className="text-sm md:text-base font-semibold text-surface-800 dark:text-surface-200 tracking-tight">
-                      {feat.title}
-                    </p>
-                    <p className="text-xs md:text-sm text-surface-400 dark:text-surface-500 mt-1.5 leading-relaxed">
-                      {feat.desc}
-                    </p>
+                    <p className="font-semibold text-sm text-surface-800 dark:text-surface-200">{feat.title}</p>
+                    <p className="text-xs text-surface-400 mt-1 leading-relaxed">{feat.desc}</p>
                   </div>
                 );
               })}
             </div>
           </div>
-        </div>
+        </SectionWrapper>
       </ScrollReveal>
 
-      <ProductQuickView product={quickViewProduct} isOpen={!!quickViewProduct} onClose={() => setQuickViewProduct(null)} />
+      <ProductQuickView
+        product={quickViewProduct}
+        isOpen={!!quickViewProduct}
+        onClose={() => setQuickViewProduct(null)}
+      />
     </div>
   );
 }

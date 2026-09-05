@@ -54,7 +54,7 @@ export default function FlashSaleTimer() {
 function TimeBlock({ value }) {
   return (
     <div className="bg-surface-900 dark:bg-surface-100 text-white dark:text-surface-900
-      rounded-lg px-2.5 py-1 text-sm font-bold font-mono min-w-[36px] text-center
+       px-2.5 py-1 text-sm font-bold font-mono min-w-[36px] text-center
       shadow-sm">
       {value}
     </div>

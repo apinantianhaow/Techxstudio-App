@@ -31,7 +31,7 @@ export default function FilterSortBar({ sortBy, priceRange, onSortChange, onPric
       <div className="flex items-center justify-between gap-3">
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl glass-card
+          className="flex items-center gap-2 px-4 py-2.5  glass-card
             text-sm font-medium hover:shadow-md transition-all duration-300
             text-surface-700 dark:text-surface-300"
         >
@@ -44,7 +44,7 @@ export default function FilterSortBar({ sortBy, priceRange, onSortChange, onPric
           <select
             value={sortBy}
             onChange={(e) => onSortChange(e.target.value)}
-            className="appearance-none px-4 py-2.5 pr-8 rounded-xl glass-card
+            className="appearance-none px-4 py-2.5 pr-8  glass-card
               text-sm font-medium cursor-pointer hover:shadow-md transition-all
               bg-transparent text-surface-700 dark:text-surface-300
               focus:outline-none focus:ring-2 focus:ring-primary-500/30"
@@ -69,7 +69,7 @@ export default function FilterSortBar({ sortBy, priceRange, onSortChange, onPric
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <div className="glass-card p-4 rounded-xl space-y-3">
+            <div className="glass-card p-4  space-y-3">
               <p className="text-sm font-semibold text-surface-700 dark:text-surface-300">
                 {t('filter.priceRange')}
               </p>
@@ -78,7 +78,7 @@ export default function FilterSortBar({ sortBy, priceRange, onSortChange, onPric
                   <button
                     key={range.value}
                     onClick={() => onPriceChange(range.value)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
+                    className={`px-3 py-1.5  text-xs font-medium transition-all duration-200
                       ${
                         priceRange === range.value
                           ? 'gradient-primary text-white shadow-md'

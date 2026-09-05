@@ -19,9 +19,9 @@ export default function ThemeToggle() {
     <motion.button
       whileTap={{ scale: 0.92 }}
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className="relative w-9 h-9 flex items-center justify-center rounded-full
-        hover:bg-surface-100/80 dark:hover:bg-surface-800/50
-        transition-colors duration-200"
+      className="relative w-9 h-9 flex items-center justify-center 
+        hover:bg-white/10 transition-colors duration-200"
+      style={{ color: 'rgba(255,255,255,0.7)' }}
       aria-label="Toggle theme"
     >
       <AnimatePresence mode="wait">
@@ -33,7 +33,7 @@ export default function ThemeToggle() {
             exit={{ rotate: 90, opacity: 0, scale: 0 }}
             transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
           >
-            <Sun className="w-[18px] h-[18px] text-amber-400" />
+            <Sun className="w-[18px] h-[18px]" style={{ color: '#fbbf24' }} />
           </motion.div>
         ) : (
           <motion.div
@@ -43,7 +43,7 @@ export default function ThemeToggle() {
             exit={{ rotate: -90, opacity: 0, scale: 0 }}
             transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
           >
-            <Moon className="w-[18px] h-[18px] text-primary-500" />
+            <Moon className="w-[18px] h-[18px] text-white/70" />
           </motion.div>
         )}
       </AnimatePresence>

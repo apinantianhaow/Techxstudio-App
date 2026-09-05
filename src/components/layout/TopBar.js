@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Search, ShoppingBag, User, Heart } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Search, ShoppingCart, User, Heart, Menu } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import LanguageToggle from '@/components/ui/LanguageToggle';
 import SearchOverlay from '@/components/layout/SearchOverlay';
@@ -21,6 +21,7 @@ const DESKTOP_NAV = [
 
 export default function TopBar() {
   const [searchOpen, setSearchOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const totalItems = useCartTotalItems();
   const favCount = useFavoritesCount();
   const pathname = usePathname();
@@ -28,31 +29,44 @@ export default function TopBar() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-[var(--z-sticky)] glass">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-10 h-14 md:h-[60px] flex items-center justify-between gap-6">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 flex-shrink-0 group">
-            <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center
-              shadow-md group-hover:shadow-lg transition-shadow duration-300">
-              <span className="text-white font-bold text-sm">TX</span>
-            </div>
-            <span className="font-semibold text-[17px] tracking-tight text-surface-900 dark:text-surface-100 hidden sm:block">
-              TechXStudio
-            </span>
-          </Link>
+      {/* ── Main Header ── */}
+      <header className="fixed top-0 left-0 right-0 z-[var(--z-sticky)]" style={{ background: '#1e1b4b' }}>
+        <div className="max-w-[1400px] mx-auto px-4 md:px-10 h-14 flex items-center gap-3">
 
-          {/* Desktop Nav — Apple-style minimal */}
-          <nav className="hidden md:flex items-center gap-0.5">
+          {/* Mobile menu icon */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden flex items-center justify-center w-9 h-9 text-white/80 hover:text-white transition-colors"
+            aria-label="Menu"
+          >
+            <Menu className="w-5 h-5" />
+          </motion.button>
+
+          {/* Search pill — center on mobile, left on desktop */}
+          <div className="flex-1 md:flex-none md:w-72 lg:w-96">
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="search-pill w-full flex items-center gap-2.5 px-4 h-9 text-left"
+              aria-label="Search"
+            >
+              <span className="text-white/50 text-sm flex-1 truncate">{t('search.placeholder') || 'Search products…'}</span>
+              <Search className="w-4 h-4 text-white/60 flex-shrink-0" />
+            </button>
+          </div>
+
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-1 flex-1 justify-center">
             {DESKTOP_NAV.map((item) => {
               const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`px-4 py-1.5 rounded-full text-[13px] font-medium transition-all duration-300
+                  className={`px-3.5 py-1.5  text-[13px] font-medium transition-all duration-200
                     ${isActive
-                      ? 'text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30'
-                      : 'text-surface-500 dark:text-surface-400 hover:text-surface-900 dark:hover:text-surface-100'
+                      ? 'bg-white/15 text-white'
+                      : 'text-white/60 hover:text-white hover:bg-white/10'
                     }`}
                 >
                   {t(item.key)}
@@ -61,64 +75,76 @@ export default function TopBar() {
             })}
           </nav>
 
-          {/* Actions — clean icon row */}
-          <div className="flex items-center gap-0.5">
-            <motion.button
-              whileTap={{ scale: 0.92 }}
-              onClick={() => setSearchOpen(true)}
-              className="w-9 h-9 flex items-center justify-center rounded-full
-                hover:bg-surface-100/80 dark:hover:bg-surface-800/50 transition-colors duration-200"
-              aria-label="Search"
-            >
-              <Search className="w-[18px] h-[18px] text-surface-600 dark:text-surface-400" />
-            </motion.button>
-
+          {/* Right icons */}
+          <div className="flex items-center gap-0.5 ml-auto">
             <LanguageToggle />
             <ThemeToggle />
 
             <Link href="/wishlist" className="hidden md:block">
-              <motion.div
-                whileTap={{ scale: 0.92 }}
-                className="relative w-9 h-9 flex items-center justify-center rounded-full
-                  hover:bg-surface-100/80 dark:hover:bg-surface-800/50 transition-colors duration-200"
-              >
-                <Heart className="w-[18px] h-[18px] text-surface-600 dark:text-surface-400" />
+              <motion.div whileTap={{ scale: 0.9 }}
+                className="relative w-9 h-9 flex items-center justify-center text-white/70 hover:text-white transition-colors">
+                <Heart className="w-[18px] h-[18px]" />
                 {favCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full gradient-primary
-                    flex items-center justify-center text-[10px] font-bold text-white px-1">
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4  bg-pink-500
+                    flex items-center justify-center text-[9px] font-bold text-white px-1">
                     {favCount > 9 ? '9+' : favCount}
                   </span>
                 )}
               </motion.div>
             </Link>
 
+            {/* Cart icon — key feature from screenshot */}
             <Link href="/cart">
-              <motion.div
-                whileTap={{ scale: 0.92 }}
-                className="relative w-9 h-9 flex items-center justify-center rounded-full
-                  hover:bg-surface-100/80 dark:hover:bg-surface-800/50 transition-colors duration-200"
-              >
-                <ShoppingBag className="w-[18px] h-[18px] text-surface-600 dark:text-surface-400" />
+              <motion.div whileTap={{ scale: 0.9 }}
+                className="relative w-9 h-9 flex items-center justify-center text-white/70 hover:text-white transition-colors">
+                <ShoppingCart className="w-[18px] h-[18px]" />
                 {totalItems > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full gradient-primary
-                    flex items-center justify-center text-[10px] font-bold text-white px-1">
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4  gradient-primary
+                    flex items-center justify-center text-[9px] font-bold text-white px-1">
                     {totalItems > 9 ? '9+' : totalItems}
                   </span>
                 )}
               </motion.div>
             </Link>
 
-            <Link href="/account">
-              <motion.div
-                whileTap={{ scale: 0.92 }}
-                className="w-9 h-9 flex items-center justify-center rounded-full
-                  hover:bg-surface-100/80 dark:hover:bg-surface-800/50 transition-colors duration-200"
-              >
-                <User className="w-[18px] h-[18px] text-surface-600 dark:text-surface-400" />
+            <Link href="/account" className="hidden md:block">
+              <motion.div whileTap={{ scale: 0.9 }}
+                className="w-9 h-9 flex items-center justify-center text-white/70 hover:text-white transition-colors">
+                <User className="w-[18px] h-[18px]" />
               </motion.div>
             </Link>
           </div>
         </div>
+
+        {/* Mobile dropdown nav */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden overflow-hidden border-t border-white/10"
+              style={{ background: '#1e1b4b' }}
+            >
+              <div className="px-4 py-3 flex flex-col gap-1">
+                {DESKTOP_NAV.map((item) => {
+                  const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`px-4 py-2.5  text-sm font-medium transition-colors
+                        ${isActive ? 'bg-white/15 text-white' : 'text-white/60 hover:bg-white/10 hover:text-white'}`}
+                    >
+                      {t(item.key)}
+                    </Link>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} />

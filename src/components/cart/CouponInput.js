@@ -37,13 +37,13 @@ export default function CouponInput({ cartTotal, onApply, onRemove, appliedCoupo
       <AnimatePresence mode="wait">
         {appliedCoupon ? (
           <motion.div key="applied" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-            className="flex items-center justify-between p-3 rounded-xl bg-success/10 border border-success/20">
+            className="flex items-center justify-between p-3  bg-success/10 border border-success/20">
             <div className="flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-success" />
               <span className="text-sm font-semibold text-success">{appliedCoupon.code}</span>
             </div>
             <button onClick={() => { onRemove?.(); setCode(''); toast(t('coupon.removed')); }}
-              className="w-6 h-6 rounded-full bg-surface-200 dark:bg-surface-700 flex items-center justify-center">
+              className="w-6 h-6  bg-surface-200 dark:bg-surface-700 flex items-center justify-center">
               <X className="w-3 h-3" />
             </button>
           </motion.div>
@@ -54,7 +54,7 @@ export default function CouponInput({ cartTotal, onApply, onRemove, appliedCoupo
               <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
               <input type="text" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())}
                 placeholder={t('coupon.placeholder')}
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-surface-100 dark:bg-surface-800
+                className="w-full pl-9 pr-3 py-2.5  bg-surface-100 dark:bg-surface-800
                   border border-surface-200 dark:border-surface-700
                   text-sm font-medium uppercase tracking-wider
                   focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
@@ -62,7 +62,7 @@ export default function CouponInput({ cartTotal, onApply, onRemove, appliedCoupo
                 onKeyDown={(e) => e.key === 'Enter' && handleApply()} />
             </div>
             <motion.button whileTap={{ scale: 0.95 }} onClick={handleApply} disabled={loading || !code.trim()}
-              className="px-4 py-2.5 rounded-xl gradient-primary text-white text-sm font-semibold
+              className="px-4 py-2.5  gradient-primary text-white text-sm font-semibold
                 disabled:opacity-50 flex items-center gap-1.5">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : t('coupon.apply')}
             </motion.button>

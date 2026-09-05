@@ -42,7 +42,7 @@ export default function BottomNav() {
               <div className="relative">
                 <motion.div
                   whileTap={{ scale: 0.85 }}
-                  className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300
+                  className={`w-10 h-10 flex items-center justify-center  transition-all duration-300
                     ${isActive
                       ? 'gradient-primary shadow-md'
                       : 'hover:bg-surface-100/80 dark:hover:bg-surface-800/50'}`}
@@ -54,7 +54,7 @@ export default function BottomNav() {
                   <motion.span
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="absolute -top-1 -right-1 min-w-[16px] h-4 rounded-full bg-error
+                    className="absolute -top-1 -right-1 min-w-[16px] h-4  bg-error
                       flex items-center justify-center text-[9px] font-bold text-white px-1"
                   >
                     {badge > 9 ? '9+' : badge}

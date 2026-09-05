@@ -27,7 +27,7 @@ export default function OrderTimeline({ currentStatus }) {
         const isCurrent = i === currentIndex;
         return (
           <div key={step.status} className="relative flex flex-col items-center z-10">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300
+            <div className={`w-10 h-10  flex items-center justify-center transition-all duration-300
               ${isComplete ? 'gradient-primary text-white shadow-md' : 'bg-surface-200 dark:bg-surface-700 text-surface-400'}
               ${isCurrent ? 'ring-4 ring-primary-500/20 scale-110' : ''}`}>
               <Icon className="w-5 h-5" />

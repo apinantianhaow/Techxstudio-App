@@ -71,7 +71,7 @@ export default function ProductReviews({ productId, reviews = [] }) {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             onSubmit={handleSubmit}
-            className="glass-card p-4 rounded-xl space-y-3 overflow-hidden"
+            className="glass-card p-4  space-y-3 overflow-hidden"
           >
             <div>
               <label className="text-sm font-medium text-surface-600 dark:text-surface-400 mb-1 block">{t('compare.rating')}</label>
@@ -82,7 +82,7 @@ export default function ProductReviews({ productId, reviews = [] }) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={t('reviews.reviewTitle')}
-              className="w-full px-3 py-2 rounded-lg bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700
+              className="w-full px-3 py-2  bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700
                 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30"
             />
             <textarea
@@ -90,14 +90,14 @@ export default function ProductReviews({ productId, reviews = [] }) {
               onChange={(e) => setComment(e.target.value)}
               placeholder={t('reviews.reviewComment')}
               rows={3}
-              className="w-full px-3 py-2 rounded-lg bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700
+              className="w-full px-3 py-2  bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700
                 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30"
             />
             <motion.button
               whileTap={{ scale: 0.95 }}
               type="submit"
               disabled={submitting}
-              className="gradient-primary text-white px-5 py-2 rounded-lg text-sm font-semibold
+              className="gradient-primary text-white px-5 py-2  text-sm font-semibold
                 flex items-center gap-2 disabled:opacity-50"
             >
               <Send className="w-4 h-4" />
@@ -118,10 +118,10 @@ export default function ProductReviews({ productId, reviews = [] }) {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="glass-card p-4 rounded-xl"
+              className="glass-card p-4 "
             >
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                <div className="w-8 h-8  bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
                   <User className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div className="flex-1">

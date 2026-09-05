@@ -58,12 +58,12 @@ export default function ProductQuickView({ product, isOpen, onClose }) {
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2
-              md:w-[500px] md:max-h-[85vh] z-[var(--z-modal)] glass-modal rounded-2xl overflow-y-auto"
+              md:w-[500px] md:max-h-[85vh] z-[var(--z-modal)] glass-modal  overflow-y-auto"
           >
             {/* Close */}
             <button
               onClick={onClose}
-              className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-surface-100/80 dark:bg-surface-800/80
+              className="absolute top-3 right-3 z-10 w-8 h-8  bg-surface-100/80 dark:bg-surface-800/80
                 flex items-center justify-center backdrop-blur-sm"
             >
               <X className="w-4 h-4" />
@@ -76,7 +76,7 @@ export default function ProductQuickView({ product, isOpen, onClose }) {
                 <img src={currentColor.image_url} alt={product.name} className="w-full h-full object-contain" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <div className="w-32 h-32 rounded-3xl gradient-primary opacity-10" />
+                  <div className="w-32 h-32  gradient-primary opacity-10" />
                 </div>
               )}
             </div>
@@ -107,7 +107,7 @@ export default function ProductQuickView({ product, isOpen, onClose }) {
                       <button
                         key={c.id}
                         onClick={() => setSelectedColor(i)}
-                        className={`w-8 h-8 rounded-full border-2 transition-all
+                        className={`w-8 h-8  border-2 transition-all
                           ${i === selectedColor
                             ? 'border-primary-600 scale-110 shadow-md'
                             : 'border-surface-200 dark:border-surface-600'}`}
@@ -128,7 +128,7 @@ export default function ProductQuickView({ product, isOpen, onClose }) {
                       <button
                         key={opt.id}
                         onClick={() => setSelectedOption(i)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all
+                        className={`px-3 py-1.5  text-xs font-medium transition-all
                           ${i === selectedOption
                             ? 'gradient-primary text-white shadow-md'
                             : 'bg-surface-100 dark:bg-surface-700 text-surface-600 dark:text-surface-300'}`}
@@ -145,7 +145,7 @@ export default function ProductQuickView({ product, isOpen, onClose }) {
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={handleAddToCart}
-                  className="flex-1 gradient-primary text-white py-3 rounded-xl font-semibold
+                  className="flex-1 gradient-primary text-white py-3  font-semibold
                     flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-shadow btn-ripple"
                 >
                   <ShoppingBag className="w-5 h-5" />
@@ -157,7 +157,7 @@ export default function ProductQuickView({ product, isOpen, onClose }) {
                     toggleFavorite(product.id);
                     toast(liked ? t('product.removedFromWishlist') : t('product.addedToWishlist'));
                   }}
-                  className="w-12 h-12 rounded-xl bg-surface-100 dark:bg-surface-700
+                  className="w-12 h-12  bg-surface-100 dark:bg-surface-700
                     flex items-center justify-center hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                 >
                   <Heart className={`w-5 h-5 ${liked ? 'fill-red-500 text-red-500' : 'text-surface-400'}`} />
