@@ -89,9 +89,28 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('techx-token');
   };
 
+  const updateProfile = async (data) => {
+    const res = await authFetch('/api/auth/me', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || 'Update failed');
+    setUser(result.user);
+    return result;
+  };
+
+  const deleteAccount = async () => {
+    const res = await authFetch('/api/auth/me', { method: 'DELETE' });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || 'Delete failed');
+    logout();
+    return result;
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, token, loading, login, signup, logout, authFetch, isLoggedIn: !!user }}
+      value={{ user, token, loading, login, signup, logout, updateProfile, deleteAccount, authFetch, isLoggedIn: !!user }}
     >
       {children}
     </AuthContext.Provider>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ShoppingBag, Trash2, ArrowRight, PackageOpen } from 'lucide-react';
+import { ShoppingBag, Trash2, ArrowRight, PackageOpen, MapPin, CreditCard } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Breadcrumbs from '@/components/layout/Breadcrumbs';
@@ -21,6 +21,8 @@ export default function CartPage() {
   const { t } = useTranslation();
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [ordering, setOrdering] = useState(false);
+  const [shippingAddress, setShippingAddress] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('credit_card');
 
   const discount = appliedCoupon?.discount || 0;
   const finalPrice = Math.max(0, totalPrice - discount);
@@ -31,7 +33,11 @@ export default function CartPage() {
     try {
       const res = await authFetch('/api/orders', {
         method: 'POST',
-        body: JSON.stringify({ shipping_address: 'Bangkok', payment_method: 'credit_card', coupon_code: appliedCoupon?.code || undefined }),
+        body: JSON.stringify({
+          shipping_address: shippingAddress.trim(),
+          payment_method: paymentMethod,
+          coupon_code: appliedCoupon?.code || undefined,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -102,7 +108,49 @@ export default function CartPage() {
           <span className="text-xl font-bold gradient-text">{formatPrice(finalPrice)}</span>
         </div>
 
-        <motion.button whileTap={{ scale: 0.97 }} onClick={handleCheckout} disabled={ordering}
+        {/* Shipping Address */}
+        <div className="border-t border-surface-200 dark:border-surface-700 pt-3 space-y-2">
+          <label className="flex items-center gap-1.5 text-sm font-semibold text-surface-700 dark:text-surface-300">
+            <MapPin className="w-4 h-4 text-primary-500" /> {t('cart.shippingAddress')}
+          </label>
+          <textarea
+            value={shippingAddress}
+            onChange={(e) => setShippingAddress(e.target.value)}
+            placeholder={t('cart.addressPlaceholder')}
+            rows={2}
+            className="w-full px-3 py-2.5 rounded-xl bg-surface-50 dark:bg-surface-800
+              border border-surface-200 dark:border-surface-700 text-sm
+              focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500
+              resize-none transition-all placeholder:text-surface-400"
+          />
+        </div>
+
+        {/* Payment Method */}
+        <div className="space-y-2">
+          <label className="flex items-center gap-1.5 text-sm font-semibold text-surface-700 dark:text-surface-300">
+            <CreditCard className="w-4 h-4 text-primary-500" /> {t('cart.paymentMethod')}
+          </label>
+          <div className="flex gap-2">
+            {[
+              { value: 'credit_card', label: t('cart.creditCard') },
+              { value: 'bank_transfer', label: t('cart.bankTransfer') },
+              { value: 'cod', label: t('cart.cod') },
+            ].map((pm) => (
+              <button key={pm.value}
+                onClick={() => setPaymentMethod(pm.value)}
+                className={`flex-1 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200
+                  ${paymentMethod === pm.value
+                    ? 'gradient-primary text-white shadow-md'
+                    : 'bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-300 hover:bg-surface-200 dark:hover:bg-surface-700'
+                  }`}>
+                {pm.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <motion.button whileTap={{ scale: 0.97 }} onClick={handleCheckout}
+          disabled={ordering || !shippingAddress.trim()}
           className="w-full gradient-primary text-white py-3.5 rounded-xl font-bold text-base
             flex items-center justify-center gap-2 shadow-lg hover:shadow-xl disabled:opacity-50 btn-ripple transition-shadow">
           {ordering ? (

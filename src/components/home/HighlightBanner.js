@@ -4,69 +4,112 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/context/LanguageContext';
-import { ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 import 'swiper/css';
 import 'swiper/css/pagination';
 
-const SLIDE_THEMES = [
-  { from: '#8b6fcf', via: '#7b5fc0', to: '#6a4fb8' },
-  { from: '#5b4896', via: '#4a3a80', to: '#3a2e6a' },
-  { from: '#7c5cbf', via: '#9b7dd4', to: '#5a3fa0' },
+const FALLBACK_SLIDES = [
+  { title: 'iPhone 16 Pro Max', subtitle: 'Powered by A18 Pro', desc: 'The most powerful Pro camera system' },
+  { title: 'iPad Pro M4', subtitle: 'Impossibly Thin.', desc: 'Ultra Retina XDR display with M4 chip' },
+  { title: 'Flash Sale', subtitle: 'Up to 15% Off', desc: '100% genuine Apple products at special prices' },
+];
+
+const THEMES = [
+  { gradient: 'linear-gradient(160deg, #8b6fcf 0%, #7b5fc0 50%, #6a4fb8 100%)' },
+  { gradient: 'linear-gradient(160deg, #5b4896 0%, #4a3a80 50%, #3a2e6a 100%)' },
+  { gradient: 'linear-gradient(160deg, #7c5cbf 0%, #9b7dd4 50%, #5a3fa0 100%)' },
 ];
 
 export default function HighlightBanner() {
   const { t } = useTranslation();
-  const slides = t('banner.slides');
+  const rawSlides = t('banner.slides');
+  const slides = Array.isArray(rawSlides) && rawSlides.length > 0 ? rawSlides : FALLBACK_SLIDES;
 
   return (
-    <div className="relative overflow-hidden">
+    <div className="w-full">
       <Swiper
         modules={[Autoplay, Pagination]}
-        autoplay={{ delay: 5000, disableOnInteraction: false }}
+        autoplay={{ delay: 6000, disableOnInteraction: false }}
         pagination={{ clickable: true }}
-        loop
+        loop={slides.length > 1}
+        style={{ width: '100%' }}
       >
-        {(Array.isArray(slides) ? slides : []).map((slide, i) => {
-          const theme = SLIDE_THEMES[i % SLIDE_THEMES.length];
+        {slides.map((slide, i) => {
+          const theme = THEMES[i % THEMES.length];
           return (
             <SwiperSlide key={i}>
               <div
-                className="relative flex flex-col items-center justify-center
-                  px-6 py-12 md:py-16 lg:py-20
-                  min-h-[200px] md:min-h-[300px] lg:min-h-[360px]"
                 style={{
-                  background: `linear-gradient(160deg, ${theme.from} 0%, ${theme.via} 50%, ${theme.to} 100%)`,
+                  width: '100%',
+                  minHeight: '400px',
+                  background: theme.gradient,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '72px 24px',
                 }}
               >
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-                  className="relative z-10 text-center max-w-2xl"
+                  transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+                  style={{ textAlign: 'center', maxWidth: '640px' }}
                 >
-                  {/* Brand name — formal sans-serif, clean uppercase */}
-                  <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-none tracking-tight uppercase mb-3">
-                    TechXStudio
-                  </h1>
+                  <h2 style={{
+                    fontSize: 'clamp(36px, 5vw, 64px)',
+                    fontWeight: 700,
+                    lineHeight: 1.05,
+                    letterSpacing: '-0.02em',
+                    color: '#fff',
+                    margin: 0,
+                    textTransform: 'uppercase',
+                  }}>
+                    {slide.title}
+                  </h2>
 
                   {slide.subtitle && (
-                    <p className="text-white/60 text-xs md:text-sm font-medium tracking-[0.2em] uppercase">
+                    <p style={{
+                      marginTop: '12px',
+                      fontSize: 'clamp(14px, 1.8vw, 20px)',
+                      fontWeight: 400,
+                      color: 'rgba(255,255,255,0.7)',
+                      letterSpacing: '0.15em',
+                      textTransform: 'uppercase',
+                    }}>
                       {slide.subtitle}
                     </p>
                   )}
 
-                  {slide.title && (
-                    <p className="text-white/80 text-sm md:text-base mt-4 font-light">
-                      {slide.title}
+                  {slide.desc && (
+                    <p style={{
+                      marginTop: '8px',
+                      fontSize: 'clamp(13px, 1.5vw, 16px)',
+                      color: 'rgba(255,255,255,0.5)',
+                    }}>
+                      {slide.desc}
                     </p>
                   )}
 
-                  <button className="group mt-6 md:mt-8 inline-flex items-center gap-2
-                    px-6 py-2.5 bg-white text-surface-900 text-sm font-semibold uppercase tracking-wider
-                    hover:bg-white/90 transition-colors duration-200">
-                    Shop Now
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                  </button>
+                  <div style={{ marginTop: '28px', display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                    <Link href="/category/phone"
+                      style={{
+                        display: 'inline-flex', alignItems: 'center',
+                        padding: '10px 28px', fontSize: '14px', fontWeight: 600,
+                        backgroundColor: '#fff', color: '#1e1b2e',
+                        textDecoration: 'none',
+                      }}>
+                      Shop Now
+                    </Link>
+                    <Link href="/category/all"
+                      style={{
+                        display: 'inline-flex', alignItems: 'center',
+                        padding: '10px 28px', fontSize: '14px', fontWeight: 600,
+                        border: '1px solid rgba(255,255,255,0.4)', color: '#fff',
+                        textDecoration: 'none',
+                      }}>
+                      Browse
+                    </Link>
+                  </div>
                 </motion.div>
               </div>
             </SwiperSlide>

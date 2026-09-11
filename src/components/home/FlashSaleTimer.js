@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Zap } from 'lucide-react';
 import { useTranslation } from '@/context/LanguageContext';
 
 export default function FlashSaleTimer() {
@@ -35,27 +34,22 @@ export default function FlashSaleTimer() {
   const pad = (n) => String(n).padStart(2, '0');
 
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex items-center gap-1.5 text-error">
-        <Zap className="w-4 h-4 fill-current" />
-        <span className="text-sm font-bold hidden sm:inline">{t('home.flashSale')}</span>
-      </div>
-      <div className="flex items-center gap-1">
-        <TimeBlock value={pad(timeLeft.hours)} />
-        <span className="text-surface-400 font-medium text-sm">:</span>
-        <TimeBlock value={pad(timeLeft.minutes)} />
-        <span className="text-surface-400 font-medium text-sm">:</span>
-        <TimeBlock value={pad(timeLeft.seconds)} />
-      </div>
+    <div className="flex items-center gap-1.5">
+      <span className="text-xs text-surface-400 font-medium mr-1">Ends in</span>
+      <TimeBlock value={pad(timeLeft.hours)} />
+      <span className="text-surface-300 text-xs">:</span>
+      <TimeBlock value={pad(timeLeft.minutes)} />
+      <span className="text-surface-300 text-xs">:</span>
+      <TimeBlock value={pad(timeLeft.seconds)} />
     </div>
   );
 }
 
 function TimeBlock({ value }) {
   return (
-    <div className="bg-surface-900 dark:bg-surface-100 text-white dark:text-surface-900
-       px-2.5 py-1 text-sm font-bold font-mono min-w-[36px] text-center
-      shadow-sm">
+    <div className="bg-surface-800 dark:bg-surface-100
+      text-white dark:text-surface-900
+      px-2 py-1 text-xs font-bold font-mono min-w-[28px] text-center">
       {value}
     </div>
   );

@@ -4,14 +4,12 @@ import Link from 'next/link';
 import { Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
 import useWishlistStore from '@/stores/useWishlistStore';
-import useCompareStore from '@/stores/useCompareStore';
 import { formatPrice, calcDiscountedPrice } from '@/lib/utils';
 import { useTranslation } from '@/context/LanguageContext';
 import { toast } from 'sonner';
 
 export default function ProductCard({ product, index = 0, onQuickView }) {
   const { isFavorite, toggleFavorite } = useWishlistStore();
-  const { isInCompare, toggleCompare } = useCompareStore();
   const { t } = useTranslation();
   const liked = isFavorite(product.id);
 
@@ -29,46 +27,44 @@ export default function ProductCard({ product, index = 0, onQuickView }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay: index * 0.05, ease: [0.25, 0.1, 0.25, 1] }}
+      transition={{ duration: 0.3, delay: index * 0.04 }}
     >
       <Link href={`/product/${product.id}`}>
-        <div className="group relative glass-card cursor-pointer overflow-hidden h-full">
+        <div className="group cursor-pointer glass-card overflow-hidden">
 
-          {/* Badge — top left */}
-          {product.sale_percent > 0 && (
-            <div className="absolute top-0 left-0 z-10 px-2.5 py-1 gradient-sale
-              text-[10px] font-bold text-white uppercase tracking-wider">
-              -{product.sale_percent}%
-            </div>
-          )}
-
-          {product.badge && !product.sale_percent && (
-            <div className={`absolute top-0 left-0 z-10 px-2.5 py-1
-              text-[10px] font-bold text-white uppercase tracking-wider
-              ${product.badge === 'HOT' ? 'bg-badge-hot' : product.badge === 'NEW' ? 'bg-badge-new' : 'gradient-primary'}`}>
-              {product.badge}
-            </div>
-          )}
-
-          {/* Wishlist — top right */}
-          <motion.button
-            whileTap={{ scale: 0.7 }}
-            onClick={handleFavorite}
-            className="absolute top-2.5 right-2.5 z-10 w-8 h-8 flex items-center justify-center
-              bg-white/80 dark:bg-surface-800/80 hover:bg-white dark:hover:bg-surface-700
-              transition-colors"
-            aria-label={t('nav.wishlist')}
-          >
-            <Heart className={`w-4 h-4 transition-all duration-200
-              ${liked ? 'fill-red-500 text-red-500' : 'text-surface-400 hover:text-red-400'}`}
-            />
-          </motion.button>
-
-          {/* Product image */}
-          <div className="relative bg-surface-50 dark:bg-surface-800 overflow-hidden"
+          {/* Image */}
+          <div className="relative bg-white dark:bg-surface-800 overflow-hidden"
             style={{ aspectRatio: '1/1' }}>
+
+            {product.sale_percent > 0 && (
+              <span className="absolute top-2 left-2 z-10 px-2 py-0.5
+                gradient-sale text-white text-[10px] font-bold">
+                -{product.sale_percent}%
+              </span>
+            )}
+
+            {product.badge && !product.sale_percent && (
+              <span className={`absolute top-2 left-2 z-10 px-2 py-0.5
+                text-white text-[10px] font-bold
+                ${product.badge === 'HOT' ? 'bg-badge-hot' : 'gradient-primary'}`}>
+                {product.badge}
+              </span>
+            )}
+
+            <motion.button
+              whileTap={{ scale: 0.7 }}
+              onClick={handleFavorite}
+              className="absolute top-2 right-2 z-10 w-7 h-7 flex items-center justify-center
+                opacity-0 group-hover:opacity-100 transition-opacity"
+              aria-label="Wishlist"
+            >
+              <Heart className={`w-4 h-4
+                ${liked ? 'fill-red-500 text-red-500' : 'text-surface-400'}`}
+              />
+            </motion.button>
+
             {firstColor?.image_url ? (
               <img
                 src={firstColor.image_url}
@@ -78,46 +74,41 @@ export default function ProductCard({ product, index = 0, onQuickView }) {
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                <div className="w-14 h-14 bg-surface-200 dark:bg-surface-700" />
+                <div className="w-12 h-12 bg-surface-200 dark:bg-surface-700" />
               </div>
             )}
           </div>
 
-          {/* Product info */}
+          {/* Info */}
           <div className="p-4 border-t border-surface-100 dark:border-surface-700">
+            {product.product_colors?.length > 1 && (
+              <div className="flex items-center gap-1.5 mb-2">
+                {product.product_colors.slice(0, 5).map((color) => (
+                  <div
+                    key={color.id}
+                    className="w-2.5 h-2.5 border border-surface-300"
+                    style={{ backgroundColor: color.hex, borderRadius: '50%' }}
+                    title={color.name}
+                  />
+                ))}
+              </div>
+            )}
+
             <h3 className="font-medium text-sm text-surface-800 dark:text-surface-200
-              line-clamp-2 leading-snug mb-2">
+              line-clamp-2 leading-snug text-center">
               {product.name}
             </h3>
 
-            {/* Price — left aligned, consistent */}
-            <div className="flex items-baseline gap-2">
-              <span className="font-bold text-base text-primary-600 dark:text-primary-400">
+            <div className="mt-1.5 text-center">
+              <span className="font-bold text-sm gradient-text">
                 {formatPrice(salePrice)}
               </span>
               {product.sale_percent > 0 && (
-                <span className="text-xs text-surface-400 line-through">
+                <span className="text-xs text-surface-400 line-through ml-1.5">
                   {formatPrice(displayPrice)}
                 </span>
               )}
             </div>
-
-            {/* Color options */}
-            {product.product_colors?.length > 1 && (
-              <div className="flex items-center gap-1.5 mt-2.5">
-                {product.product_colors.slice(0, 5).map((color) => (
-                  <div
-                    key={color.id}
-                    className="w-3 h-3 border border-surface-200 dark:border-surface-600"
-                    style={{ backgroundColor: color.hex }}
-                    title={color.name}
-                  />
-                ))}
-                {product.product_colors.length > 5 && (
-                  <span className="text-[10px] text-surface-400 ml-0.5">+{product.product_colors.length - 5}</span>
-                )}
-              </div>
-            )}
           </div>
         </div>
       </Link>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Package, ShoppingBag } from 'lucide-react';
+import { Package, ShoppingBag, XCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Breadcrumbs from '@/components/layout/Breadcrumbs';
@@ -9,12 +9,35 @@ import OrderTimeline from '@/components/orders/OrderTimeline';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/context/LanguageContext';
 import { formatPrice, formatDateTime } from '@/lib/utils';
+import { toast } from 'sonner';
 
 export default function OrdersPage() {
   const { isLoggedIn, authFetch, loading: authLoading } = useAuth();
   const { t } = useTranslation();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [cancellingId, setCancellingId] = useState(null);
+  const [confirmCancelId, setConfirmCancelId] = useState(null);
+
+  const handleCancelOrder = async (orderId) => {
+    setCancellingId(orderId);
+    try {
+      const res = await authFetch(`/api/orders/${orderId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'cancelled' }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, status: 'cancelled' } : o));
+      toast.success(t('orders.cancelSuccess'));
+    } catch (err) {
+      toast.error(err.message || t('orders.cancelFailed'));
+    } finally {
+      setCancellingId(null);
+      setConfirmCancelId(null);
+    }
+  };
 
   useEffect(() => {
     async function fetchOrders() {
@@ -122,9 +145,38 @@ export default function OrdersPage() {
               </div>
 
               <div className="px-4 py-3 bg-surface-50 dark:bg-surface-900/50 flex items-center justify-between">
-                {order.discount_amount > 0 && (
-                  <span className="text-[10px] text-success">{t('orders.discount')} -{formatPrice(order.discount_amount)}</span>
-                )}
+                <div className="flex items-center gap-2">
+                  {order.discount_amount > 0 && (
+                    <span className="text-[10px] text-success">{t('orders.discount')} -{formatPrice(order.discount_amount)}</span>
+                  )}
+                  {order.status === 'confirmed' && (
+                    confirmCancelId === order.id ? (
+                      <div className="flex items-center gap-1.5">
+                        <motion.button whileTap={{ scale: 0.95 }} onClick={() => handleCancelOrder(order.id)}
+                          disabled={cancellingId === order.id}
+                          className="px-2.5 py-1 rounded-lg bg-error text-white text-[10px] font-semibold
+                            disabled:opacity-50 flex items-center gap-1">
+                          {cancellingId === order.id ? (
+                            <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <><XCircle className="w-3 h-3" /> {t('orders.confirmCancel')}</>
+                          )}
+                        </motion.button>
+                        <button onClick={() => setConfirmCancelId(null)}
+                          className="px-2 py-1 rounded-lg bg-surface-200 dark:bg-surface-700 text-[10px] font-medium
+                            text-surface-600 dark:text-surface-400">
+                          {t('common.cancel')}
+                        </button>
+                      </div>
+                    ) : (
+                      <motion.button whileTap={{ scale: 0.95 }} onClick={() => setConfirmCancelId(order.id)}
+                        className="px-2.5 py-1 rounded-lg bg-error/10 text-error text-[10px] font-semibold
+                          hover:bg-error/20 transition-colors flex items-center gap-1">
+                        <XCircle className="w-3 h-3" /> {t('orders.cancelOrder')}
+                      </motion.button>
+                    )
+                  )}
+                </div>
                 <div className="ml-auto text-right">
                   <p className="text-[10px] text-surface-400">{t('orders.totalPaid')}</p>
                   <p className="font-bold gradient-text">{formatPrice(order.total_amount)}</p>

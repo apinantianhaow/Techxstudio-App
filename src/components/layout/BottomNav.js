@@ -29,41 +29,31 @@ export default function BottomNav() {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-[var(--z-sticky)] glass
-      shadow-bottom-nav md:hidden safe-area-bottom">
-      <div className="flex items-center justify-around h-[68px] px-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-[var(--z-sticky)] glass md:hidden">
+      <div className="flex items-center justify-around h-[56px] max-w-[500px] mx-auto">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
           const badge = getBadge(item);
 
           return (
-            <Link key={item.href} href={item.href} className="relative flex flex-col items-center justify-center w-16 h-full">
+            <Link key={item.href} href={item.href}
+              className="relative flex flex-col items-center justify-center w-14 h-full">
               <div className="relative">
-                <motion.div
-                  whileTap={{ scale: 0.85 }}
-                  className={`w-10 h-10 flex items-center justify-center  transition-all duration-300
-                    ${isActive
-                      ? 'gradient-primary shadow-md'
-                      : 'hover:bg-surface-100/80 dark:hover:bg-surface-800/50'}`}
-                >
-                  <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-surface-400'}`} />
-                </motion.div>
-
+                <Icon className={`w-5 h-5 transition-colors
+                  ${isActive ? 'text-primary-400' : 'text-white/40'}`}
+                  strokeWidth={isActive ? 2 : 1.5}
+                />
                 {badge > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-1 -right-1 min-w-[16px] h-4  bg-error
-                      flex items-center justify-center text-[9px] font-bold text-white px-1"
-                  >
+                  <span className="absolute -top-1.5 -right-2 min-w-[14px] h-[14px]
+                    bg-error text-white text-[8px] font-bold
+                    flex items-center justify-center px-0.5">
                     {badge > 9 ? '9+' : badge}
-                  </motion.span>
+                  </span>
                 )}
               </div>
-
-              <span className={`text-[10px] mt-1 font-medium transition-colors
-                ${isActive ? 'text-primary-600 dark:text-primary-400' : 'text-surface-400'}`}>
+              <span className={`text-[9px] mt-0.5 font-medium
+                ${isActive ? 'text-primary-400' : 'text-white/40'}`}>
                 {t(item.key)}
               </span>
             </Link>

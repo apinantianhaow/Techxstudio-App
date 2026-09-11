@@ -1,74 +1,51 @@
 @import "tailwindcss";
 
 /* ============================================================
-   TechXStudio — Design System (Tailwind CSS v4)
-   Modern E-Commerce Theme — Navy / Purple / White
+   TechXStudio — Purple/Navy Design System
+   Original brand colors + Apple-inspired layout
    ============================================================ */
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ============================================================
-   Design Tokens
-   ============================================================ */
 @theme inline {
-  /* Primary — Royal Purple */
-  --color-primary-50:  #f5f3ff;
-  --color-primary-100: #ede9fe;
-  --color-primary-200: #ddd6fe;
-  --color-primary-300: #c4b5fd;
+  /* Primary — Purple / Violet brand */
   --color-primary-400: #a78bfa;
   --color-primary-500: #8b5cf6;
   --color-primary-600: #7c3aed;
   --color-primary-700: #6d28d9;
-  --color-primary-800: #5b21b6;
-  --color-primary-900: #4c1d95;
 
-  /* Navy — Top bar & accents */
-  --color-navy-800: #1e1b4b;
-  --color-navy-900: #13102e;
-
-  /* Hero purple */
-  --color-hero: #7b6fc5;
-  --color-hero-light: #a89edf;
-  --color-hero-dark: #4c3f8a;
-
-  /* Accent — Electric Blue */
-  --color-accent-400: #60a5fa;
-  --color-accent-500: #3b82f6;
-  --color-accent-600: #2563eb;
-
-  /* Surface — clean neutrals */
-  --color-surface-50:  #f7f7f8;
-  --color-surface-100: #efefef;
-  --color-surface-200: #e0e0e0;
-  --color-surface-300: #c8c8c8;
-  --color-surface-400: #9c9c9c;
-  --color-surface-500: #6b6b6b;
-  --color-surface-600: #4a4a4a;
-  --color-surface-700: #333333;
-  --color-surface-800: #1f1f1f;
-  --color-surface-900: #111111;
-  --color-surface-950: #070707;
+  /* Surface — Navy-tinted neutrals */
+  --color-surface-50:  #f8f7fc;
+  --color-surface-100: #f0eef7;
+  --color-surface-200: #e2dff0;
+  --color-surface-300: #c8c3dd;
+  --color-surface-400: #9490ad;
+  --color-surface-500: #6b6589;
+  --color-surface-600: #4a4563;
+  --color-surface-700: #332f4a;
+  --color-surface-800: #1e1b2e;
+  --color-surface-900: #13111d;
+  --color-surface-950: #0a0910;
 
   /* Semantic */
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-error:   #ef4444;
-  --color-info:    #3b82f6;
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-error:   #f43f5e;
+  --color-info:    #8b5cf6;
 
   /* Sale / Badge */
-  --color-sale:       #ef4444;
+  --color-sale:       #f43f5e;
   --color-badge-hot:  #f97316;
-  --color-badge-new:  #7c3aed;
+  --color-badge-new:  #8b5cf6;
 
-  /* Shadows — clean white-card feel */
-  --shadow-card:       0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
-  --shadow-card-hover: 0 12px 40px rgba(124,58,237,0.15), 0 4px 12px rgba(0,0,0,0.08);
-  --shadow-glass:      0 4px 24px rgba(0,0,0,0.05);
-  --shadow-float:      0 20px 60px rgba(0,0,0,0.12);
-  --shadow-bottom-nav: 0 -2px 20px rgba(0,0,0,0.06);
+  /* Shadows */
+  --shadow-card:       0 2px 16px rgba(124,58,237,0.08);
+  --shadow-card-hover: 0 8px 30px rgba(124,58,237,0.15);
+  --shadow-nav:        0 1px 0 rgba(0,0,0,0.15);
+  --shadow-float:      0 12px 40px rgba(0,0,0,0.25);
+  --shadow-bottom-nav: 0 -1px 0 rgba(0,0,0,0.12);
 
-  /* Border radius — SHARP (0px) */
+  /* Border radius — sharp */
   --radius-xs:   0px;
   --radius-sm:   0px;
   --radius-md:   0px;
@@ -77,8 +54,8 @@
   --radius-2xl:  0px;
   --radius-full: 0px;
 
-  /* Typography — formal sans-serif only */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
 
   /* Z-index */
   --z-dropdown: 50;
@@ -89,18 +66,11 @@
   --z-top:      500;
 
   /* Easing */
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-apple:  cubic-bezier(0.25, 0.1, 0.25, 1);
-
-  /* Durations */
-  --duration-fast: 150ms;
-  --duration-base: 280ms;
-  --duration-slow: 450ms;
+  --ease-apple: cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 /* ============================================================
-   Base Styles
+   Base
    ============================================================ */
 *, *::before, *::after {
   margin: 0; padding: 0; box-sizing: border-box;
@@ -115,187 +85,147 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background: #f2f2f2;
-  color: var(--color-surface-900);
+  background: var(--color-surface-50);
+  color: var(--color-surface-800);
   min-height: 100dvh;
   overflow-x: hidden;
-  transition: background 0.4s var(--ease-apple), color 0.3s var(--ease-apple);
 }
 
 .dark body {
-  background: #141219;
+  background: var(--color-surface-950);
   color: var(--color-surface-100);
 }
 
 /* ============================================================
-   Scrollbar — thin & clean
+   Scrollbar
    ============================================================ */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb {
-  background: rgba(0,0,0,0.12);
-  border-radius: 100px;
-}
-.dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); }
+::-webkit-scrollbar-thumb { background: rgba(124,58,237,0.2); }
+.dark ::-webkit-scrollbar-thumb { background: rgba(167,139,250,0.2); }
 
 /* ============================================================
-   Top Bar — Dark Navy (matches screenshot exactly)
+   Navigation — Dark purple/navy
    ============================================================ */
 .topbar {
-  background: #1e1b4b;
+  background: rgba(30, 27, 46, 0.95);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
 .dark .topbar {
-  background: #13102e;
+  background: rgba(10, 9, 16, 0.95);
 }
 
-/* Search input inside top bar */
+/* Search pill */
 .search-pill {
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 0;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255,255,255,0.06);
   transition: all 0.25s var(--ease-apple);
 }
 
 .search-pill:focus-within {
-  background: rgba(255, 255, 255, 0.18);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(139,92,246,0.3);
 }
 
 /* ============================================================
-   Hero / Brand Section — Purple
-   ============================================================ */
-.hero-brand {
-  background: linear-gradient(160deg, #8b6fcf 0%, #7b5fc0 40%, #6a4fb8 100%);
-}
-
-.dark .hero-brand {
-  background: linear-gradient(160deg, #5b4096 0%, #4a3280 40%, #3a2468 100%);
-}
-
-/* No serif font — formal sans-serif only */
-
-/* ============================================================
-   Glass — frosted header
-   ============================================================ */
-.glass {
-  background: #1e1b4b;
-  border: none;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-}
-
-.dark .glass {
-  background: #13102e;
-  border-bottom-color: rgba(255,255,255,0.06);
-}
-
-/* ============================================================
-   Cards — white with shadow (key design feature)
+   Glass card — subtle purple-tinted
    ============================================================ */
 .glass-card {
-  background: #ffffff;
-  border: none;
-  border-radius: 0;
-  box-shadow: var(--shadow-card);
-  transition: all 0.35s var(--ease-apple);
+  background: #fff;
+  border: 1px solid var(--color-surface-200);
+  box-shadow: none;
+  transition: all 0.3s var(--ease-apple);
 }
 
 .dark .glass-card {
-  background: #1e1c2e;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  background: var(--color-surface-800);
+  border-color: rgba(255,255,255,0.06);
 }
 
 .glass-card:hover {
-  box-shadow: var(--shadow-card-hover);
-  transform: translateY(-3px);
+  box-shadow: var(--shadow-card);
+  border-color: var(--color-primary-400);
+}
+
+/* Glass (nav) */
+.glass {
+  background: rgba(30, 27, 46, 0.92);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.dark .glass {
+  background: rgba(10, 9, 16, 0.92);
 }
 
 .glass-modal {
   background: rgba(255,255,255,0.97);
   backdrop-filter: blur(30px);
-  border: 1px solid rgba(0,0,0,0.06);
-  border-radius: 0;
+  border: 1px solid var(--color-surface-200);
 }
 
 .dark .glass-modal {
-  background: rgba(22,20,34,0.97);
-  border-color: rgba(255,255,255,0.08);
+  background: rgba(30,27,46,0.97);
+  border-color: rgba(255,255,255,0.06);
 }
 
 /* ============================================================
    Gradient Utilities
    ============================================================ */
 .gradient-primary {
-  background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
-}
-
-.gradient-hero {
-  background: linear-gradient(160deg, #8b6fcf 0%, #6a4fb8 100%);
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
 }
 
 .gradient-sale {
-  background: linear-gradient(135deg, #f43f5e, #e11d48);
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+  background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 50%, #7c3aed 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.gradient-mesh {
-  background:
-    radial-gradient(ellipse at 20% 50%, rgba(124,58,237,0.06) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 20%, rgba(99,102,241,0.05) 0%, transparent 60%);
-}
-
 /* ============================================================
    Animations
    ============================================================ */
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 6px rgba(239,68,68,0.3); }
-  50%       { box-shadow: 0 0 20px rgba(239,68,68,0.5); }
-}
-.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
-
 @keyframes shimmer {
   0%   { background-position: -200% 0; }
   100% { background-position:  200% 0; }
 }
 .animate-shimmer {
-  background: linear-gradient(90deg, #efefef 25%, #e0e0e0 50%, #efefef 75%);
+  background: linear-gradient(90deg, var(--color-surface-100) 25%, var(--color-surface-200) 50%, var(--color-surface-100) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.6s ease-in-out infinite;
-  border-radius: var(--radius-sm);
-}
-.dark .animate-shimmer {
-  background: linear-gradient(90deg, #1e1c2e 25%, #29273a 50%, #1e1c2e 75%);
-  background-size: 200% 100%;
 }
 
-/* ============================================================
-   Ripple
-   ============================================================ */
 .btn-ripple { position: relative; overflow: hidden; }
-.btn-ripple::after {
-  content: ''; position: absolute; inset: 0;
-  background: radial-gradient(circle, rgba(255,255,255,0.25) 10%, transparent 70%);
-  transform: scale(0); opacity: 0;
-  transition: transform 0.45s, opacity 0.3s;
-}
-.btn-ripple:active::after { transform: scale(4); opacity: 1; transition: 0s; }
 
 /* ============================================================
-   Section Title
+   Swiper dots
    ============================================================ */
-.section-title {
-  font-weight: 700;
-  letter-spacing: -0.02em;
+.swiper-pagination-bullet {
+  background: rgba(255,255,255,0.4) !important;
+  opacity: 1 !important;
+  width: 8px !important; height: 3px !important;
+  border-radius: 0 !important;
+  transition: all 0.3s var(--ease-apple) !important;
+}
+
+.swiper-pagination-bullet-active {
+  background: #fff !important;
+  width: 28px !important;
+  border-radius: 0 !important;
 }
 
 /* ============================================================
-   Safe Area / Desktop
+   Safe Area
    ============================================================ */
 .pb-safe {
   padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
@@ -303,23 +233,6 @@ body {
 
 @media (min-width: 768px) {
   .pb-safe { padding-bottom: 3rem; }
-}
-
-/* ============================================================
-   Swiper — dot pagination like screenshot
-   ============================================================ */
-.swiper-pagination-bullet {
-  background: rgba(255,255,255,0.4) !important;
-  opacity: 1 !important;
-  width: 8px !important; height: 3px !important;
-  border-radius: 0 !important;
-  transition: all 0.35s var(--ease-apple) !important;
-}
-
-.swiper-pagination-bullet-active {
-  background: #fff !important;
-  width: 28px !important;
-  border-radius: 0 !important;
 }
 
 /* ============================================================
@@ -332,4 +245,13 @@ body {
   }
 }
 
-/* Glass card — no default flex centering (components handle their own alignment) */
+/* ============================================================
+   Section separator
+   ============================================================ */
+.section-sep {
+  border-top: 1px solid var(--color-surface-200);
+}
+
+.dark .section-sep {
+  border-top-color: rgba(255,255,255,0.06);
+}

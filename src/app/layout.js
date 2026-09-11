@@ -32,7 +32,7 @@ export default function RootLayout({ children }) {
           <LanguageProvider>
             <AuthProvider>
               <TopBar />
-              <main className="pt-14 pb-safe min-h-screen">
+              <main className="pt-12 min-h-screen">
                 {children}
               </main>
               <BottomNav />
@@ -41,12 +41,13 @@ export default function RootLayout({ children }) {
                 position="top-center"
                 toastOptions={{
                   style: {
-                    borderRadius: '14px',
+                    borderRadius: '0',
                     fontSize: '13px',
                     fontWeight: '500',
                     background: '#ffffff',
-                    color: '#111111',
-                    boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+                    color: '#1e1b2e',
+                    boxShadow: '0 4px 20px rgba(124,58,237,0.1)',
+                    border: '1px solid #e2dff0',
                   },
                 }}
               />

@@ -97,6 +97,10 @@ export const translations = {
       reviewFailed: 'Failed to submit review',
       alreadyReviewed: 'You have already reviewed this product',
       stars: 'stars',
+      editReview: 'Edit',
+      deleteReview: 'Delete',
+      reviewUpdated: 'Review updated ⭐',
+      reviewDeleted: 'Review deleted',
     },
 
     // ── Cart ──
@@ -111,6 +115,12 @@ export const translations = {
       total: 'Total',
       checkout: 'Place Order',
       cleared: 'Cart cleared',
+      shippingAddress: 'Shipping Address',
+      addressPlaceholder: 'Enter your full address...',
+      paymentMethod: 'Payment Method',
+      creditCard: 'Credit Card',
+      bankTransfer: 'Transfer',
+      cod: 'Cash on Delivery',
     },
 
     // ── Coupon ──
@@ -158,6 +168,10 @@ export const translations = {
         shipped: 'Shipping',
         delivered: 'Delivered',
       },
+      cancelOrder: 'Cancel Order',
+      confirmCancel: 'Confirm Cancel',
+      cancelSuccess: 'Order cancelled',
+      cancelFailed: 'Unable to cancel order',
     },
 
     // ── Account ──
@@ -180,6 +194,14 @@ export const translations = {
       hasAccount: 'Already have an account? Log in',
       myOrders: 'My Orders',
       myWishlist: 'My Wishlist',
+      editProfile: 'Edit Profile',
+      phone: 'Phone',
+      profileUpdated: 'Profile updated! ✏️',
+      deleteAccount: 'Delete Account',
+      deleteWarning: 'Are you sure?',
+      deleteWarningDesc: 'This will permanently delete your account and all data. This cannot be undone.',
+      confirmDelete: 'Delete Forever',
+      accountDeleted: 'Account deleted',
     },
 
     // ── Compare ──
@@ -333,6 +355,10 @@ export const translations = {
       reviewFailed: 'ส่งรีวิวไม่สำเร็จ',
       alreadyReviewed: 'คุณได้รีวิวสินค้านี้แล้ว',
       stars: 'ดาว',
+      editReview: 'แก้ไข',
+      deleteReview: 'ลบ',
+      reviewUpdated: 'แก้ไขรีวิวแล้ว ⭐',
+      reviewDeleted: 'ลบรีวิวแล้ว',
     },
 
     // ── Cart ──
@@ -347,6 +373,12 @@ export const translations = {
       total: 'ยอดชำระ',
       checkout: 'สั่งซื้อเลย',
       cleared: 'ล้างตะกร้าแล้ว',
+      shippingAddress: 'ที่อยู่จัดส่ง',
+      addressPlaceholder: 'กรอกที่อยู่สำหรับจัดส่ง...',
+      paymentMethod: 'วิธีชำระเงิน',
+      creditCard: 'บัตรเครดิต',
+      bankTransfer: 'โอนเงิน',
+      cod: 'เก็บเงินปลายทาง',
     },
 
     // ── Coupon ──
@@ -394,6 +426,10 @@ export const translations = {
         shipped: 'กำลังจัดส่ง',
         delivered: 'จัดส่งสำเร็จ',
       },
+      cancelOrder: 'ยกเลิกคำสั่งซื้อ',
+      confirmCancel: 'ยืนยันยกเลิก',
+      cancelSuccess: 'ยกเลิกคำสั่งซื้อแล้ว',
+      cancelFailed: 'ไม่สามารถยกเลิกคำสั่งซื้อได้',
     },
 
     // ── Account ──
@@ -416,6 +452,14 @@ export const translations = {
       hasAccount: 'มีบัญชีแล้ว? เข้าสู่ระบบ',
       myOrders: 'คำสั่งซื้อ',
       myWishlist: 'สินค้าที่ชอบ',
+      editProfile: 'แก้ไขโปรไฟล์',
+      phone: 'เบอร์โทร',
+      profileUpdated: 'อัปเดตโปรไฟล์แล้ว! ✏️',
+      deleteAccount: 'ลบบัญชี',
+      deleteWarning: 'คุณแน่ใจหรือไม่?',
+      deleteWarningDesc: 'การลบบัญชีจะลบข้อมูลทั้งหมดอย่างถาวร ไม่สามารถกู้คืนได้',
+      confirmDelete: 'ลบถาวร',
+      accountDeleted: 'ลบบัญชีแล้ว',
     },
 
     // ── Compare ──

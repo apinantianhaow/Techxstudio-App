@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { User, Mail, Lock, LogOut, Package, Heart, ChevronRight, Eye, EyeOff } from 'lucide-react';
+import { User, Mail, Lock, LogOut, Package, Heart, ChevronRight, Eye, EyeOff, Pencil, Save, Trash2, Phone } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Breadcrumbs from '@/components/layout/Breadcrumbs';
@@ -11,7 +11,7 @@ import { useFavoritesCount } from '@/stores/useWishlistStore';
 import { toast } from 'sonner';
 
 export default function AccountPage() {
-  const { user, isLoggedIn, loading, login, signup, logout } = useAuth();
+  const { user, isLoggedIn, loading, login, signup, logout, updateProfile, deleteAccount } = useAuth();
   const { t } = useTranslation();
   const [mode, setMode] = useState('login');
   const [email, setEmail] = useState('');
@@ -19,6 +19,12 @@ export default function AccountPage() {
   const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const favCount = useFavoritesCount();
 
   const handleSubmit = async (e) => {
@@ -36,6 +42,35 @@ export default function AccountPage() {
       toast.error(err.message);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    setSaving(true);
+    try {
+      const updates = {};
+      if (editName.trim()) updates.full_name = editName.trim();
+      if (editPhone !== undefined) updates.phone = editPhone.trim();
+      await updateProfile(updates);
+      setIsEditing(false);
+      toast.success(t('account.profileUpdated'));
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      await deleteAccount();
+      toast.success(t('account.accountDeleted'));
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setDeleting(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -61,11 +96,56 @@ export default function AccountPage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card rounded-2xl p-6 text-center">
           <div className="w-20 h-20 mx-auto rounded-full gradient-primary flex items-center justify-center mb-3">
             <span className="text-3xl font-bold text-white">
-              {user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
+              {(editName || user?.full_name)?.charAt(0)?.toUpperCase() || 'U'}
             </span>
           </div>
-          <h2 className="text-lg font-bold text-surface-800 dark:text-surface-200">{user?.full_name}</h2>
-          <p className="text-sm text-surface-400">{user?.email}</p>
+          {isEditing ? (
+            <div className="space-y-3 mt-3">
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
+                <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)}
+                  placeholder={t('account.fullName')}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-50 dark:bg-surface-800
+                    border border-surface-200 dark:border-surface-700 text-sm
+                    focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all" />
+              </div>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
+                <input type="tel" value={editPhone} onChange={(e) => setEditPhone(e.target.value)}
+                  placeholder={t('account.phone')}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-50 dark:bg-surface-800
+                    border border-surface-200 dark:border-surface-700 text-sm
+                    focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all" />
+              </div>
+              <div className="flex gap-2">
+                <motion.button whileTap={{ scale: 0.95 }} onClick={handleSaveProfile} disabled={saving}
+                  className="flex-1 gradient-primary text-white py-2.5 rounded-xl font-semibold text-sm
+                    disabled:opacity-50 flex items-center justify-center gap-1.5">
+                  {saving ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : (
+                    <><Save className="w-4 h-4" /> {t('common.save')}</>
+                  )}
+                </motion.button>
+                <motion.button whileTap={{ scale: 0.95 }}
+                  onClick={() => { setIsEditing(false); setEditName(user?.full_name || ''); setEditPhone(user?.phone || ''); }}
+                  className="px-4 py-2.5 rounded-xl bg-surface-100 dark:bg-surface-800 text-sm font-medium
+                    text-surface-600 dark:text-surface-400">
+                  {t('common.cancel')}
+                </motion.button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <h2 className="text-lg font-bold text-surface-800 dark:text-surface-200">{user?.full_name}</h2>
+              <p className="text-sm text-surface-400">{user?.email}</p>
+              {user?.phone && <p className="text-xs text-surface-400 mt-0.5">{user.phone}</p>}
+              <motion.button whileTap={{ scale: 0.95 }}
+                onClick={() => { setIsEditing(true); setEditName(user?.full_name || ''); setEditPhone(user?.phone || ''); }}
+                className="mt-3 text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline
+                  flex items-center gap-1 mx-auto">
+                <Pencil className="w-3.5 h-3.5" /> {t('account.editProfile')}
+              </motion.button>
+            </>
+          )}
         </motion.div>
 
         <div className="glass-card rounded-xl overflow-hidden divide-y divide-surface-100 dark:divide-surface-800">
@@ -99,6 +179,34 @@ export default function AccountPage() {
           <LogOut className="w-4 h-4" />
           {t('account.logout')}
         </motion.button>
+
+        {/* Delete Account */}
+        {showDeleteConfirm ? (
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+            className="glass-card rounded-xl p-4 border-2 border-error/30 space-y-3">
+            <p className="text-sm font-semibold text-error">{t('account.deleteWarning')}</p>
+            <p className="text-xs text-surface-400">{t('account.deleteWarningDesc')}</p>
+            <div className="flex gap-2">
+              <motion.button whileTap={{ scale: 0.95 }} onClick={handleDeleteAccount} disabled={deleting}
+                className="flex-1 bg-error text-white py-2.5 rounded-xl font-semibold text-sm
+                  disabled:opacity-50 flex items-center justify-center gap-1.5">
+                {deleting ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : (
+                  <><Trash2 className="w-4 h-4" /> {t('account.confirmDelete')}</>
+                )}
+              </motion.button>
+              <motion.button whileTap={{ scale: 0.95 }} onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2.5 rounded-xl bg-surface-100 dark:bg-surface-800 text-sm font-medium
+                  text-surface-600 dark:text-surface-400">
+                {t('common.cancel')}
+              </motion.button>
+            </div>
+          </motion.div>
+        ) : (
+          <button onClick={() => setShowDeleteConfirm(true)}
+            className="w-full text-center text-xs text-surface-400 hover:text-error transition-colors py-2">
+            {t('account.deleteAccount')}
+          </button>
+        )}
       </div>
     );
   }
