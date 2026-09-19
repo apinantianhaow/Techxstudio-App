@@ -9,6 +9,11 @@
     ["cn\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
   ],
   "files.associations": {
-    "*.css": "tailwindcss"
+    "*.css": "tailwindcss",
+    "*.sql": "postgres"
+  },
+  "mssql.intelliSense.enableIntelliSense": false,
+  "[sql]": {
+    "editor.defaultFormatter": null
   }
 }
