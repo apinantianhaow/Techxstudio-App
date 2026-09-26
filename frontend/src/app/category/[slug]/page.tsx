@@ -1,0 +1,83 @@
+'use client';
+
+import { useState, useEffect, use, useMemo } from 'react';
+import { Search } from 'lucide-react';
+import Breadcrumbs from '@/components/layout/Breadcrumbs';
+import ProductCard from '@/components/product/ProductCard';
+import ProductQuickView from '@/components/product/ProductQuickView';
+import FilterSortBar from '@/components/ui/FilterSortBar';
+import LoadingSkeleton from '@/components/ui/LoadingSkeleton';
+import { useTranslation } from '@/context/LanguageContext';
+import { calcDiscountedPrice } from '@/lib/utils';
+import type { Product } from '@/types';
+
+export default function CategoryPage({ params }: PageProps<'/category/[slug]'>) {
+  const { slug } = use(params);
+  const { t } = useTranslation();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+  const [sortBy, setSortBy] = useState('newest');
+  const [priceRange, setPriceRange] = useState('all');
+
+  const label = t(`category.${slug}`) || slug;
+
+  useEffect(() => {
+    async function fetchProducts() {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/products?category=${slug}`);
+        const data = await res.json();
+        setProducts(data.products || []);
+      } catch { setProducts([]); }
+      finally { setLoading(false); }
+    }
+    fetchProducts();
+  }, [slug]);
+
+  const filteredProducts = useMemo(() => {
+    let list = [...products];
+    if (priceRange !== 'all') {
+      const [min, max] = priceRange.split('-').map(Number);
+      list = list.filter((p) => {
+        const firstOpt = p.product_options?.[0];
+        const price = calcDiscountedPrice(firstOpt?.price || p.original_price, p.sale_percent);
+        return price >= min && price <= max;
+      });
+    }
+    switch (sortBy) {
+      case 'price-asc': list.sort((a, b) => (a.product_options?.[0]?.price || a.original_price) - (b.product_options?.[0]?.price || b.original_price)); break;
+      case 'price-desc': list.sort((a, b) => (b.product_options?.[0]?.price || b.original_price) - (a.product_options?.[0]?.price || a.original_price)); break;
+      case 'rating': list.sort((a, b) => b.rating - a.rating); break;
+      case 'popular': list.sort((a, b) => (b.reviews_count ?? 0) - (a.reviews_count ?? 0)); break;
+      default: break;
+    }
+    return list;
+  }, [products, sortBy, priceRange]);
+
+  return (
+    <div className="px-4 md:px-8 lg:px-12 py-4 md:py-6 space-y-4">
+      <Breadcrumbs items={[{ label }]} />
+      <h1 className="text-2xl font-bold section-title text-surface-800 dark:text-surface-200">{label}</h1>
+
+      <FilterSortBar sortBy={sortBy} priceRange={priceRange} onSortChange={setSortBy} onPriceChange={setPriceRange} />
+
+      {loading ? (
+        <LoadingSkeleton count={6} type="card" />
+      ) : filteredProducts.length === 0 ? (
+        <div className="text-center py-16">
+          <Search className="w-10 h-10 mx-auto mb-3 text-surface-300 dark:text-surface-600" />
+          <p className="text-surface-400 dark:text-surface-500">{t('common.noResults')}</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {filteredProducts.map((product, i) => (
+            <ProductCard key={product.id} product={product} index={i} onQuickView={setQuickViewProduct} />
+          ))}
+        </div>
+      )}
+
+      <ProductQuickView product={quickViewProduct} isOpen={!!quickViewProduct} onClose={() => setQuickViewProduct(null)} />
+    </div>
+  );
+}
