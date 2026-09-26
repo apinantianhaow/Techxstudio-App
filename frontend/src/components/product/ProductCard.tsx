@@ -7,6 +7,7 @@ import useWishlistStore from '@/stores/useWishlistStore';
 import { formatPrice, calcDiscountedPrice } from '@/lib/utils';
 import { useTranslation } from '@/context/LanguageContext';
 import { toast } from 'sonner';
+import { toastIcons } from '@/components/ui/toastIcons';
 import type { MouseEvent } from 'react';
 import type { Product } from '@/types';
 
@@ -31,7 +32,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
     e.preventDefault();
     e.stopPropagation();
     toggleFavorite(product.id);
-    toast(liked ? t('product.removedFromWishlist') : t('product.addedToWishlist'));
+    toast(liked ? t('product.removedFromWishlist') : t('product.addedToWishlist'), { icon: liked ? undefined : toastIcons.wishlist });
   };
 
   return (

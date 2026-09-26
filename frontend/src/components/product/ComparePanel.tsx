@@ -1,6 +1,6 @@
 'use client';
 
-import { X, GitCompareArrows, Trash2 } from 'lucide-react';
+import { X, GitCompareArrows, Trash2, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useCompareStore from '@/stores/useCompareStore';
 import { useTranslation } from '@/context/LanguageContext';
@@ -79,7 +79,12 @@ export default function ComparePanel() {
                   <tr className="border-t border-surface-200 dark:border-surface-700">
                     <td className="py-2 px-2 text-surface-400">{t('compare.rating')}</td>
                     {items.map((item) => (
-                      <td key={item.id} className="py-2 px-3 text-center text-sm">{item.rating}</td>
+                      <td key={item.id} className="py-2 px-3 text-center text-sm">
+                        <span className="inline-flex items-center gap-1">
+                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                          {item.rating}
+                        </span>
+                      </td>
                     ))}
                   </tr>
                   <tr className="border-t border-surface-200 dark:border-surface-700">

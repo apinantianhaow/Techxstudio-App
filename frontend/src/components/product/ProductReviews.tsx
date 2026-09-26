@@ -10,6 +10,7 @@ import { useTranslation } from '@/context/LanguageContext';
 import { formatDate, errorMessage } from '@/lib/utils';
 import type { Review } from '@/types';
 import { toast } from 'sonner';
+import { toastIcons } from '@/components/ui/toastIcons';
 
 export default function ProductReviews({ productId, reviews = [] }: { productId: string; reviews?: Review[] }) {
   const { user, isLoggedIn, authFetch } = useAuth();
@@ -45,7 +46,7 @@ export default function ProductReviews({ productId, reviews = [] }: { productId:
       setRating(0);
       setTitle('');
       setComment('');
-      toast.success(t('reviews.reviewSubmitted'));
+      toast.success(t('reviews.reviewSubmitted'), { icon: toastIcons.review });
     } catch (err) {
       toast.error(errorMessage(err) || t('reviews.reviewFailed'));
     } finally {
@@ -78,7 +79,7 @@ export default function ProductReviews({ productId, reviews = [] }: { productId:
         )
       );
       setEditingId(null);
-      toast.success(t('reviews.reviewUpdated'));
+      toast.success(t('reviews.reviewUpdated'), { icon: toastIcons.review });
     } catch (err) {
       toast.error(errorMessage(err) || t('reviews.reviewFailed'));
     } finally {

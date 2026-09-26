@@ -14,6 +14,7 @@ import useWishlistStore from '@/stores/useWishlistStore';
 import { formatPrice, calcDiscountedPrice } from '@/lib/utils';
 import { useTranslation } from '@/context/LanguageContext';
 import { toast } from 'sonner';
+import { toastIcons } from '@/components/ui/toastIcons';
 import type { Product, Review } from '@/types';
 
 export default function ProductPage({ params }: PageProps<'/product/[id]'>) {
@@ -83,7 +84,7 @@ export default function ProductPage({ params }: PageProps<'/product/[id]'>) {
       image_url: currentColor?.image_url || '',
       slug: product.slug,
     });
-    toast.success(t('product.addedToCart'));
+    toast.success(t('product.addedToCart'), { icon: toastIcons.cart });
   };
 
   const handleShare = async () => {
@@ -137,7 +138,7 @@ export default function ProductPage({ params }: PageProps<'/product/[id]'>) {
               <Share2 className="w-4 h-4 text-surface-500" />
             </motion.button>
             <motion.button whileTap={{ scale: 0.8 }}
-              onClick={() => { toggleFavorite(product.id); toast(liked ? t('product.removedFromWishlist') : t('product.addedToWishlist')); }}
+              onClick={() => { toggleFavorite(product.id); toast(liked ? t('product.removedFromWishlist') : t('product.addedToWishlist'), { icon: liked ? undefined : toastIcons.wishlist }); }}
               className="w-10 h-10 rounded-full bg-surface-100 dark:bg-surface-800 flex items-center justify-center">
               <Heart className={`w-4 h-4 ${liked ? 'fill-red-500 text-red-500' : 'text-surface-500'}`} />
             </motion.button>

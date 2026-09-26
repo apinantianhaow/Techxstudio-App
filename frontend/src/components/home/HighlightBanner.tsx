@@ -3,6 +3,7 @@
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
 import { motion } from 'framer-motion';
+import { Flame, type LucideIcon } from 'lucide-react';
 import { useTranslation } from '@/context/LanguageContext';
 import Link from 'next/link';
 import 'swiper/css';
@@ -14,10 +15,10 @@ const FALLBACK_SLIDES = [
   { title: 'Flash Sale', subtitle: 'Up to 15% Off', desc: '100% genuine Apple products at special prices' },
 ];
 
-const THEMES = [
+const THEMES: { gradient: string; icon?: LucideIcon }[] = [
   { gradient: 'linear-gradient(160deg, #8b6fcf 0%, #7b5fc0 50%, #6a4fb8 100%)' },
   { gradient: 'linear-gradient(160deg, #5b4896 0%, #4a3a80 50%, #3a2e6a 100%)' },
-  { gradient: 'linear-gradient(160deg, #7c5cbf 0%, #9b7dd4 50%, #5a3fa0 100%)' },
+  { gradient: 'linear-gradient(160deg, #7c5cbf 0%, #9b7dd4 50%, #5a3fa0 100%)', icon: Flame }, // Flash Sale
 ];
 
 export default function HighlightBanner() {
@@ -36,6 +37,7 @@ export default function HighlightBanner() {
       >
         {slides.map((slide, i) => {
           const theme = THEMES[i % THEMES.length];
+          const Icon = theme.icon;
           return (
             <SwiperSlide key={i}>
               <div
@@ -65,6 +67,12 @@ export default function HighlightBanner() {
                     textTransform: 'uppercase',
                   }}>
                     {slide.title}
+                    {Icon && (
+                      <Icon
+                        aria-hidden
+                        style={{ display: 'inline-block', width: '0.8em', height: '0.8em', marginLeft: '0.2em', verticalAlign: '-0.05em' }}
+                      />
+                    )}
                   </h2>
 
                   {slide.subtitle && (

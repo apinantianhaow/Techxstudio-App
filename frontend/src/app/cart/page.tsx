@@ -13,6 +13,7 @@ import { useTranslation } from '@/context/LanguageContext';
 import { formatPrice, errorMessage } from '@/lib/utils';
 import type { AppliedCoupon } from '@/types';
 import { toast } from 'sonner';
+import { toastIcons } from '@/components/ui/toastIcons';
 
 export default function CartPage() {
   const items = useCartItems();
@@ -44,7 +45,7 @@ export default function CartPage() {
       if (!res.ok) throw new Error(data.error);
       clearCart();
       setAppliedCoupon(null);
-      toast.success(t('orders.orderSuccess'));
+      toast.success(t('orders.orderSuccess'), { icon: toastIcons.celebrate });
     } catch (err) { toast.error(errorMessage(err) || t('orders.orderFailed')); }
     finally { setOrdering(false); }
   };

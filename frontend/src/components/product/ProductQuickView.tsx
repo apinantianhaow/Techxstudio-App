@@ -9,6 +9,7 @@ import useWishlistStore from '@/stores/useWishlistStore';
 import { formatPrice, calcDiscountedPrice } from '@/lib/utils';
 import { useTranslation } from '@/context/LanguageContext';
 import { toast } from 'sonner';
+import { toastIcons } from '@/components/ui/toastIcons';
 import type { Product } from '@/types';
 
 interface ProductQuickViewProps {
@@ -44,7 +45,7 @@ export default function ProductQuickView({ product, isOpen, onClose }: ProductQu
       image_url: currentColor?.image_url || '',
       slug: product.slug,
     });
-    toast.success(t('product.addedToCart'));
+    toast.success(t('product.addedToCart'), { icon: toastIcons.cart });
     onClose();
   };
 
@@ -162,7 +163,7 @@ export default function ProductQuickView({ product, isOpen, onClose }: ProductQu
                   whileTap={{ scale: 0.8 }}
                   onClick={() => {
                     toggleFavorite(product.id);
-                    toast(liked ? t('product.removedFromWishlist') : t('product.addedToWishlist'));
+                    toast(liked ? t('product.removedFromWishlist') : t('product.addedToWishlist'), { icon: liked ? undefined : toastIcons.wishlist });
                   }}
                   className="w-12 h-12  bg-surface-100 dark:bg-surface-700
                     flex items-center justify-center hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"

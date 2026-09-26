@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/context/LanguageContext';
 import { useFavoritesCount } from '@/stores/useWishlistStore';
 import { toast } from 'sonner';
+import { toastIcons } from '@/components/ui/toastIcons';
 import { errorMessage } from '@/lib/utils';
 
 export default function AccountPage() {
@@ -34,10 +35,10 @@ export default function AccountPage() {
     try {
       if (mode === 'signup') {
         await signup(email, password, fullName);
-        toast.success(t('account.signupSuccess'));
+        toast.success(t('account.signupSuccess'), { icon: toastIcons.celebrate });
       } else {
         await login(email, password);
-        toast.success(t('account.loginSuccess'));
+        toast.success(t('account.loginSuccess'), { icon: toastIcons.welcome });
       }
     } catch (err) {
       toast.error(errorMessage(err));
@@ -54,7 +55,7 @@ export default function AccountPage() {
       if (editPhone !== undefined) updates.phone = editPhone.trim();
       await updateProfile(updates);
       setIsEditing(false);
-      toast.success(t('account.profileUpdated'));
+      toast.success(t('account.profileUpdated'), { icon: toastIcons.edit });
     } catch (err) {
       toast.error(errorMessage(err));
     } finally {
