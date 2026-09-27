@@ -19,6 +19,7 @@ export const translations = {
       close: 'Close',
       share: 'Share',
       linkCopied: 'Link copied!',
+      items: 'items',
     },
 
     // ── Navigation ──
@@ -36,6 +37,7 @@ export const translations = {
     search: {
       placeholder: 'Search products...',
       noResults: 'No products found',
+      quickLinks: 'Quick Links',
     },
 
     // ── Home ──
@@ -43,6 +45,13 @@ export const translations = {
       flashSale: 'Flash Sale',
       popular: 'Trending Now',
       accessories: 'Accessories',
+      store: 'Store',
+      storeTagline: 'Find the Apple gear you love, at a better price.',
+      flashSaleTagline: 'Great deals, today only.',
+      popularTagline: 'What everyone’s buying.',
+      accessoriesTagline: 'Complete your setup.',
+      difference: 'The TechXStudio difference',
+      differenceTagline: 'Even more reasons to shop with us.',
       features: {
         authentic: { title: '100% Authentic', desc: 'Genuine Apple products' },
         freeShipping: { title: 'Free Shipping', desc: 'Orders over ฿3,000' },
@@ -58,6 +67,16 @@ export const translations = {
         { title: 'iPad Pro M4', subtitle: 'Impossibly Thin. Incredibly Powerful.', desc: 'Ultra Retina XDR display with the all-new M4 chip' },
         { title: 'Flash Sale', subtitle: 'Up to 15% Off', desc: '100% genuine Apple products at special prices — today only' },
       ],
+    },
+
+    // ── Hero ──
+    hero: {
+      shop: 'Shop now',
+      browse: 'Browse all',
+      saleCta: 'Shop the sale',
+      accessoriesTitle: 'Accessories',
+      accessoriesSubtitle: 'Sound, charge and create.',
+      explore: 'Explore',
     },
 
     // ── Categories ──
@@ -81,6 +100,11 @@ export const translations = {
       addedToWishlist: 'Added to Wishlist',
       removedFromWishlist: 'Removed from Wishlist',
       addedToCompare: 'Added to comparison',
+      colorPrompt: 'Pick your favorite.',
+      optionsPrompt: 'Choose your model.',
+      quantity: 'Quantity',
+      save: 'Save',
+      badges: { NEW: 'New', HOT: 'Hot', SALE: 'Sale' },
     },
 
     // ── Reviews ──
@@ -121,6 +145,10 @@ export const translations = {
       creditCard: 'Credit Card',
       bankTransfer: 'Transfer',
       cod: 'Cash on Delivery',
+      bagTotal: 'Your bag total is',
+      freeDeliveryReturns: 'Free shipping and 14-day returns on every order.',
+      remove: 'Remove',
+      summary: 'Order summary',
     },
 
     // ── Coupon ──
@@ -234,11 +262,20 @@ export const translations = {
       hours: 'hr',
       minutes: 'min',
       seconds: 'sec',
+      endsIn: 'Ends in',
     },
 
     // ── Breadcrumbs ──
     breadcrumbs: {
       home: 'Home',
+    },
+
+    // ── Footer ──
+    footer: {
+      shop: 'Shop',
+      account: 'Account',
+      disclaimer: 'TechXStudio is a personal demo project for learning purposes. It is not affiliated with, endorsed by, or sponsored by Apple Inc. Product names are trademarks of their respective owners.',
+      copyright: 'TechXStudio. Built for learning.',
     },
 
     // ── Auth Errors (API) ──
@@ -277,6 +314,7 @@ export const translations = {
       close: 'ปิด',
       share: 'แชร์',
       linkCopied: 'คัดลอกลิงก์แล้ว',
+      items: 'รายการ',
     },
 
     // ── Navigation ──
@@ -294,6 +332,7 @@ export const translations = {
     search: {
       placeholder: 'ค้นหาสินค้า...',
       noResults: 'ไม่พบสินค้าที่ค้นหา',
+      quickLinks: 'ลิงก์ด่วน',
     },
 
     // ── Home ──
@@ -301,6 +340,13 @@ export const translations = {
       flashSale: 'Flash Sale',
       popular: 'สินค้ายอดนิยม',
       accessories: 'อุปกรณ์เสริม',
+      store: 'สโตร์',
+      storeTagline: 'ช้อปสินค้า Apple ที่คุณชอบ ในราคาที่ดีกว่า',
+      flashSaleTagline: 'ดีลสุดคุ้ม เฉพาะวันนี้',
+      popularTagline: 'ที่ใคร ๆ ก็กำลังซื้อ',
+      accessoriesTagline: 'เติมเต็มทุกการใช้งาน',
+      difference: 'ทำไมต้อง TechXStudio',
+      differenceTagline: 'อีกหลายเหตุผลที่คุณจะวางใจเรา',
       features: {
         authentic: { title: 'ของแท้ 100%', desc: 'สินค้า Apple แท้ทุกชิ้น' },
         freeShipping: { title: 'จัดส่งฟรี', desc: 'เมื่อสั่งซื้อครบ ฿3,000' },
@@ -316,6 +362,16 @@ export const translations = {
         { title: 'iPad Pro M4', subtitle: 'บางเฉียบ ทรงพลังสุดขีด', desc: 'จอ Ultra Retina XDR พร้อมชิป M4 ใหม่ล่าสุด' },
         { title: 'Flash Sale', subtitle: 'ลดสูงสุด 15%', desc: 'สินค้า Apple แท้ 100% ราคาพิเศษ เฉพาะวันนี้' },
       ],
+    },
+
+    // ── Hero ──
+    hero: {
+      shop: 'ซื้อเลย',
+      browse: 'ดูทั้งหมด',
+      saleCta: 'ช้อปดีลนี้',
+      accessoriesTitle: 'อุปกรณ์เสริม',
+      accessoriesSubtitle: 'ฟัง ชาร์จ และสร้างสรรค์',
+      explore: 'สำรวจ',
     },
 
     // ── Categories ──
@@ -339,6 +395,11 @@ export const translations = {
       addedToWishlist: 'เพิ่มลง Wishlist แล้ว',
       removedFromWishlist: 'ลบออกจาก Wishlist แล้ว',
       addedToCompare: 'เพิ่มในรายการเปรียบเทียบ',
+      colorPrompt: 'เลือกสีที่ใช่',
+      optionsPrompt: 'เลือกรุ่นที่ต้องการ',
+      quantity: 'จำนวน',
+      save: 'ลด',
+      badges: { NEW: 'ใหม่', HOT: 'มาแรง', SALE: 'ลดราคา' },
     },
 
     // ── Reviews ──
@@ -379,6 +440,10 @@ export const translations = {
       creditCard: 'บัตรเครดิต',
       bankTransfer: 'โอนเงิน',
       cod: 'เก็บเงินปลายทาง',
+      bagTotal: 'ยอดรวมในตะกร้าของคุณคือ',
+      freeDeliveryReturns: 'จัดส่งฟรี และเปลี่ยนคืนได้ภายใน 14 วันทุกคำสั่งซื้อ',
+      remove: 'ลบ',
+      summary: 'สรุปคำสั่งซื้อ',
     },
 
     // ── Coupon ──
@@ -492,11 +557,20 @@ export const translations = {
       hours: 'ชม.',
       minutes: 'นาที',
       seconds: 'วินาที',
+      endsIn: 'สิ้นสุดใน',
     },
 
     // ── Breadcrumbs ──
     breadcrumbs: {
       home: 'หน้าหลัก',
+    },
+
+    // ── Footer ──
+    footer: {
+      shop: 'ช้อป',
+      account: 'บัญชี',
+      disclaimer: 'TechXStudio เป็นโปรเจกต์ส่วนตัวเพื่อการเรียนรู้ ไม่มีส่วนเกี่ยวข้อง ไม่ได้รับการรับรองหรือสนับสนุนจาก Apple Inc. ชื่อผลิตภัณฑ์เป็นเครื่องหมายการค้าของเจ้าของแต่ละราย',
+      copyright: 'TechXStudio สร้างขึ้นเพื่อการเรียนรู้',
     },
 
     // ── Auth Errors (API) ──

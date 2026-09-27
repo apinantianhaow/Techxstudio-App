@@ -1,16 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Package, ShoppingBag, XCircle } from 'lucide-react';
+import { Package, ShoppingBag } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import Breadcrumbs from '@/components/layout/Breadcrumbs';
 import OrderTimeline from '@/components/orders/OrderTimeline';
+import { DeviceArt, deviceKindFor } from '@/components/product/ProductVisual';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/context/LanguageContext';
 import { formatPrice, formatDateTime, errorMessage } from '@/lib/utils';
 import type { Order } from '@/types';
 import { toast } from 'sonner';
+
+const spinner = 'h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent';
 
 export default function OrdersPage() {
   const { isLoggedIn, authFetch, loading: authLoading } = useAuth();
@@ -55,138 +57,119 @@ export default function OrdersPage() {
 
   if (!authLoading && !isLoggedIn) {
     return (
-      <div className="px-4 md:px-8 lg:px-12 py-4 md:py-6 max-w-6xl mx-auto space-y-4">
-        <Breadcrumbs items={[{ label: t('orders.title') }]} />
-        <div className="text-center py-20 space-y-4">
-          <Package className="w-20 h-20 mx-auto text-surface-300 dark:text-surface-600" />
-          <h2 className="text-xl font-bold text-surface-700 dark:text-surface-300">{t('orders.loginRequired')}</h2>
-          <p className="text-sm text-surface-400">{t('orders.loginRequiredDesc')}</p>
-          <Link href="/account">
-            <motion.button whileTap={{ scale: 0.95 }} className="gradient-primary text-white px-6 py-3 rounded-xl font-semibold mt-2">
-              {t('account.login')}
-            </motion.button>
-          </Link>
-        </div>
+      <div className="page-width py-24 text-center md:py-32">
+        <Package className="mx-auto h-14 w-14 text-ink-3" strokeWidth={1.25} />
+        <h1 className="t-headline mt-6 text-ink">{t('orders.loginRequired')}</h1>
+        <p className="mt-3 text-[17px] text-ink-2">{t('orders.loginRequiredDesc')}</p>
+        <Link href="/account" className="btn btn-primary mt-8">{t('account.login')}</Link>
       </div>
     );
   }
 
-  return (
-    <div className="px-4 md:px-8 lg:px-12 py-4 md:py-6 max-w-6xl mx-auto space-y-4">
-      <Breadcrumbs items={[{ label: t('orders.title') }]} />
-      <h1 className="text-xl font-bold section-title text-surface-800 dark:text-surface-200">{t('orders.title')}</h1>
+  const statusStyle = (status: Order['status']) =>
+    status === 'delivered' ? 'bg-success/12 text-success'
+      : status === 'cancelled' ? 'bg-danger/10 text-danger'
+      : 'bg-accent/10 text-accent dark:text-link';
 
-      {loading ? (
-        <div className="space-y-3">
-          {[1, 2].map(i => (
-            <div key={i} className="glass-card rounded-xl p-4 space-y-3">
-              <div className="h-4 w-1/3 rounded animate-shimmer" />
-              <div className="h-12 rounded animate-shimmer" />
-              <div className="h-4 w-1/2 rounded animate-shimmer" />
-            </div>
-          ))}
-        </div>
-      ) : orders.length === 0 ? (
-        <div className="text-center py-16 space-y-4">
-          <ShoppingBag className="w-16 h-16 mx-auto text-surface-300 dark:text-surface-600" />
-          <p className="text-surface-400">{t('orders.empty')}</p>
-          <Link href="/">
-            <motion.button whileTap={{ scale: 0.95 }} className="gradient-primary text-white px-6 py-3 rounded-xl font-semibold">
-              {t('orders.startShopping')}
-            </motion.button>
-          </Link>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {orders.map((order, i) => (
-            <motion.div key={order.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }} className="glass-card rounded-xl overflow-hidden">
-              <div className="p-4 border-b border-surface-200 dark:border-surface-700">
-                <div className="flex items-center justify-between mb-3">
+  return (
+    <div className="min-h-[calc(100dvh-2.75rem)] bg-canvas-alt pb-20">
+      <div className="mx-auto max-w-[880px] px-5 md:px-8">
+        <h1 className="t-headline pt-12 pb-8 text-ink md:pt-16">{t('orders.title')}</h1>
+
+        {loading ? (
+          <div className="space-y-5">
+            {[1, 2].map(i => (
+              <div key={i} className="card space-y-4 p-6">
+                <div className="h-4 w-1/3 rounded-full animate-shimmer" />
+                <div className="h-12 rounded-control animate-shimmer" />
+                <div className="h-4 w-1/2 rounded-full animate-shimmer" />
+              </div>
+            ))}
+          </div>
+        ) : orders.length === 0 ? (
+          <div className="card py-20 text-center">
+            <ShoppingBag className="mx-auto h-12 w-12 text-ink-3" strokeWidth={1.25} />
+            <p className="mt-4 text-[17px] text-ink-2">{t('orders.empty')}</p>
+            <Link href="/" className="btn btn-primary mt-6">{t('orders.startShopping')}</Link>
+          </div>
+        ) : (
+          <div className="space-y-5">
+            {orders.map((order, i) => (
+              <motion.article key={order.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }} className="card overflow-hidden">
+                <header className="flex flex-wrap items-start justify-between gap-3 p-6 pb-5">
                   <div>
-                    <p className="text-[10px] text-surface-400">{t('orders.orderNumber')}</p>
-                    <p className="text-xs font-mono font-bold text-surface-600 dark:text-surface-400">
+                    <p className="text-[12px] text-ink-2">{t('orders.orderNumber')}</p>
+                    <p className="text-[17px] font-semibold tracking-wide text-ink">
                       {order.id.slice(0, 8).toUpperCase()}
                     </p>
+                    <p className="mt-0.5 text-[12px] text-ink-3">{formatDateTime(order.created_at)}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-[10px] text-surface-400">{formatDateTime(order.created_at)}</p>
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full
-                      ${order.status === 'delivered' ? 'bg-success/10 text-success' :
-                        order.status === 'cancelled' ? 'bg-error/10 text-error' :
-                        'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'}`}>
-                      {t(`orders.status.${order.status}`)}
-                    </span>
-                  </div>
-                </div>
-                {order.status !== 'cancelled' && <OrderTimeline currentStatus={order.status} />}
-              </div>
+                  <span className={`rounded-full px-3 py-1 text-[12px] font-semibold ${statusStyle(order.status)}`}>
+                    {t(`orders.status.${order.status}`)}
+                  </span>
+                </header>
 
-              <div className="p-4 space-y-2">
-                {order.order_items?.map((item) => (
-                  <div key={item.id} className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-lg bg-surface-100 dark:bg-surface-800 overflow-hidden flex-shrink-0">
-                      {item.image_url ? (
-                        <img src={item.image_url} alt={item.product_name} className="w-full h-full object-contain p-1" />
+                {order.status !== 'cancelled' && (
+                  <div className="px-6 pb-6">
+                    <OrderTimeline currentStatus={order.status} />
+                  </div>
+                )}
+
+                <ul className="mx-6 border-t border-line">
+                  {order.order_items?.map((item) => (
+                    <li key={item.id} className="flex items-center gap-4 border-b border-line py-4 last:border-b-0">
+                      <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl bg-canvas-alt p-2">
+                        {item.image_url ? (
+                          <img src={item.image_url} alt={item.product_name} className="h-full w-full object-contain" />
+                        ) : (
+                          <DeviceArt kind={deviceKindFor({ name: item.product_name })} className="h-full w-full" />
+                        )}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[15px] font-semibold text-ink">{item.product_name}</span>
+                        <span className="block text-[13px] text-ink-2">
+                          {[item.option_label, item.color_name].filter(Boolean).join(' · ')} × {item.quantity}
+                        </span>
+                      </span>
+                      <span className="text-[15px] text-ink">{formatPrice(item.price * item.quantity)}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <footer className="flex flex-wrap items-center justify-between gap-3 bg-fill/60 px-6 py-4">
+                  <div className="flex items-center gap-4">
+                    {order.discount_amount > 0 && (
+                      <span className="text-[13px] text-success">{t('orders.discount')} −{formatPrice(order.discount_amount)}</span>
+                    )}
+                    {order.status === 'confirmed' && (
+                      confirmCancelId === order.id ? (
+                        <span className="flex items-center gap-2">
+                          <button onClick={() => handleCancelOrder(order.id)} disabled={cancellingId === order.id}
+                            className="btn btn-sm bg-danger text-white hover:opacity-90">
+                            {cancellingId === order.id ? <span className={spinner} /> : t('orders.confirmCancel')}
+                          </button>
+                          <button onClick={() => setConfirmCancelId(null)} className="btn btn-sm btn-tinted">
+                            {t('common.cancel')}
+                          </button>
+                        </span>
                       ) : (
-                        <div className="w-full h-full gradient-primary opacity-10" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-surface-700 dark:text-surface-300 truncate">{item.product_name}</p>
-                      <p className="text-[10px] text-surface-400">
-                        {[item.option_label, item.color_name].filter(Boolean).join(' • ')} × {item.quantity}
-                      </p>
-                    </div>
-                    <span className="text-xs font-bold text-surface-600 dark:text-surface-400">
-                      {formatPrice(item.price * item.quantity)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="px-4 py-3 bg-surface-50 dark:bg-surface-900/50 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {order.discount_amount > 0 && (
-                    <span className="text-[10px] text-success">{t('orders.discount')} -{formatPrice(order.discount_amount)}</span>
-                  )}
-                  {order.status === 'confirmed' && (
-                    confirmCancelId === order.id ? (
-                      <div className="flex items-center gap-1.5">
-                        <motion.button whileTap={{ scale: 0.95 }} onClick={() => handleCancelOrder(order.id)}
-                          disabled={cancellingId === order.id}
-                          className="px-2.5 py-1 rounded-lg bg-error text-white text-[10px] font-semibold
-                            disabled:opacity-50 flex items-center gap-1">
-                          {cancellingId === order.id ? (
-                            <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <><XCircle className="w-3 h-3" /> {t('orders.confirmCancel')}</>
-                          )}
-                        </motion.button>
-                        <button onClick={() => setConfirmCancelId(null)}
-                          className="px-2 py-1 rounded-lg bg-surface-200 dark:bg-surface-700 text-[10px] font-medium
-                            text-surface-600 dark:text-surface-400">
-                          {t('common.cancel')}
+                        <button onClick={() => setConfirmCancelId(order.id)} className="text-[14px] text-danger hover:underline">
+                          {t('orders.cancelOrder')}
                         </button>
-                      </div>
-                    ) : (
-                      <motion.button whileTap={{ scale: 0.95 }} onClick={() => setConfirmCancelId(order.id)}
-                        className="px-2.5 py-1 rounded-lg bg-error/10 text-error text-[10px] font-semibold
-                          hover:bg-error/20 transition-colors flex items-center gap-1">
-                        <XCircle className="w-3 h-3" /> {t('orders.cancelOrder')}
-                      </motion.button>
-                    )
-                  )}
-                </div>
-                <div className="ml-auto text-right">
-                  <p className="text-[10px] text-surface-400">{t('orders.totalPaid')}</p>
-                  <p className="font-bold gradient-text">{formatPrice(order.total_amount)}</p>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      )}
+                      )
+                    )}
+                  </div>
+                  <p className="ml-auto text-right">
+                    <span className="mr-2 text-[13px] text-ink-2">{t('orders.totalPaid')}</span>
+                    <span className="text-[19px] font-semibold text-ink">{formatPrice(order.total_amount)}</span>
+                  </p>
+                </footer>
+              </motion.article>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

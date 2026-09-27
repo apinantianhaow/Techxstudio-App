@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { useTranslation } from '@/context/LanguageContext';
 import { Globe } from 'lucide-react';
 
@@ -8,17 +7,13 @@ export default function LanguageToggle() {
   const { locale, toggleLanguage } = useTranslation();
 
   return (
-    <motion.button
-      whileTap={{ scale: 0.92 }}
+    <button
       onClick={toggleLanguage}
-      className="h-9 px-2 flex items-center gap-1
-        text-white/60 hover:text-white transition-colors"
+      className="flex h-11 items-center gap-1 px-2 text-ink/80 transition-colors hover:text-ink"
       aria-label="Switch language"
     >
-      <Globe className="w-[14px] h-[14px]" />
-      <span className="text-xs font-medium">
-        {locale === 'en' ? 'EN' : 'TH'}
-      </span>
-    </motion.button>
+      <Globe className="h-[15px] w-[15px]" strokeWidth={1.75} />
+      <span className="text-[12px]">{locale === 'en' ? 'EN' : 'TH'}</span>
+    </button>
   );
 }

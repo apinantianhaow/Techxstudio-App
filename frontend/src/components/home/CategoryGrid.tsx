@@ -1,48 +1,42 @@
 'use client';
 
 import Link from 'next/link';
-import { Smartphone, Tablet, Headphones } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { LayoutGrid } from 'lucide-react';
+import { DeviceArt, type DeviceKind } from '@/components/product/ProductVisual';
 import { useTranslation } from '@/context/LanguageContext';
 
-const CATEGORIES = [
-  { slug: 'phone',     key: 'category.phone',     icon: Smartphone, color: 'text-primary-500' },
-  { slug: 'tablet',    key: 'category.tablet',     icon: Tablet,     color: 'text-primary-600' },
-  { slug: 'accessory', key: 'category.accessory',  icon: Headphones, color: 'text-primary-400' },
+const CATEGORIES: { slug: string; key: string; kind?: DeviceKind; tint?: string }[] = [
+  { slug: 'phone',     key: 'category.phone',     kind: 'phone',      tint: '#BFA48F' },
+  { slug: 'tablet',    key: 'category.tablet',    kind: 'tablet',     tint: '#E3E3E3' },
+  { slug: 'accessory', key: 'category.accessory', kind: 'headphones', tint: '#6B8FAD' },
+  { slug: 'all',       key: 'category.all' },
 ];
 
+/** Apple Store–style row of category icons. */
 export default function CategoryGrid() {
   const { t } = useTranslation();
 
   return (
-    <div className="grid grid-cols-3 gap-4 md:gap-6">
-      {CATEGORIES.map((cat, i) => {
-        const Icon = cat.icon;
-        return (
-          <motion.div
-            key={cat.slug}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.08, duration: 0.35 }}
-          >
-            <Link href={`/category/${cat.slug}`}>
-              <div className="group cursor-pointer text-center py-8 md:py-10
-                bg-white dark:bg-surface-800
-                border border-surface-200 dark:border-surface-700
-                hover:border-primary-400 hover:shadow-[0_4px_20px_rgba(124,58,237,0.1)]
-                transition-all duration-300">
-                <Icon className={`w-8 h-8 md:w-10 md:h-10 mx-auto mb-3 ${cat.color}
-                  group-hover:scale-110 transition-transform duration-300`}
-                  strokeWidth={1.5} />
-                <p className="text-sm font-semibold text-surface-600 dark:text-surface-300
-                  uppercase tracking-wide">
-                  {t(cat.key)}
-                </p>
-              </div>
+    <nav aria-label={t('nav.categories')} className="page-width">
+      <ul className="-mx-2 flex gap-2 overflow-x-auto py-8 [scrollbar-width:none] md:gap-6">
+        {CATEGORIES.map((cat) => (
+          <li key={cat.slug} className="flex-shrink-0">
+            <Link href={`/category/${cat.slug}`}
+              className="group flex w-[104px] flex-col items-center gap-3 rounded-control px-2 py-2 text-center">
+              <span className="flex h-[78px] items-end justify-center transition-transform duration-300 group-hover:-translate-y-1">
+                {cat.kind ? (
+                  <DeviceArt kind={cat.kind} tint={cat.tint} className="h-[72px] w-auto" />
+                ) : (
+                  <span className="flex h-[64px] w-[64px] items-center justify-center rounded-[18px] bg-card shadow-card">
+                    <LayoutGrid className="h-7 w-7 text-ink-2" strokeWidth={1.5} />
+                  </span>
+                )}
+              </span>
+              <span className="text-[14px] font-semibold text-ink group-hover:text-link">{t(cat.key)}</span>
             </Link>
-          </motion.div>
-        );
-      })}
-    </div>
+          </li>
+        ))}
+      </ul>
+    </nav>
   );
 }

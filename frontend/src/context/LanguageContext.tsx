@@ -37,6 +37,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Lets CSS adapt to the script (e.g. taller line-height for Thai)
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
+
   const t = useCallback(
     (<T,>(key: string, fallback?: string): T => {
       const keys = key.split('.');

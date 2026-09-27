@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Search, ShoppingBag, Menu, X } from 'lucide-react';
+import { Search, ShoppingBag, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import LanguageToggle from '@/components/ui/LanguageToggle';
@@ -16,7 +16,10 @@ const NAV_LINKS = [
   { href: '/category/phone', key: 'category.phone' },
   { href: '/category/tablet', key: 'category.tablet' },
   { href: '/category/accessory', key: 'category.accessory' },
+  { href: '/category/all', key: 'category.all' },
 ];
+
+const iconLink = 'flex h-11 w-9 items-center justify-center text-ink/80 transition-colors hover:text-ink';
 
 export default function TopBar() {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -24,74 +27,73 @@ export default function TopBar() {
   const totalItems = useCartTotalItems();
   const pathname = usePathname();
   const { t } = useTranslation();
+  const closeSearch = useCallback(() => setSearchOpen(false), []);
+
+  // Lock page scroll behind the full-screen mobile menu
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileMenuOpen]);
+
+  const isActive = (href: string) => pathname === href || (href !== '/' && pathname.startsWith(href));
 
   return (
     <>
-      <header className="topbar fixed top-0 left-0 right-0 z-[var(--z-sticky)]">
-        <nav className="w-full h-12 px-6 md:px-10
-          flex items-center justify-between gap-4">
-
-          {/* Logo — white on dark purple */}
-          <Link href="/" className="text-white text-[15px] font-semibold tracking-tight
-            hover:opacity-80 transition-opacity flex-shrink-0 whitespace-nowrap">
+      <header className={`fixed inset-x-0 top-0 z-[var(--z-sticky)] ${mobileMenuOpen ? 'bg-canvas' : 'glass-nav'}`}>
+        <nav className="mx-auto flex h-11 max-w-[1024px] items-center justify-between gap-4 px-4">
+          <Link href="/" className="flex-shrink-0 text-[15px] font-semibold tracking-tight text-ink/90 transition-opacity hover:opacity-70">
             TechXStudio
           </Link>
 
           {/* Desktop nav */}
-          <div className="hidden md:flex items-center gap-7 flex-1 justify-center">
-            {NAV_LINKS.map((item) => {
-              const isActive = pathname === item.href ||
-                (item.href !== '/' && pathname.startsWith(item.href));
-              return (
+          <ul className="hidden flex-1 items-center justify-center gap-8 md:flex">
+            {NAV_LINKS.map((item) => (
+              <li key={item.href}>
                 <Link
-                  key={item.href}
                   href={item.href}
-                  className={`text-xs transition-colors whitespace-nowrap
-                    ${isActive
-                      ? 'text-white font-medium'
-                      : 'text-white/60 hover:text-white'
-                    }`}
+                  aria-current={isActive(item.href) ? 'page' : undefined}
+                  className={`whitespace-nowrap text-[12px] transition-colors
+                    ${isActive(item.href) ? 'text-ink' : 'text-ink/75 hover:text-ink'}`}
                 >
                   {t(item.key)}
                 </Link>
-              );
-            })}
-          </div>
+              </li>
+            ))}
+          </ul>
 
           {/* Right icons */}
-          <div className="flex items-center gap-0.5 flex-shrink-0">
+          <div className="flex flex-shrink-0 items-center">
             <LanguageToggle />
             <ThemeToggle />
-
-            <button
-              onClick={() => setSearchOpen(true)}
-              className="w-9 h-9 flex items-center justify-center
-                text-white/60 hover:text-white transition-colors"
-              aria-label="Search"
-            >
-              <Search className="w-4 h-4" />
+            <button onClick={() => setSearchOpen(true)} className={iconLink} aria-label={t('nav.search')}>
+              <Search className="h-[17px] w-[17px]" strokeWidth={1.75} />
             </button>
-
-            <Link href="/cart"
-              className="relative w-9 h-9 flex items-center justify-center
-                text-white/60 hover:text-white transition-colors">
-              <ShoppingBag className="w-4 h-4" />
+            <Link href="/account" className={`${iconLink} hidden md:flex`} aria-label={t('nav.account')}>
+              <User className="h-[17px] w-[17px]" strokeWidth={1.75} />
+            </Link>
+            <Link href="/cart" className={`${iconLink} relative`} aria-label={t('nav.cart')}>
+              <ShoppingBag className="h-[17px] w-[17px]" strokeWidth={1.75} />
               {totalItems > 0 && (
-                <span className="absolute top-1 right-0 min-w-[16px] h-4
-                  bg-primary-500 text-white text-[9px] font-bold
-                  flex items-center justify-center px-0.5">
+                <span className="absolute bottom-2 right-0.5 flex h-[15px] min-w-[15px] items-center justify-center
+                  rounded-full bg-ink px-1 text-[9px] font-semibold text-canvas">
                   {totalItems > 9 ? '9+' : totalItems}
                 </span>
               )}
             </Link>
 
+            {/* Mobile menu (two-line "hamburger" like Apple's) */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden w-9 h-9 flex items-center justify-center
-                text-white/60 hover:text-white transition-colors"
+              className={`${iconLink} md:hidden`}
               aria-label="Menu"
+              aria-expanded={mobileMenuOpen}
             >
-              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              <span className="relative block h-3 w-4">
+                <span className={`absolute left-0 block h-[1.5px] w-4 rounded bg-current transition-transform duration-300
+                  ${mobileMenuOpen ? 'top-[5px] rotate-45' : 'top-0.5'}`} />
+                <span className={`absolute left-0 block h-[1.5px] w-4 rounded bg-current transition-transform duration-300
+                  ${mobileMenuOpen ? 'top-[5px] -rotate-45' : 'top-2'}`} />
+              </span>
             </button>
           </div>
         </nav>
@@ -99,34 +101,37 @@ export default function TopBar() {
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden overflow-hidden border-t border-white/10"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="h-[calc(100dvh-2.75rem)] overflow-y-auto bg-canvas md:hidden"
             >
-              <div className="px-6 py-2">
-                {NAV_LINKS.map((item) => {
-                  const isActive = pathname === item.href ||
-                    (item.href !== '/' && pathname.startsWith(item.href));
-                  return (
+              <ul className="px-10 pt-6">
+                {NAV_LINKS.map((item, i) => (
+                  <motion.li
+                    key={item.href}
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.04 * i, duration: 0.3 }}
+                  >
                     <Link
-                      key={item.href}
                       href={item.href}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`block py-3 text-sm border-b border-white/5
-                        ${isActive ? 'text-white font-medium' : 'text-white/60'}`}
+                      className={`block py-2 text-[28px] font-semibold tracking-tight
+                        ${isActive(item.href) ? 'text-ink' : 'text-ink/80'}`}
                     >
                       {t(item.key)}
                     </Link>
-                  );
-                })}
-              </div>
+                  </motion.li>
+                ))}
+              </ul>
             </motion.div>
           )}
         </AnimatePresence>
       </header>
 
-      <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+      <SearchOverlay isOpen={searchOpen} onClose={closeSearch} />
     </>
   );
 }

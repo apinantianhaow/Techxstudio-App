@@ -6,13 +6,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '@/context/LanguageContext';
 
 interface FilterSortBarProps {
+  count?: number;
   sortBy: string;
   priceRange: string;
   onSortChange: (value: string) => void;
   onPriceChange: (value: string) => void;
 }
 
-export default function FilterSortBar({ sortBy, priceRange, onSortChange, onPriceChange }: FilterSortBarProps) {
+export default function FilterSortBar({ count, sortBy, priceRange, onSortChange, onPriceChange }: FilterSortBarProps) {
   const [showFilters, setShowFilters] = useState(false);
   const { t } = useTranslation();
 
@@ -33,69 +34,60 @@ export default function FilterSortBar({ sortBy, priceRange, onSortChange, onPric
   ];
 
   return (
-    <div className="space-y-3">
-      {/* Top bar */}
-      <div className="flex items-center justify-between gap-3">
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center gap-2 px-4 py-2.5  glass-card
-            text-sm font-medium hover:shadow-md transition-all duration-300
-            text-surface-700 dark:text-surface-300"
-        >
-          <SlidersHorizontal className="w-4 h-4" />
-          {t('filter.filter')}
-        </button>
+    <div>
+      <div className="flex items-center justify-between gap-3 border-b border-line pb-4">
+        <p className="text-[14px] text-ink-2">
+          {count !== undefined && `${count} ${t('common.items')}`}
+        </p>
 
-        {/* Sort dropdown */}
-        <div className="relative">
-          <select
-            value={sortBy}
-            onChange={(e) => onSortChange(e.target.value)}
-            className="appearance-none px-4 py-2.5 pr-8  glass-card
-              text-sm font-medium cursor-pointer hover:shadow-md transition-all
-              bg-transparent text-surface-700 dark:text-surface-300
-              focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            aria-expanded={showFilters}
+            aria-pressed={showFilters || priceRange !== 'all'}
+            className="chip"
           >
-            {SORT_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400 pointer-events-none" />
+            <SlidersHorizontal className="h-3.5 w-3.5" />
+            {t('filter.filter')}
+          </button>
+
+          <div className="relative">
+            <select
+              value={sortBy}
+              onChange={(e) => onSortChange(e.target.value)}
+              aria-label="Sort"
+              className="chip cursor-pointer appearance-none pr-8 focus:outline-none"
+            >
+              {SORT_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ink-2" />
+          </div>
         </div>
       </div>
 
-      {/* Filter panel */}
-      <AnimatePresence>
+      <AnimatePresence initial={false}>
         {showFilters && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.3, ease: [0.28, 0.11, 0.32, 1] }}
             className="overflow-hidden"
           >
-            <div className="glass-card p-4  space-y-3">
-              <p className="text-sm font-semibold text-surface-700 dark:text-surface-300">
-                {t('filter.priceRange')}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {PRICE_RANGES.map((range) => (
-                  <button
-                    key={range.value}
-                    onClick={() => onPriceChange(range.value)}
-                    className={`px-3 py-1.5  text-xs font-medium transition-all duration-200
-                      ${
-                        priceRange === range.value
-                          ? 'gradient-primary text-white shadow-md'
-                          : 'bg-surface-100 dark:bg-surface-700 text-surface-600 dark:text-surface-300 hover:bg-surface-200 dark:hover:bg-surface-600'
-                      }`}
-                  >
-                    {range.label}
-                  </button>
-                ))}
-              </div>
+            <div className="flex flex-wrap items-center gap-2 pt-4">
+              <span className="mr-2 text-[14px] font-semibold text-ink">{t('filter.priceRange')}</span>
+              {PRICE_RANGES.map((range) => (
+                <button
+                  key={range.value}
+                  onClick={() => onPriceChange(range.value)}
+                  aria-pressed={priceRange === range.value}
+                  className="chip"
+                >
+                  {range.label}
+                </button>
+              ))}
             </div>
           </motion.div>
         )}

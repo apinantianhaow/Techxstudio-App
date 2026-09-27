@@ -11,8 +11,6 @@ export type AddToCartInput = Pick<CartItem, 'product_id' | 'name' | 'price'> &
 interface CartState {
   items: CartItem[];
   isLoading: boolean;
-  readonly totalItems: number;
-  readonly totalPrice: number;
   addToCart: (product: AddToCartInput) => void;
   updateQuantity: (id: string, quantity: number) => void;
   removeFromCart: (id: string) => void;
@@ -22,18 +20,9 @@ interface CartState {
 
 const useCartStore = create<CartState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       items: [],
       isLoading: false,
-
-      // Computed
-      get totalItems() {
-        return get().items.reduce((sum, item) => sum + item.quantity, 0);
-      },
-
-      get totalPrice() {
-        return get().items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-      },
 
       // Actions
       addToCart: (product) => {

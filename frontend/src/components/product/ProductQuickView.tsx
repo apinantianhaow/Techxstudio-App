@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { X, ShoppingBag, Heart } from 'lucide-react';
+import { X, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import StarRating from '@/components/ui/StarRating';
+import ProductVisual from '@/components/product/ProductVisual';
 import useCartStore from '@/stores/useCartStore';
 import useWishlistStore from '@/stores/useWishlistStore';
 import { formatPrice, calcDiscountedPrice } from '@/lib/utils';
@@ -58,89 +59,61 @@ export default function ProductQuickView({ product, isOpen, onClose }: ProductQu
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-[var(--z-overlay)] bg-black/50 backdrop-blur-sm"
+            className="fixed inset-0 z-[var(--z-overlay)] bg-black/40 backdrop-blur-md"
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            initial={{ opacity: 0, scale: 0.96, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2
-              md:w-[500px] md:max-h-[85vh] z-[var(--z-modal)] glass-modal  overflow-y-auto"
+            exit={{ opacity: 0, scale: 0.96, y: 16 }}
+            transition={{ duration: 0.3, ease: [0.28, 0.11, 0.32, 1] }}
+            className="sheet fixed inset-4 z-[var(--z-modal)] overflow-y-auto rounded-[22px]
+              md:inset-auto md:left-1/2 md:top-1/2 md:max-h-[85vh] md:w-[520px] md:-translate-x-1/2 md:-translate-y-1/2"
           >
-            {/* Close */}
-            <button
-              onClick={onClose}
-              className="absolute top-3 right-3 z-10 w-8 h-8  bg-surface-100/80 dark:bg-surface-800/80
-                flex items-center justify-center backdrop-blur-sm"
-            >
-              <X className="w-4 h-4" />
+            <button onClick={onClose} className="icon-btn absolute right-4 top-4 z-10" aria-label={t('common.close')}>
+              <X className="h-4 w-4" />
             </button>
 
-            {/* Image */}
-            <div className="aspect-square bg-gradient-to-br from-surface-50 to-surface-100
-              dark:from-surface-800 dark:to-surface-900 p-6">
-              {currentColor?.image_url ? (
-                <img src={currentColor.image_url} alt={product.name} className="w-full h-full object-contain" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <div className="w-32 h-32  gradient-primary opacity-10" />
-                </div>
-              )}
+            <div className="aspect-square bg-canvas-alt p-12">
+              <ProductVisual product={product} color={currentColor} className="h-full w-full" />
             </div>
 
-            <div className="p-5 space-y-4">
-              {/* Name & Rating */}
+            <div className="space-y-5 p-6">
               <div>
-                <h3 className="font-bold text-lg text-surface-900 dark:text-surface-100">{product.name}</h3>
-                <StarRating rating={product.rating} reviews={product.reviews_count} size="sm" />
+                <h3 className="t-title text-ink">{product.name}</h3>
+                <div className="mt-2">
+                  <StarRating rating={product.rating} reviews={product.reviews_count} size="sm" />
+                </div>
               </div>
 
-              {/* Price */}
-              <div className="flex items-center gap-3">
-                <span className="text-2xl font-bold gradient-text">{formatPrice(salePrice)}</span>
+              <div className="flex items-baseline gap-3">
+                <span className="text-[21px] font-semibold text-ink">{formatPrice(salePrice)}</span>
                 {product.sale_percent > 0 && (
-                  <span className="text-sm text-surface-400 line-through">{formatPrice(price)}</span>
+                  <span className="text-[15px] text-ink-3 line-through">{formatPrice(price)}</span>
                 )}
               </div>
 
-              {/* Colors */}
               {colors.length > 1 && (
                 <div>
-                  <p className="text-xs font-medium text-surface-500 dark:text-surface-400 mb-2">
-                    {t('product.color')}: {currentColor?.name}
-                  </p>
-                  <div className="flex gap-2">
+                  <p className="mb-2 text-[14px] text-ink-2">{t('product.color')}: {currentColor?.name}</p>
+                  <div className="flex gap-3">
                     {colors.map((c, i) => (
-                      <button
-                        key={c.id}
-                        onClick={() => setSelectedColor(i)}
-                        className={`w-8 h-8  border-2 transition-all
-                          ${i === selectedColor
-                            ? 'border-primary-600 scale-110 shadow-md'
-                            : 'border-surface-200 dark:border-surface-600'}`}
-                        style={{ backgroundColor: c.hex }}
-                        title={c.name}
-                      />
+                      <button key={c.id} onClick={() => setSelectedColor(i)} title={c.name}
+                        aria-label={c.name} aria-pressed={i === selectedColor}
+                        className={`h-8 w-8 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)] ring-offset-2 ring-offset-card transition
+                          ${i === selectedColor ? 'ring-2 ring-accent' : ''}`}
+                        style={{ backgroundColor: c.hex }} />
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Options */}
               {options.length > 1 && (
                 <div>
-                  <p className="text-xs font-medium text-surface-500 dark:text-surface-400 mb-2">{t('product.options')}</p>
+                  <p className="mb-2 text-[14px] text-ink-2">{t('product.options')}</p>
                   <div className="flex flex-wrap gap-2">
                     {options.map((opt, i) => (
-                      <button
-                        key={opt.id}
-                        onClick={() => setSelectedOption(i)}
-                        className={`px-3 py-1.5  text-xs font-medium transition-all
-                          ${i === selectedOption
-                            ? 'gradient-primary text-white shadow-md'
-                            : 'bg-surface-100 dark:bg-surface-700 text-surface-600 dark:text-surface-300'}`}
-                      >
+                      <button key={opt.id} onClick={() => setSelectedOption(i)}
+                        aria-pressed={i === selectedOption} className="choice px-4 py-2 text-[14px]">
                         {opt.label}
                       </button>
                     ))}
@@ -148,28 +121,21 @@ export default function ProductQuickView({ product, isOpen, onClose }: ProductQu
                 </div>
               )}
 
-              {/* Actions */}
-              <div className="flex gap-3 pt-2">
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleAddToCart}
-                  className="flex-1 gradient-primary text-white py-3  font-semibold
-                    flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-shadow btn-ripple"
-                >
-                  <ShoppingBag className="w-5 h-5" />
+              <div className="flex gap-3 pt-1">
+                <button onClick={handleAddToCart} className="btn btn-primary btn-block flex-1">
                   {t('common.addToCart')}
-                </motion.button>
-                <motion.button
-                  whileTap={{ scale: 0.8 }}
+                </button>
+                <button
                   onClick={() => {
                     toggleFavorite(product.id);
                     toast(liked ? t('product.removedFromWishlist') : t('product.addedToWishlist'), { icon: liked ? undefined : toastIcons.wishlist });
                   }}
-                  className="w-12 h-12  bg-surface-100 dark:bg-surface-700
-                    flex items-center justify-center hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                  aria-label={t('nav.wishlist')}
+                  aria-pressed={liked}
+                  className="flex w-[52px] flex-shrink-0 items-center justify-center rounded-control bg-fill transition-colors hover:bg-fill-strong"
                 >
-                  <Heart className={`w-5 h-5 ${liked ? 'fill-red-500 text-red-500' : 'text-surface-400'}`} />
-                </motion.button>
+                  <Heart className={`h-5 w-5 ${liked ? 'fill-danger text-danger' : 'text-ink-2'}`} />
+                </button>
               </div>
             </div>
           </motion.div>

@@ -1,97 +1,73 @@
 'use client';
 
-import { Minus, Plus, Trash2 } from 'lucide-react';
+import { Minus, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { DeviceArt, deviceKindFor } from '@/components/product/ProductVisual';
 import useCartStore from '@/stores/useCartStore';
+import { useTranslation } from '@/context/LanguageContext';
 import { formatPrice } from '@/lib/utils';
 import type { CartItem as CartItemData } from '@/types';
 
 export default function CartItem({ item, index = 0 }: { item: CartItemData; index?: number }) {
   const { updateQuantity, removeFromCart } = useCartStore();
+  const { t } = useTranslation();
+  const details = [item.color_name, item.option_label].filter(Boolean).join(' · ');
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 20, height: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
+    <motion.li
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, height: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.04 }}
       layout
-      className="glass-card p-3 "
+      className="overflow-hidden border-b border-line"
     >
-      <div className="flex gap-3">
-        {/* Image */}
-        <div className="w-20 h-20  bg-surface-100 dark:bg-surface-800 flex-shrink-0 overflow-hidden">
+      <div className="flex gap-5 py-6 md:gap-8 md:py-8">
+        <div className="flex h-24 w-24 flex-shrink-0 items-center justify-center rounded-control bg-canvas-alt p-3 md:h-32 md:w-32 md:p-4">
           {item.image_url ? (
-            <img src={item.image_url} alt={item.name} className="w-full h-full object-contain p-1" />
+            <img src={item.image_url} alt={item.name} className="h-full w-full object-contain" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <div className="w-10 h-10  gradient-primary opacity-10" />
-            </div>
+            <DeviceArt kind={deviceKindFor(item)} className="h-full w-full" />
           )}
         </div>
 
-        {/* Details */}
-        <div className="flex-1 min-w-0">
-          <h4 className="font-semibold text-sm text-surface-800 dark:text-surface-200 truncate">
-            {item.name}
-          </h4>
-          <div className="flex items-center gap-2 mt-0.5">
-            {item.color_name && (
-              <span className="text-[10px] px-2 py-0.5  bg-surface-100 dark:bg-surface-700 text-surface-500">
-                {item.color_name}
-              </span>
-            )}
-            {item.option_label && (
-              <span className="text-[10px] px-2 py-0.5  bg-surface-100 dark:bg-surface-700 text-surface-500">
-                {item.option_label}
-              </span>
-            )}
+        <div className="flex min-w-0 flex-1 flex-col">
+          <div className="flex flex-col gap-1 md:flex-row md:items-start md:justify-between md:gap-6">
+            <div className="min-w-0">
+              <h3 className="text-[19px] font-semibold leading-tight text-ink md:text-[21px]">{item.name}</h3>
+              {details && <p className="mt-1 text-[14px] text-ink-2">{details}</p>}
+            </div>
+            <p className="text-[17px] font-semibold text-ink md:text-right">
+              {formatPrice(item.price * item.quantity)}
+            </p>
           </div>
 
-          {/* Price + Actions */}
-          <div className="flex items-center justify-between mt-2">
-            <span className="font-bold text-sm gradient-text">
-              {formatPrice(item.price * item.quantity)}
-            </span>
-
-            <div className="flex items-center gap-1.5">
-              {/* Quantity controls */}
-              <div className="flex items-center gap-0 bg-surface-100 dark:bg-surface-800  overflow-hidden">
-                <motion.button
-                  whileTap={{ scale: 0.8 }}
-                  onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                  disabled={item.quantity <= 1}
-                  className="w-7 h-7 flex items-center justify-center text-surface-500
-                    hover:bg-surface-200 dark:hover:bg-surface-700 disabled:opacity-30 transition-colors"
-                >
-                  <Minus className="w-3 h-3" />
-                </motion.button>
-                <span className="w-7 text-center text-xs font-bold text-surface-700 dark:text-surface-300">
-                  {item.quantity}
-                </span>
-                <motion.button
-                  whileTap={{ scale: 0.8 }}
-                  onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                  className="w-7 h-7 flex items-center justify-center text-surface-500
-                    hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors"
-                >
-                  <Plus className="w-3 h-3" />
-                </motion.button>
-              </div>
-
-              {/* Delete */}
-              <motion.button
-                whileTap={{ scale: 0.8 }}
-                onClick={() => removeFromCart(item.id)}
-                className="w-7 h-7 flex items-center justify-center 
-                  bg-error/10 text-error hover:bg-error/20 transition-colors"
+          <div className="mt-auto flex items-center justify-between pt-4">
+            <div className="flex items-center gap-1 rounded-full bg-fill p-1">
+              <button
+                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                disabled={item.quantity <= 1}
+                aria-label="−"
+                className="flex h-7 w-7 items-center justify-center rounded-full text-ink hover:bg-card disabled:opacity-30"
               >
-                <Trash2 className="w-3.5 h-3.5" />
-              </motion.button>
+                <Minus className="h-3.5 w-3.5" />
+              </button>
+              <span className="w-7 text-center text-[15px] font-semibold tabular-nums text-ink">{item.quantity}</span>
+              <button
+                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                aria-label="+"
+                className="flex h-7 w-7 items-center justify-center rounded-full text-ink hover:bg-card"
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </button>
             </div>
+
+            <button onClick={() => removeFromCart(item.id)} className="link text-[14px]">
+              {t('cart.remove')}
+            </button>
           </div>
         </div>
       </div>
-    </motion.div>
+    </motion.li>
   );
 }

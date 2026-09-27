@@ -31,12 +31,12 @@ export default function ScrollReveal({ children, className = '', delay = 0 }: Sc
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 40 }}
-      animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+      initial={{ opacity: 0, y: 24 }}
+      animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
       transition={{
-        duration: 0.6,
+        duration: 0.8,
         delay,
-        ease: [0.22, 1, 0.36, 1],
+        ease: [0.28, 0.11, 0.32, 1],
       }}
       className={className}
     >

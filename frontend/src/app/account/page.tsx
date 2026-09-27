@@ -1,16 +1,17 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { User, Mail, Lock, LogOut, Package, Heart, ChevronRight, Eye, EyeOff, Pencil, Save, Trash2, Phone } from 'lucide-react';
+import { LogOut, Package, Heart, ChevronRight, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import Breadcrumbs from '@/components/layout/Breadcrumbs';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/context/LanguageContext';
 import { useFavoritesCount } from '@/stores/useWishlistStore';
 import { toast } from 'sonner';
 import { toastIcons } from '@/components/ui/toastIcons';
 import { errorMessage } from '@/lib/utils';
+
+const spinner = 'h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent';
 
 export default function AccountPage() {
   const { user, isLoggedIn, loading, login, signup, logout, updateProfile, deleteAccount } = useAuth();
@@ -78,204 +79,162 @@ export default function AccountPage() {
 
   if (loading) {
     return (
-      <div className="max-w-md mx-auto px-4 py-20 flex justify-center">
-        <div className="w-8 h-8 border-3 border-primary-600 border-t-transparent rounded-full animate-spin" />
+      <div className="flex justify-center py-32 text-ink-3">
+        <span className={spinner} />
       </div>
     );
   }
 
-  // Logged in — Profile view
+  // Logged in — Profile view (iOS Settings style)
   if (isLoggedIn) {
     const menuItems = [
-      { icon: Package, label: t('account.myOrders'), href: '/orders', badge: null },
-      { icon: Heart, label: t('account.myWishlist'), href: '/wishlist', badge: favCount || null },
+      { icon: Package, label: t('account.myOrders'), href: '/orders', badge: null, tile: 'bg-[#0071e3]' },
+      { icon: Heart, label: t('account.myWishlist'), href: '/wishlist', badge: favCount || null, tile: 'bg-[#ff375f]' },
     ];
 
     return (
-      <div className="max-w-md mx-auto px-4 py-4 space-y-4">
-        <Breadcrumbs items={[{ label: t('account.title') }]} />
+      <div className="min-h-[calc(100dvh-2.75rem)] bg-canvas-alt">
+        <div className="mx-auto max-w-[560px] space-y-8 px-5 py-12 md:py-16">
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="text-center">
+            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-b from-[#a1a1a6] to-[#6e6e73]">
+              <span className="text-[40px] font-semibold text-white">
+                {(editName || user?.full_name)?.charAt(0)?.toUpperCase() || 'U'}
+              </span>
+            </div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card rounded-2xl p-6 text-center">
-          <div className="w-20 h-20 mx-auto rounded-full gradient-primary flex items-center justify-center mb-3">
-            <span className="text-3xl font-bold text-white">
-              {(editName || user?.full_name)?.charAt(0)?.toUpperCase() || 'U'}
-            </span>
-          </div>
-          {isEditing ? (
-            <div className="space-y-3 mt-3">
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
+            {isEditing ? (
+              <div className="mt-6 space-y-3 text-left">
                 <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)}
-                  placeholder={t('account.fullName')}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-50 dark:bg-surface-800
-                    border border-surface-200 dark:border-surface-700 text-sm
-                    focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all" />
-              </div>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
+                  placeholder={t('account.fullName')} aria-label={t('account.fullName')} className="field" />
                 <input type="tel" value={editPhone} onChange={(e) => setEditPhone(e.target.value)}
-                  placeholder={t('account.phone')}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-50 dark:bg-surface-800
-                    border border-surface-200 dark:border-surface-700 text-sm
-                    focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all" />
-              </div>
-              <div className="flex gap-2">
-                <motion.button whileTap={{ scale: 0.95 }} onClick={handleSaveProfile} disabled={saving}
-                  className="flex-1 gradient-primary text-white py-2.5 rounded-xl font-semibold text-sm
-                    disabled:opacity-50 flex items-center justify-center gap-1.5">
-                  {saving ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : (
-                    <><Save className="w-4 h-4" /> {t('common.save')}</>
-                  )}
-                </motion.button>
-                <motion.button whileTap={{ scale: 0.95 }}
-                  onClick={() => { setIsEditing(false); setEditName(user?.full_name || ''); setEditPhone(user?.phone || ''); }}
-                  className="px-4 py-2.5 rounded-xl bg-surface-100 dark:bg-surface-800 text-sm font-medium
-                    text-surface-600 dark:text-surface-400">
-                  {t('common.cancel')}
-                </motion.button>
-              </div>
-            </div>
-          ) : (
-            <>
-              <h2 className="text-lg font-bold text-surface-800 dark:text-surface-200">{user?.full_name}</h2>
-              <p className="text-sm text-surface-400">{user?.email}</p>
-              {user?.phone && <p className="text-xs text-surface-400 mt-0.5">{user.phone}</p>}
-              <motion.button whileTap={{ scale: 0.95 }}
-                onClick={() => { setIsEditing(true); setEditName(user?.full_name || ''); setEditPhone(user?.phone || ''); }}
-                className="mt-3 text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline
-                  flex items-center gap-1 mx-auto">
-                <Pencil className="w-3.5 h-3.5" /> {t('account.editProfile')}
-              </motion.button>
-            </>
-          )}
-        </motion.div>
-
-        <div className="glass-card rounded-xl overflow-hidden divide-y divide-surface-100 dark:divide-surface-800">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link key={item.href} href={item.href}>
-                <div className="flex items-center justify-between px-4 py-3.5 hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <Icon className="w-5 h-5 text-primary-600" />
-                    <span className="text-sm font-medium text-surface-700 dark:text-surface-300">{item.label}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {item.badge && (
-                      <span className="px-2 py-0.5 rounded-full bg-primary-100 dark:bg-primary-900/30 text-[10px] font-bold text-primary-600 dark:text-primary-400">
-                        {item.badge}
-                      </span>
-                    )}
-                    <ChevronRight className="w-4 h-4 text-surface-300" />
-                  </div>
+                  placeholder={t('account.phone')} aria-label={t('account.phone')} className="field" />
+                <div className="flex gap-3 pt-1">
+                  <button onClick={handleSaveProfile} disabled={saving} className="btn btn-primary flex-1">
+                    {saving ? <span className={spinner} /> : t('common.save')}
+                  </button>
+                  <button
+                    onClick={() => { setIsEditing(false); setEditName(user?.full_name || ''); setEditPhone(user?.phone || ''); }}
+                    className="btn btn-tinted">
+                    {t('common.cancel')}
+                  </button>
                 </div>
-              </Link>
-            );
-          })}
-        </div>
-
-        <motion.button whileTap={{ scale: 0.95 }}
-          onClick={() => { logout(); toast(t('account.loggedOut')); }}
-          className="w-full py-3 rounded-xl bg-error/10 text-error font-semibold text-sm
-            flex items-center justify-center gap-2 hover:bg-error/20 transition-colors">
-          <LogOut className="w-4 h-4" />
-          {t('account.logout')}
-        </motion.button>
-
-        {/* Delete Account */}
-        {showDeleteConfirm ? (
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-            className="glass-card rounded-xl p-4 border-2 border-error/30 space-y-3">
-            <p className="text-sm font-semibold text-error">{t('account.deleteWarning')}</p>
-            <p className="text-xs text-surface-400">{t('account.deleteWarningDesc')}</p>
-            <div className="flex gap-2">
-              <motion.button whileTap={{ scale: 0.95 }} onClick={handleDeleteAccount} disabled={deleting}
-                className="flex-1 bg-error text-white py-2.5 rounded-xl font-semibold text-sm
-                  disabled:opacity-50 flex items-center justify-center gap-1.5">
-                {deleting ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : (
-                  <><Trash2 className="w-4 h-4" /> {t('account.confirmDelete')}</>
-                )}
-              </motion.button>
-              <motion.button whileTap={{ scale: 0.95 }} onClick={() => setShowDeleteConfirm(false)}
-                className="px-4 py-2.5 rounded-xl bg-surface-100 dark:bg-surface-800 text-sm font-medium
-                  text-surface-600 dark:text-surface-400">
-                {t('common.cancel')}
-              </motion.button>
-            </div>
+              </div>
+            ) : (
+              <>
+                <h1 className="t-title mt-5 text-ink">{user?.full_name}</h1>
+                <p className="mt-1 text-[17px] text-ink-2">{user?.email}</p>
+                {user?.phone && <p className="text-[14px] text-ink-3">{user.phone}</p>}
+                <button
+                  onClick={() => { setIsEditing(true); setEditName(user?.full_name || ''); setEditPhone(user?.phone || ''); }}
+                  className="link mt-3 text-[15px]">
+                  {t('account.editProfile')}
+                </button>
+              </>
+            )}
           </motion.div>
-        ) : (
-          <button onClick={() => setShowDeleteConfirm(true)}
-            className="w-full text-center text-xs text-surface-400 hover:text-error transition-colors py-2">
-            {t('account.deleteAccount')}
+
+          {/* Inset grouped list */}
+          <ul className="overflow-hidden rounded-card bg-card">
+            {menuItems.map((item, i) => {
+              const Icon = item.icon;
+              return (
+                <li key={item.href}>
+                  <Link href={item.href} className="flex items-center gap-3.5 pl-4 transition-colors hover:bg-fill">
+                    <span className={`flex h-8 w-8 items-center justify-center rounded-lg ${item.tile}`}>
+                      <Icon className="h-[18px] w-[18px] text-white" />
+                    </span>
+                    <span className={`flex flex-1 items-center justify-between py-3.5 pr-4 ${i > 0 ? 'border-t border-hairline' : ''}`}>
+                      <span className="text-[17px] text-ink">{item.label}</span>
+                      <span className="flex items-center gap-2 text-ink-3">
+                        {item.badge && <span className="text-[17px]">{item.badge}</span>}
+                        <ChevronRight className="h-4 w-4" />
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+
+          <button
+            onClick={() => { logout(); toast(t('account.loggedOut')); }}
+            className="flex w-full items-center justify-center gap-2 rounded-card bg-card py-3.5 text-[17px] text-danger transition-colors hover:bg-fill">
+            <LogOut className="h-4 w-4" />
+            {t('account.logout')}
           </button>
-        )}
+
+          {/* Delete Account */}
+          {showDeleteConfirm ? (
+            <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}
+              className="space-y-3 rounded-card bg-card p-5">
+              <p className="text-[17px] font-semibold text-danger">{t('account.deleteWarning')}</p>
+              <p className="text-[14px] text-ink-2">{t('account.deleteWarningDesc')}</p>
+              <div className="flex gap-3 pt-1">
+                <button onClick={handleDeleteAccount} disabled={deleting}
+                  className="btn flex-1 bg-danger text-white hover:opacity-90">
+                  {deleting ? <span className={spinner} /> : t('account.confirmDelete')}
+                </button>
+                <button onClick={() => setShowDeleteConfirm(false)} className="btn btn-tinted">
+                  {t('common.cancel')}
+                </button>
+              </div>
+            </motion.div>
+          ) : (
+            <button onClick={() => setShowDeleteConfirm(true)}
+              className="w-full py-2 text-center text-[14px] text-ink-2 transition-colors hover:text-danger">
+              {t('account.deleteAccount')}
+            </button>
+          )}
+        </div>
       </div>
     );
   }
 
-  // Not logged in — Login/Signup form
+  // Not logged in — Sign in / Sign up
   return (
-    <div className="max-w-md mx-auto px-4 py-4 space-y-4">
-      <Breadcrumbs items={[{ label: mode === 'login' ? t('account.login') : t('account.signup') }]} />
-
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card rounded-2xl p-6 space-y-5">
+    <div className="mx-auto max-w-[440px] px-5 py-16 md:py-24">
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
         <div className="text-center">
-          <div className="w-16 h-16 mx-auto rounded-2xl gradient-primary flex items-center justify-center mb-3">
-            <span className="text-2xl font-bold text-white">TX</span>
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-[18px] bg-ink">
+            <span className="text-[22px] font-semibold tracking-tight text-canvas">TX</span>
           </div>
-          <h1 className="text-xl font-bold text-surface-800 dark:text-surface-200">
+          <h1 className="t-title text-ink">
             {mode === 'login' ? t('account.welcomeBack') : t('account.createAccount')}
           </h1>
-          <p className="text-sm text-surface-400 mt-1">
+          <p className="mt-2 text-[17px] text-ink-2">
             {mode === 'login' ? t('account.loginDesc') : t('account.signupDesc')}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="mt-10 space-y-3">
           {mode === 'signup' && (
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
-              <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)}
-                placeholder={t('account.fullName')} required
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-surface-50 dark:bg-surface-800
-                  border border-surface-200 dark:border-surface-700 text-sm
-                  focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all" />
-            </div>
+            <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)}
+              placeholder={t('account.fullName')} aria-label={t('account.fullName')} required
+              autoComplete="name" className="field" />
           )}
 
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-              placeholder={t('account.email')} required
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-surface-50 dark:bg-surface-800
-                border border-surface-200 dark:border-surface-700 text-sm
-                focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all" />
-          </div>
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+            placeholder={t('account.email')} aria-label={t('account.email')} required
+            autoComplete="email" className="field" />
 
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
             <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)}
-              placeholder={t('account.password')} required minLength={6}
-              className="w-full pl-10 pr-10 py-3 rounded-xl bg-surface-50 dark:bg-surface-800
-                border border-surface-200 dark:border-surface-700 text-sm
-                focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all" />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-surface-400">
-              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              placeholder={t('account.password')} aria-label={t('account.password')} required minLength={6}
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'} className="field pr-12" />
+            <button type="button" onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-3 hover:text-ink">
+              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             </button>
           </div>
 
-          <motion.button whileTap={{ scale: 0.97 }} type="submit" disabled={submitting}
-            className="w-full gradient-primary text-white py-3.5 rounded-xl font-bold
-              disabled:opacity-50 btn-ripple shadow-lg hover:shadow-xl transition-shadow">
-            {submitting ? (
-              <div className="w-5 h-5 mx-auto border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : mode === 'login' ? t('account.login') : t('account.signup')}
-          </motion.button>
+          <button type="submit" disabled={submitting} className="btn btn-primary btn-block !mt-6">
+            {submitting ? <span className={spinner} /> : mode === 'login' ? t('account.login') : t('account.signup')}
+          </button>
         </form>
 
-        <div className="text-center">
-          <button type="button" onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
-            className="text-sm text-primary-600 dark:text-primary-400 font-medium hover:underline">
+        <div className="mt-6 text-center">
+          <button type="button" onClick={() => setMode(mode === 'login' ? 'signup' : 'login')} className="link text-[15px]">
             {mode === 'login' ? t('account.noAccount') : t('account.hasAccount')}
           </button>
         </div>

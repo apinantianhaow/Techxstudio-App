@@ -7,45 +7,36 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
-  const { theme, setTheme } = useTheme();
+  // resolvedTheme reflects the OS setting when theme is "system"
+  const { resolvedTheme, setTheme } = useTheme();
 
   useEffect(() => setMounted(true), []);
 
   if (!mounted) {
-    return <div className="w-9 h-9" />;
+    return <div className="h-11 w-9" />;
   }
 
+  const isDark = resolvedTheme === 'dark';
+
   return (
-    <motion.button
-      whileTap={{ scale: 0.92 }}
-      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className="w-9 h-9 flex items-center justify-center
-        text-white/60 hover:text-white transition-colors"
+    <button
+      onClick={() => setTheme(isDark ? 'light' : 'dark')}
+      className="flex h-11 w-9 items-center justify-center text-ink/80 transition-colors hover:text-ink"
       aria-label="Toggle theme"
     >
-      <AnimatePresence mode="wait">
-        {theme === 'dark' ? (
-          <motion.div
-            key="sun"
-            initial={{ rotate: -90, opacity: 0, scale: 0 }}
-            animate={{ rotate: 0, opacity: 1, scale: 1 }}
-            exit={{ rotate: 90, opacity: 0, scale: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <Sun className="w-4 h-4 text-amber-400" />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="moon"
-            initial={{ rotate: 90, opacity: 0, scale: 0 }}
-            animate={{ rotate: 0, opacity: 1, scale: 1 }}
-            exit={{ rotate: -90, opacity: 0, scale: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <Moon className="w-4 h-4" />
-          </motion.div>
-        )}
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.span
+          key={isDark ? 'sun' : 'moon'}
+          initial={{ rotate: -90, opacity: 0 }}
+          animate={{ rotate: 0, opacity: 1 }}
+          exit={{ rotate: 90, opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          {isDark
+            ? <Sun className="h-[17px] w-[17px]" strokeWidth={1.75} />
+            : <Moon className="h-[16px] w-[16px]" strokeWidth={1.75} />}
+        </motion.span>
       </AnimatePresence>
-    </motion.button>
+    </button>
   );
 }

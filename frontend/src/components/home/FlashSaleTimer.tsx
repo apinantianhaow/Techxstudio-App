@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '@/context/LanguageContext';
 
-export default function FlashSaleTimer() {
+export default function FlashSaleTimer({ tone = 'default' }: { tone?: 'default' | 'dark' }) {
   const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
   const { t } = useTranslation();
 
@@ -32,25 +32,20 @@ export default function FlashSaleTimer() {
   }, []);
 
   const pad = (n: number) => String(n).padStart(2, '0');
+  const dark = tone === 'dark';
 
   return (
-    <div className="flex items-center gap-1.5">
-      <span className="text-xs text-surface-400 font-medium mr-1">Ends in</span>
-      <TimeBlock value={pad(timeLeft.hours)} />
-      <span className="text-surface-300 text-xs">:</span>
-      <TimeBlock value={pad(timeLeft.minutes)} />
-      <span className="text-surface-300 text-xs">:</span>
-      <TimeBlock value={pad(timeLeft.seconds)} />
-    </div>
-  );
-}
-
-function TimeBlock({ value }: { value: string }) {
-  return (
-    <div className="bg-surface-800 dark:bg-surface-100
-      text-white dark:text-surface-900
-      px-2 py-1 text-xs font-bold font-mono min-w-[28px] text-center">
-      {value}
+    <div className="flex items-center gap-1.5" role="timer">
+      <span className={`mr-1.5 text-[14px] ${dark ? 'text-white/60' : 'text-ink-2'}`}>{t('timer.endsIn')}</span>
+      {[timeLeft.hours, timeLeft.minutes, timeLeft.seconds].map((v, i) => (
+        <span key={i} className="flex items-center gap-1.5">
+          {i > 0 && <span className={dark ? 'text-white/40' : 'text-ink-3'}>:</span>}
+          <span className={`min-w-[2.25rem] rounded-lg px-2 py-1 text-center text-[15px] font-semibold tabular-nums
+            ${dark ? 'bg-white/12 text-white' : 'bg-card text-ink shadow-card'}`}>
+            {pad(v)}
+          </span>
+        </span>
+      ))}
     </div>
   );
 }

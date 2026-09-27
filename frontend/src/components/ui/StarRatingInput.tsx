@@ -38,8 +38,8 @@ export default function StarRatingInput({ value = 0, onChange, size = 'md' }: St
           <Star
             className={`${starSize} transition-colors duration-150 ${
               star <= (hovered || value)
-                ? 'fill-amber-400 text-amber-400'
-                : 'text-surface-300 dark:text-surface-600'
+                ? 'fill-[#ff9f0a] text-[#ff9f0a]'
+                : 'text-line'
             }`}
           />
         </motion.button>

@@ -4,12 +4,10 @@ import { useState, useEffect } from 'react';
 import HighlightBanner from '@/components/home/HighlightBanner';
 import FlashSaleTimer from '@/components/home/FlashSaleTimer';
 import CategoryGrid from '@/components/home/CategoryGrid';
-import ProductCard from '@/components/product/ProductCard';
-import ProductQuickView from '@/components/product/ProductQuickView';
+import ProductShelf from '@/components/product/ProductShelf';
 import ScrollReveal from '@/components/ui/ScrollReveal';
-import LoadingSkeleton from '@/components/ui/LoadingSkeleton';
 import { useTranslation } from '@/context/LanguageContext';
-import { Zap, TrendingUp, Headphones, Shield, Truck, RotateCcw, CreditCard } from 'lucide-react';
+import { Shield, Truck, RotateCcw, CreditCard } from 'lucide-react';
 import type { Product } from '@/types';
 
 export default function HomePage() {
@@ -17,7 +15,6 @@ export default function HomePage() {
   const [popular, setPopular]         = useState<Product[]>([]);
   const [accessories, setAccessories] = useState<Product[]>([]);
   const [loading, setLoading]         = useState(true);
-  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -49,128 +46,70 @@ export default function HomePage() {
   }, []);
 
   const features = [
-    { Icon: Shield,    key: 'authentic' },
-    { Icon: Truck,     key: 'freeShipping' },
-    { Icon: RotateCcw, key: 'returns' },
-    { Icon: CreditCard,key: 'installment' },
+    { Icon: Shield,     key: 'authentic',    color: 'text-[#0071e3]' },
+    { Icon: Truck,      key: 'freeShipping', color: 'text-[#248a3d] dark:text-[#30d158]' },
+    { Icon: RotateCcw,  key: 'returns',      color: 'text-[#bf4800] dark:text-[#f56300]' },
+    { Icon: CreditCard, key: 'installment',  color: 'text-[#8e44ec] dark:text-[#bf5af2]' },
   ];
 
   return (
-    <div className="pb-24 md:pb-10">
-
-      {/* ── Hero Banner — full width ── */}
+    <div>
       <HighlightBanner />
 
-      {/* ── Categories ── */}
-      <ScrollReveal delay={0.05}>
-        <section style={{ borderTop: '1px solid #e8e8ed' }}>
-          <div className="w-full px-6 md:px-10 py-12 md:py-16">
-            <h2 className="text-2xl md:text-3xl font-semibold text-surface-800 dark:text-surface-100
-              tracking-tight text-center mb-8">
-              {t('nav.categories') || 'Categories'}
-            </h2>
-            <CategoryGrid />
-          </div>
-        </section>
-      </ScrollReveal>
+      {/* ── Store ── */}
+      <div className="mt-3 bg-canvas-alt pt-14 pb-16 md:pt-20 md:pb-24">
+        <ScrollReveal className="page-width">
+          <h2 className="t-headline max-w-3xl">
+            <span className="text-ink">{t('home.store')}</span>{' '}
+            <span className="text-ink-2">{t('home.storeTagline')}</span>
+          </h2>
+        </ScrollReveal>
 
-      {/* ── Flash Sale ── */}
-      <ScrollReveal delay={0.1}>
-        <section style={{ borderTop: '1px solid #e8e8ed' }}>
-          <div className="w-full px-6 md:px-10 py-12 md:py-16">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-2">
-                <Zap className="w-5 h-5 text-error fill-current" />
-                <h2 className="text-2xl md:text-3xl font-semibold text-surface-800 dark:text-surface-100 tracking-tight">
-                  {t('home.flashSale')}
-                </h2>
-              </div>
-              <FlashSaleTimer />
-            </div>
-            {loading ? (
-              <LoadingSkeleton count={4} type="card" />
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
-                {flashSale.map((product, i) => (
-                  <ProductCard key={product.id} product={product} index={i} onQuickView={setQuickViewProduct} />
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-      </ScrollReveal>
+        <CategoryGrid />
 
-      {/* ── Trending ── */}
-      <ScrollReveal delay={0.15}>
-        <section style={{ borderTop: '1px solid #e8e8ed' }}>
-          <div className="w-full px-6 md:px-10 py-12 md:py-16">
-            <div className="flex items-center gap-2 mb-8">
-              <TrendingUp className="w-5 h-5 text-primary-500" />
-              <h2 className="text-2xl md:text-3xl font-semibold text-surface-800 dark:text-surface-100 tracking-tight">
-                {t('home.popular')}
-              </h2>
-            </div>
-            {loading ? (
-              <LoadingSkeleton count={4} type="card" />
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
-                {popular.map((product, i) => (
-                  <ProductCard key={product.id} product={product} index={i} onQuickView={setQuickViewProduct} />
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-      </ScrollReveal>
+        <ProductShelf
+          id="flash-sale"
+          title={t('home.flashSale')}
+          tagline={t('home.flashSaleTagline')}
+          products={flashSale}
+          loading={loading}
+          aside={<FlashSaleTimer />}
+        />
+        <ProductShelf
+          title={t('home.popular')}
+          tagline={t('home.popularTagline')}
+          products={popular}
+          loading={loading}
+        />
+        <ProductShelf
+          title={t('home.accessories')}
+          tagline={t('home.accessoriesTagline')}
+          products={accessories}
+          loading={loading}
+        />
 
-      {/* ── Accessories ── */}
-      <ScrollReveal delay={0.2}>
-        <section style={{ borderTop: '1px solid #e8e8ed' }}>
-          <div className="w-full px-6 md:px-10 py-12 md:py-16">
-            <div className="flex items-center gap-2 mb-8">
-              <Headphones className="w-5 h-5 text-surface-500" />
-              <h2 className="text-2xl md:text-3xl font-semibold text-surface-800 dark:text-surface-100 tracking-tight">
-                {t('home.accessories')}
-              </h2>
-            </div>
-            {loading ? (
-              <LoadingSkeleton count={4} type="card" />
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
-                {accessories.map((product, i) => (
-                  <ProductCard key={product.id} product={product} index={i} onQuickView={setQuickViewProduct} />
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-      </ScrollReveal>
-
-      {/* ── Trust Features ── */}
-      <ScrollReveal delay={0.25}>
-        <section style={{ borderTop: '1px solid #e8e8ed', backgroundColor: '#f5f5f7' }}>
-          <div className="w-full px-6 md:px-10 py-14 md:py-20">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-8">
-              {features.map(({ Icon, key }) => {
-                const feat = t<{ title: string; desc: string }>(`home.features.${key}`);
-                return (
-                  <div key={key} className="text-center">
-                    <Icon className="w-7 h-7 mx-auto mb-3 text-surface-400" strokeWidth={1.5} />
-                    <p className="font-semibold text-sm text-surface-800">{feat.title}</p>
-                    <p className="text-xs text-surface-400 mt-1.5 leading-relaxed">{feat.desc}</p>
+        {/* ── Why shop with us ── */}
+        <section className="page-width pt-10 md:pt-14">
+          <h2 className="t-title max-w-3xl">
+            <span className="text-ink">{t('home.difference')}</span>{' '}
+            <span className="text-ink-2">{t('home.differenceTagline')}</span>
+          </h2>
+          <div className="mt-8 grid grid-cols-2 gap-3 md:gap-5 lg:grid-cols-4">
+            {features.map(({ Icon, key, color }, i) => {
+              const feat = t<{ title: string; desc: string }>(`home.features.${key}`);
+              return (
+                <ScrollReveal key={key} delay={i * 0.06}>
+                  <div className="card card-hover h-full p-5 md:p-7">
+                    <Icon className={`h-8 w-8 md:h-9 md:w-9 ${color}`} strokeWidth={1.5} />
+                    <p className="mt-4 text-[17px] font-semibold leading-tight text-ink md:mt-5 md:text-[21px]">{feat.title}</p>
+                    <p className="mt-1.5 text-[14px] text-ink-2 md:mt-2 md:text-[15px]">{feat.desc}</p>
                   </div>
-                );
-              })}
-            </div>
+                </ScrollReveal>
+              );
+            })}
           </div>
         </section>
-      </ScrollReveal>
-
-      <ProductQuickView
-        product={quickViewProduct}
-        isOpen={!!quickViewProduct}
-        onClose={() => setQuickViewProduct(null)}
-      />
+      </div>
     </div>
   );
 }

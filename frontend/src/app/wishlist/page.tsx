@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import Breadcrumbs from '@/components/layout/Breadcrumbs';
 import ProductCard from '@/components/product/ProductCard';
-import ProductQuickView from '@/components/product/ProductQuickView';
+import LoadingSkeleton from '@/components/ui/LoadingSkeleton';
 import useWishlistStore from '@/stores/useWishlistStore';
 import { useTranslation } from '@/context/LanguageContext';
 import type { Product } from '@/types';
@@ -16,7 +15,6 @@ export default function WishlistPage() {
   const { t } = useTranslation();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     async function fetchFavorites() {
@@ -33,34 +31,32 @@ export default function WishlistPage() {
 
   if (!loading && products.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-4 space-y-4">
-        <Breadcrumbs items={[{ label: t('wishlist.title') }]} />
-        <div className="text-center py-20 space-y-4">
-          <Heart className="w-20 h-20 mx-auto text-surface-300 dark:text-surface-600" />
-          <h2 className="text-xl font-bold text-surface-700 dark:text-surface-300">{t('wishlist.empty')}</h2>
-          <p className="text-sm text-surface-400">{t('wishlist.emptyDesc')}</p>
-          <Link href="/">
-            <motion.button whileTap={{ scale: 0.95 }} className="gradient-primary text-white px-6 py-3 rounded-xl font-semibold mt-2">
-              {t('cart.shopNow')}
-            </motion.button>
-          </Link>
-        </div>
+      <div className="page-width py-24 text-center md:py-32">
+        <Heart className="mx-auto h-14 w-14 text-ink-3" strokeWidth={1.25} />
+        <h1 className="t-headline mt-6 text-ink">{t('wishlist.empty')}</h1>
+        <p className="mt-3 text-[17px] text-ink-2">{t('wishlist.emptyDesc')}</p>
+        <Link href="/" className="btn btn-primary mt-8">{t('cart.shopNow')}</Link>
       </div>
     );
   }
 
   return (
-    <div className="px-4 md:px-8 lg:px-12 py-4 md:py-6 space-y-4">
-      <Breadcrumbs items={[{ label: t('wishlist.title') }]} />
-      <h1 className="text-xl font-bold section-title text-surface-800 dark:text-surface-200">
-        {t('wishlist.title')} ({favorites.length})
-      </h1>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-        <AnimatePresence>
-          {products.map((product, i) => <ProductCard key={product.id} product={product} index={i} onQuickView={setQuickViewProduct} />)}
-        </AnimatePresence>
+    <div className="min-h-[calc(100dvh-2.75rem)] bg-canvas-alt pb-20">
+      <div className="page-width">
+        <h1 className="t-headline pt-12 pb-8 md:pt-16">
+          <span className="text-ink">{t('wishlist.title')}</span>{' '}
+          <span className="text-ink-2">{favorites.length} {t('common.items')}</span>
+        </h1>
+        {loading ? (
+          <LoadingSkeleton count={4} type="card" />
+        ) : (
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 lg:grid-cols-4">
+            <AnimatePresence>
+              {products.map((product, i) => <ProductCard key={product.id} product={product} index={i} />)}
+            </AnimatePresence>
+          </div>
+        )}
       </div>
-      <ProductQuickView product={quickViewProduct} isOpen={!!quickViewProduct} onClose={() => setQuickViewProduct(null)} />
     </div>
   );
 }

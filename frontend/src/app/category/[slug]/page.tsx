@@ -1,22 +1,22 @@
 'use client';
 
 import { useState, useEffect, use, useMemo } from 'react';
+import Link from 'next/link';
 import { Search } from 'lucide-react';
-import Breadcrumbs from '@/components/layout/Breadcrumbs';
 import ProductCard from '@/components/product/ProductCard';
-import ProductQuickView from '@/components/product/ProductQuickView';
 import FilterSortBar from '@/components/ui/FilterSortBar';
 import LoadingSkeleton from '@/components/ui/LoadingSkeleton';
 import { useTranslation } from '@/context/LanguageContext';
 import { calcDiscountedPrice } from '@/lib/utils';
 import type { Product } from '@/types';
 
+const CATEGORY_TABS = ['all', 'phone', 'tablet', 'accessory'];
+
 export default function CategoryPage({ params }: PageProps<'/category/[slug]'>) {
   const { slug } = use(params);
   const { t } = useTranslation();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [sortBy, setSortBy] = useState('newest');
   const [priceRange, setPriceRange] = useState('all');
 
@@ -56,28 +56,47 @@ export default function CategoryPage({ params }: PageProps<'/category/[slug]'>) 
   }, [products, sortBy, priceRange]);
 
   return (
-    <div className="px-4 md:px-8 lg:px-12 py-4 md:py-6 space-y-4">
-      <Breadcrumbs items={[{ label }]} />
-      <h1 className="text-2xl font-bold section-title text-surface-800 dark:text-surface-200">{label}</h1>
+    <div className="min-h-[calc(100dvh-2.75rem)] bg-canvas-alt pb-20">
+      <header className="page-width pt-10 md:pt-16">
+        <h1 className="t-headline text-ink">{label}</h1>
 
-      <FilterSortBar sortBy={sortBy} priceRange={priceRange} onSortChange={setSortBy} onPriceChange={setPriceRange} />
-
-      {loading ? (
-        <LoadingSkeleton count={6} type="card" />
-      ) : filteredProducts.length === 0 ? (
-        <div className="text-center py-16">
-          <Search className="w-10 h-10 mx-auto mb-3 text-surface-300 dark:text-surface-600" />
-          <p className="text-surface-400 dark:text-surface-500">{t('common.noResults')}</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {filteredProducts.map((product, i) => (
-            <ProductCard key={product.id} product={product} index={i} onQuickView={setQuickViewProduct} />
+        {/* Category tabs */}
+        <nav aria-label={t('nav.categories')} className="-mx-1 mt-6 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none]">
+          {CATEGORY_TABS.map((c) => (
+            <Link key={c} href={`/category/${c}`} className="chip"
+              aria-current={c === slug ? 'page' : undefined}>
+              {t(`category.${c}`)}
+            </Link>
           ))}
-        </div>
-      )}
+        </nav>
+      </header>
 
-      <ProductQuickView product={quickViewProduct} isOpen={!!quickViewProduct} onClose={() => setQuickViewProduct(null)} />
+      <div className="page-width mt-6">
+        <FilterSortBar
+          count={loading ? undefined : filteredProducts.length}
+          sortBy={sortBy}
+          priceRange={priceRange}
+          onSortChange={setSortBy}
+          onPriceChange={setPriceRange}
+        />
+
+        <div className="mt-6">
+          {loading ? (
+            <LoadingSkeleton count={8} type="card" />
+          ) : filteredProducts.length === 0 ? (
+            <div className="py-24 text-center">
+              <Search className="mx-auto mb-4 h-10 w-10 text-ink-3" strokeWidth={1.5} />
+              <p className="text-[19px] font-semibold text-ink">{t('common.noResults')}</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 lg:grid-cols-4">
+              {filteredProducts.map((product, i) => (
+                <ProductCard key={product.id} product={product} index={i} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

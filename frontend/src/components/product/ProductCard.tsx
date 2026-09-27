@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
+import ProductVisual from '@/components/product/ProductVisual';
 import useWishlistStore from '@/stores/useWishlistStore';
 import { formatPrice, calcDiscountedPrice } from '@/lib/utils';
 import { useTranslation } from '@/context/LanguageContext';
@@ -23,10 +24,13 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const liked = isFavorite(product.id);
 
   const colors = product.product_colors ?? [];
-  const firstColor = colors[0];
   const firstOption = product.product_options?.[0];
   const displayPrice = firstOption?.price || product.original_price;
   const salePrice = calcDiscountedPrice(displayPrice, product.sale_percent);
+
+  const eyebrow = product.sale_percent > 0
+    ? `${t('product.save')} ${product.sale_percent}%`
+    : product.badge ? t(`product.badges.${product.badge}`, product.badge) : null;
 
   const handleFavorite = (e: MouseEvent) => {
     e.preventDefault();
@@ -37,88 +41,59 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      className="h-full"
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.04 }}
+      transition={{ duration: 0.5, delay: index * 0.05, ease: [0.28, 0.11, 0.32, 1] }}
     >
-      <Link href={`/product/${product.id}`}>
-        <div className="group cursor-pointer glass-card overflow-hidden">
+      <Link href={`/product/${product.id}`}
+        className="group card card-hover flex h-full flex-col p-5 md:p-6">
 
-          {/* Image */}
-          <div className="relative bg-white dark:bg-surface-800 overflow-hidden"
-            style={{ aspectRatio: '1/1' }}>
+        {/* Image */}
+        <div className="relative aspect-square">
+          {/* Absolute so tall art can't stretch the square */}
+          <ProductVisual product={product}
+            className="absolute inset-0 h-full w-full p-5 transition-transform duration-500 ease-apple group-hover:scale-[1.04]" />
 
-            {product.sale_percent > 0 && (
-              <span className="absolute top-2 left-2 z-10 px-2 py-0.5
-                gradient-sale text-white text-[10px] font-bold">
-                -{product.sale_percent}%
-              </span>
-            )}
+          <motion.button
+            whileTap={{ scale: 0.8 }}
+            onClick={handleFavorite}
+            className={`absolute -right-2 -top-2 flex h-9 w-9 items-center justify-center rounded-full
+              transition-opacity hover:bg-fill
+              ${liked ? 'opacity-100' : 'md:opacity-0 md:group-hover:opacity-100'}`}
+            aria-label={liked ? t('product.removedFromWishlist') : t('nav.wishlist')}
+            aria-pressed={liked}
+          >
+            <Heart className={`h-[18px] w-[18px] ${liked ? 'fill-danger text-danger' : 'text-ink-2'}`} />
+          </motion.button>
+        </div>
 
-            {product.badge && !product.sale_percent && (
-              <span className={`absolute top-2 left-2 z-10 px-2 py-0.5
-                text-white text-[10px] font-bold
-                ${product.badge === 'HOT' ? 'bg-badge-hot' : 'gradient-primary'}`}>
-                {product.badge}
-              </span>
-            )}
-
-            <motion.button
-              whileTap={{ scale: 0.7 }}
-              onClick={handleFavorite}
-              className="absolute top-2 right-2 z-10 w-7 h-7 flex items-center justify-center
-                opacity-0 group-hover:opacity-100 transition-opacity"
-              aria-label="Wishlist"
-            >
-              <Heart className={`w-4 h-4
-                ${liked ? 'fill-red-500 text-red-500' : 'text-surface-400'}`}
-              />
-            </motion.button>
-
-            {firstColor?.image_url ? (
-              <img
-                src={firstColor.image_url}
-                alt={product.name}
-                className="w-full h-full object-contain p-6
-                  group-hover:scale-105 transition-transform duration-500"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <div className="w-12 h-12 bg-surface-200 dark:bg-surface-700" />
-              </div>
-            )}
-          </div>
-
-          {/* Info */}
-          <div className="p-4 border-t border-surface-100 dark:border-surface-700">
-            {colors.length > 1 && (
-              <div className="flex items-center gap-1.5 mb-2">
-                {colors.slice(0, 5).map((color) => (
-                  <div
-                    key={color.id}
-                    className="w-2.5 h-2.5 border border-surface-300"
-                    style={{ backgroundColor: color.hex, borderRadius: '50%' }}
-                    title={color.name}
-                  />
-                ))}
-              </div>
-            )}
-
-            <h3 className="font-medium text-sm text-surface-800 dark:text-surface-200
-              line-clamp-2 leading-snug text-center">
-              {product.name}
-            </h3>
-
-            <div className="mt-1.5 text-center">
-              <span className="font-bold text-sm gradient-text">
-                {formatPrice(salePrice)}
-              </span>
-              {product.sale_percent > 0 && (
-                <span className="text-xs text-surface-400 line-through ml-1.5">
-                  {formatPrice(displayPrice)}
-                </span>
-              )}
+        {/* Info */}
+        <div className="mt-4 flex flex-1 flex-col">
+          {colors.length > 1 && (
+            <div className="mb-3 flex items-center gap-1.5">
+              {colors.slice(0, 6).map((color) => (
+                <span
+                  key={color.id}
+                  className="h-3 w-3 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)]"
+                  style={{ backgroundColor: color.hex }}
+                  title={color.name}
+                />
+              ))}
             </div>
+          )}
+
+          {eyebrow && <p className="t-eyebrow mb-1">{eyebrow}</p>}
+
+          <h3 className="line-clamp-2 text-[19px] font-semibold leading-[1.21] tracking-[0.012em] text-ink">
+            {product.name}
+          </h3>
+
+          <div className="mt-auto pt-3 text-[15px] leading-tight">
+            <span className="text-ink">{formatPrice(salePrice)}</span>
+            {product.sale_percent > 0 && (
+              <span className="ml-2 text-ink-3 line-through">{formatPrice(displayPrice)}</span>
+            )}
           </div>
         </div>
       </Link>

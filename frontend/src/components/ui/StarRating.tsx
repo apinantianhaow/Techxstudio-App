@@ -26,20 +26,20 @@ export default function StarRating({ rating = 0, reviews = 0, size = 'sm', showC
   for (let i = 0; i < 5; i++) {
     if (i < fullStars) {
       stars.push(
-        <Star key={i} className={`${starSize} fill-amber-400 text-amber-400`} />
+        <Star key={i} className={`${starSize} fill-[#ff9f0a] text-[#ff9f0a]`} />
       );
     } else if (i === fullStars && hasHalf) {
       stars.push(
         <div key={i} className="relative">
-          <Star className={`${starSize} text-surface-300 dark:text-surface-600`} />
+          <Star className={`${starSize} text-line`} />
           <div className="absolute inset-0 overflow-hidden w-1/2">
-            <Star className={`${starSize} fill-amber-400 text-amber-400`} />
+            <Star className={`${starSize} fill-[#ff9f0a] text-[#ff9f0a]`} />
           </div>
         </div>
       );
     } else {
       stars.push(
-        <Star key={i} className={`${starSize} text-surface-300 dark:text-surface-600`} />
+        <Star key={i} className={`${starSize} text-line`} />
       );
     }
   }
@@ -48,7 +48,7 @@ export default function StarRating({ rating = 0, reviews = 0, size = 'sm', showC
     <div className="flex items-center gap-1">
       <div className="flex items-center gap-0.5">{stars}</div>
       {showCount && (
-        <span className="text-xs text-surface-500 dark:text-surface-400 ml-1">
+        <span className="ml-1 text-[14px] text-ink-2">
           ({reviews.toLocaleString()})
         </span>
       )}

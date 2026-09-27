@@ -1,7 +1,8 @@
 'use client';
 
-import { X, GitCompareArrows, Trash2, Star } from 'lucide-react';
+import { X, Trash2, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ProductVisual from '@/components/product/ProductVisual';
 import useCompareStore from '@/stores/useCompareStore';
 import { useTranslation } from '@/context/LanguageContext';
 import { formatPrice, calcDiscountedPrice } from '@/lib/utils';
@@ -12,6 +13,9 @@ export default function ComparePanel() {
 
   if (items.length === 0) return null;
 
+  const row = 'border-t border-line';
+  const label = 'py-3 px-2 text-[13px] text-ink-2';
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -19,89 +23,79 @@ export default function ComparePanel() {
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
-          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="fixed bottom-16 md:bottom-0 left-0 right-0 z-[var(--z-overlay)] glass-modal  shadow-float"
+          transition={{ duration: 0.35, ease: [0.28, 0.11, 0.32, 1] }}
+          className="sheet fixed inset-x-0 bottom-[52px] z-[var(--z-overlay)] rounded-t-[22px] md:bottom-0"
         >
-          <div className="max-w-4xl mx-auto p-4">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <GitCompareArrows className="w-5 h-5 text-primary-600" />
-                <h3 className="font-bold text-surface-800 dark:text-surface-200">
-                  {t('compare.title')} ({items.length}/3)
-                </h3>
-              </div>
-              <div className="flex items-center gap-2">
-                <button onClick={clearCompare} className="text-xs text-surface-400 hover:text-error transition-colors">
-                  {t('common.clearAll')}
-                </button>
-                <button onClick={closePanel} className="w-8 h-8  bg-surface-100 dark:bg-surface-800 flex items-center justify-center">
-                  <X className="w-4 h-4" />
+          <div className="mx-auto max-w-4xl p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-[17px] font-semibold text-ink">
+                {t('compare.title')} <span className="text-ink-2">{items.length}/3</span>
+              </h3>
+              <div className="flex items-center gap-4">
+                <button onClick={clearCompare} className="link text-[14px]">{t('common.clearAll')}</button>
+                <button onClick={closePanel} className="icon-btn" aria-label={t('common.close')}>
+                  <X className="h-4 w-4" />
                 </button>
               </div>
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full">
                 <thead>
                   <tr>
-                    <th className="text-left py-2 px-2 text-surface-400 font-medium w-24">Product</th>
+                    <th className="w-24" />
                     {items.map((item) => (
-                      <th key={item.id} className="py-2 px-3 min-w-[140px]">
+                      <th key={item.id} className="min-w-[140px] px-3 py-2 font-normal">
                         <div className="relative">
-                          <button onClick={() => removeFromCompare(item.id)}
-                            className="absolute -top-1 -right-1 w-5 h-5  bg-error/10 flex items-center justify-center">
-                            <Trash2 className="w-3 h-3 text-error" />
+                          <button onClick={() => removeFromCompare(item.id)} aria-label={t('cart.remove')}
+                            className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-fill">
+                            <Trash2 className="h-3 w-3 text-danger" />
                           </button>
-                          <div className="w-16 h-16 mx-auto bg-surface-100 dark:bg-surface-800  overflow-hidden mb-1">
-                            {item.product_colors?.[0]?.image_url ? (
-                              <img src={item.product_colors[0].image_url} alt={item.name} className="w-full h-full object-contain p-1" />
-                            ) : (
-                              <div className="w-full h-full gradient-primary opacity-10" />
-                            )}
+                          <div className="mx-auto mb-2 h-16 w-16 rounded-xl bg-canvas-alt p-2">
+                            <ProductVisual product={item} className="h-full w-full" />
                           </div>
-                          <p className="text-xs font-semibold text-surface-700 dark:text-surface-300 line-clamp-2">{item.name}</p>
+                          <p className="line-clamp-2 text-[13px] font-semibold text-ink">{item.name}</p>
                         </div>
                       </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-t border-surface-200 dark:border-surface-700">
-                    <td className="py-2 px-2 text-surface-400">{t('compare.price')}</td>
+                  <tr className={row}>
+                    <td className={label}>{t('compare.price')}</td>
                     {items.map((item) => (
-                      <td key={item.id} className="py-2 px-3 text-center">
-                        <span className="font-bold gradient-text text-sm">
-                          {formatPrice(calcDiscountedPrice(item.original_price, item.sale_percent))}
-                        </span>
+                      <td key={item.id} className="px-3 py-3 text-center text-[14px] font-semibold text-ink">
+                        {formatPrice(calcDiscountedPrice(item.original_price, item.sale_percent))}
                       </td>
                     ))}
                   </tr>
-                  <tr className="border-t border-surface-200 dark:border-surface-700">
-                    <td className="py-2 px-2 text-surface-400">{t('compare.rating')}</td>
+                  <tr className={row}>
+                    <td className={label}>{t('compare.rating')}</td>
                     {items.map((item) => (
-                      <td key={item.id} className="py-2 px-3 text-center text-sm">
+                      <td key={item.id} className="px-3 py-3 text-center text-[14px] text-ink">
                         <span className="inline-flex items-center gap-1">
-                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                          <Star className="h-3.5 w-3.5 fill-[#ff9f0a] text-[#ff9f0a]" />
                           {item.rating}
                         </span>
                       </td>
                     ))}
                   </tr>
-                  <tr className="border-t border-surface-200 dark:border-surface-700">
-                    <td className="py-2 px-2 text-surface-400">{t('compare.category')}</td>
+                  <tr className={row}>
+                    <td className={label}>{t('compare.category')}</td>
                     {items.map((item) => (
-                      <td key={item.id} className="py-2 px-3 text-center text-xs capitalize text-surface-600 dark:text-surface-400">
+                      <td key={item.id} className="px-3 py-3 text-center text-[13px] capitalize text-ink-2">
                         {t(`category.${item.category}`)}
                       </td>
                     ))}
                   </tr>
-                  <tr className="border-t border-surface-200 dark:border-surface-700">
-                    <td className="py-2 px-2 text-surface-400">{t('compare.colors')}</td>
+                  <tr className={row}>
+                    <td className={label}>{t('compare.colors')}</td>
                     {items.map((item) => (
-                      <td key={item.id} className="py-2 px-3">
-                        <div className="flex justify-center gap-1">
+                      <td key={item.id} className="px-3 py-3">
+                        <div className="flex justify-center gap-1.5">
                           {item.product_colors?.slice(0, 4).map((c) => (
-                            <div key={c.id} className="w-4 h-4  border border-surface-200" style={{ backgroundColor: c.hex }} />
+                            <span key={c.id} className="h-4 w-4 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)]"
+                              style={{ backgroundColor: c.hex }} />
                           ))}
                         </div>
                       </td>

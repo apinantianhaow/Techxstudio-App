@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect, use } from 'react';
-import { ShoppingBag, Heart, Share2, ChevronLeft } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Heart, Share, Minus, Plus, Truck, RotateCcw, ShieldCheck } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Breadcrumbs from '@/components/layout/Breadcrumbs';
 import StarRating from '@/components/ui/StarRating';
+import ProductVisual from '@/components/product/ProductVisual';
 import ProductReviews from '@/components/product/ProductReviews';
 import ProductRecommendations from '@/components/product/ProductRecommendations';
 import LoadingSkeleton from '@/components/ui/LoadingSkeleton';
@@ -20,7 +21,7 @@ import type { Product, Review } from '@/types';
 export default function ProductPage({ params }: PageProps<'/product/[id]'>) {
   const { id } = use(params);
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [product, setProduct] = useState<Product | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,9 +57,9 @@ export default function ProductPage({ params }: PageProps<'/product/[id]'>) {
   if (loading) return <LoadingSkeleton type="detail" />;
   if (!product) {
     return (
-      <div className="px-4 md:px-8 lg:px-12 py-20 max-w-6xl mx-auto text-center">
-        <p className="text-surface-400 text-lg">{t('errors.productNotFound')}</p>
-        <button onClick={() => router.push('/')} className="mt-4 text-primary-600 font-medium">{t('common.backToHome')}</button>
+      <div className="page-width py-32 text-center">
+        <p className="t-title text-ink">{t('errors.productNotFound')}</p>
+        <button onClick={() => router.push('/')} className="btn btn-primary mt-8">{t('common.backToHome')}</button>
       </div>
     );
   }
@@ -72,6 +73,9 @@ export default function ProductPage({ params }: PageProps<'/product/[id]'>) {
   const salePrice = calcDiscountedPrice(price, product.sale_percent);
   const liked = isFavorite(product.id);
   const catLabel = t(`category.${product.category}`) || product.category || '';
+  const eyebrow = product.sale_percent > 0
+    ? `${t('product.save')} ${product.sale_percent}%`
+    : product.badge ? t(`product.badges.${product.badge}`, product.badge) : null;
 
   const handleAddToCart = () => {
     addToCart({
@@ -96,139 +100,170 @@ export default function ProductPage({ params }: PageProps<'/product/[id]'>) {
     }
   };
 
+  const perks = (['freeShipping', 'returns', 'authentic'] as const).map((key, i) => ({
+    Icon: [Truck, RotateCcw, ShieldCheck][i],
+    ...t<{ title: string; desc: string }>(`home.features.${key}`),
+  }));
+
   return (
-    <div className="px-4 md:px-8 lg:px-12 py-4 md:py-6 max-w-6xl mx-auto space-y-6">
-      <div className="flex items-center gap-2">
-        <motion.button whileTap={{ scale: 0.85 }} onClick={() => router.back()}
-          className="w-9 h-9 rounded-full bg-surface-100 dark:bg-surface-800 flex items-center justify-center">
-          <ChevronLeft className="w-5 h-5" />
-        </motion.button>
-        <Breadcrumbs items={[{ label: catLabel, href: `/category/${product.category}` }, { label: product.name }]} />
+    <div className="pb-20">
+      <div className="page-width">
+        <Breadcrumbs items={[
+          ...(product.category ? [{ label: catLabel, href: `/category/${product.category}` }] : []),
+          { label: product.name },
+        ]} />
       </div>
 
-      {/* Product Image */}
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-        className="relative aspect-square max-w-md mx-auto rounded-2xl overflow-hidden
-          bg-gradient-to-br from-surface-50 to-surface-100 dark:from-surface-800 dark:to-surface-900">
-        {product.badge && (
-          <div className={`absolute top-4 left-4 z-10 px-3 py-1 rounded-full text-xs font-bold text-white
-            ${product.badge === 'HOT' ? 'bg-badge-hot' : product.badge === 'NEW' ? 'bg-badge-new' : 'gradient-sale'}`}>
-            {product.badge}
+      <div className="page-width grid gap-10 pt-4 md:grid-cols-[1.15fr_1fr] md:gap-14 lg:gap-20">
+        {/* ── Visual ── */}
+        <div className="md:sticky md:top-20 md:self-start">
+          <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-card bg-canvas-alt">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={selectedColor}
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.35, ease: [0.28, 0.11, 0.32, 1] }}
+                className="h-full w-full p-12 md:p-16"
+              >
+                <ProductVisual product={product} color={currentColor} className="h-full w-full" />
+              </motion.div>
+            </AnimatePresence>
           </div>
-        )}
-        {currentColor?.image_url ? (
-          <img src={currentColor.image_url} alt={product.name} className="w-full h-full object-contain p-8" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="w-40 h-40 rounded-3xl gradient-primary opacity-10" />
-          </div>
-        )}
-      </motion.div>
-
-      {/* Product Info */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="space-y-4">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-surface-900 dark:text-surface-100">{product.name}</h1>
-            <StarRating rating={product.rating} reviews={product.reviews_count} size="sm" />
-          </div>
-          <div className="flex gap-2 flex-shrink-0">
-            <motion.button whileTap={{ scale: 0.8 }} onClick={handleShare}
-              className="w-10 h-10 rounded-full bg-surface-100 dark:bg-surface-800 flex items-center justify-center">
-              <Share2 className="w-4 h-4 text-surface-500" />
-            </motion.button>
-            <motion.button whileTap={{ scale: 0.8 }}
-              onClick={() => { toggleFavorite(product.id); toast(liked ? t('product.removedFromWishlist') : t('product.addedToWishlist'), { icon: liked ? undefined : toastIcons.wishlist }); }}
-              className="w-10 h-10 rounded-full bg-surface-100 dark:bg-surface-800 flex items-center justify-center">
-              <Heart className={`w-4 h-4 ${liked ? 'fill-red-500 text-red-500' : 'text-surface-500'}`} />
-            </motion.button>
-          </div>
-        </div>
-
-        {/* Price */}
-        <div className="flex items-center gap-3">
-          <span className="text-3xl font-bold gradient-text">{formatPrice(salePrice)}</span>
-          {product.sale_percent > 0 && (
-            <>
-              <span className="text-lg text-surface-400 line-through">{formatPrice(price)}</span>
-              <span className="px-2 py-0.5 rounded-full gradient-sale text-xs font-bold text-white">-{product.sale_percent}%</span>
-            </>
+          {currentColor && (
+            <p className="mt-3 text-center text-[14px] text-ink-2">{currentColor.name}</p>
           )}
         </div>
 
-        {product.description && (
-          <p className="text-sm text-surface-500 dark:text-surface-400 leading-relaxed">{product.description}</p>
-        )}
+        {/* ── Buy panel ── */}
+        <div>
+          {eyebrow && <p className="t-eyebrow text-[14px]">{eyebrow}</p>}
+          <h1 className="t-title mt-1 text-ink">{product.name}</h1>
 
-        {/* Color picker */}
-        {colors.length > 0 && (
-          <div>
-            <p className="text-sm font-semibold text-surface-700 dark:text-surface-300 mb-2">
-              {t('product.color')}: <span className="font-normal text-surface-500">{currentColor?.name}</span>
-            </p>
-            <div className="flex gap-2.5">
-              {colors.map((c, i) => (
-                <motion.button key={c.id} whileTap={{ scale: 0.85 }} onClick={() => setSelectedColor(i)}
-                  className={`w-10 h-10 rounded-full border-2 transition-all duration-200
-                    ${i === selectedColor ? 'border-primary-600 scale-110 shadow-lg ring-4 ring-primary-500/20' : 'border-surface-200 dark:border-surface-600 hover:scale-105'}`}
-                  style={{ backgroundColor: c.hex }} title={c.name} />
-              ))}
+          <div className="mt-3 flex items-center gap-3">
+            <StarRating rating={product.rating} reviews={product.reviews_count} size="sm" />
+          </div>
+
+          <div className="mt-5 flex items-baseline gap-3">
+            <span className="text-[24px] font-semibold tracking-tight text-ink">{formatPrice(salePrice)}</span>
+            {product.sale_percent > 0 && (
+              <span className="text-[17px] text-ink-3 line-through">{formatPrice(price)}</span>
+            )}
+          </div>
+
+          {product.description && (
+            <p className="mt-4 text-[17px] leading-relaxed text-ink-2">{product.description}</p>
+          )}
+
+          {/* Color */}
+          {colors.length > 0 && (
+            <section className="mt-8 border-t border-line pt-6">
+              <h2 className="text-[19px] font-semibold text-ink">
+                {t('product.color')}{locale === 'en' && '.'} <span className="text-ink-2">{t('product.colorPrompt')}</span>
+              </h2>
+              <p className="mt-3 text-[14px] text-ink-2">{currentColor?.name}</p>
+              <div className="mt-3 flex flex-wrap gap-3">
+                {colors.map((c, i) => (
+                  <button key={c.id} onClick={() => setSelectedColor(i)} title={c.name}
+                    aria-label={c.name} aria-pressed={i === selectedColor}
+                    className={`h-9 w-9 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)] ring-offset-2 ring-offset-canvas transition
+                      ${i === selectedColor ? 'ring-2 ring-accent' : 'hover:ring-2 hover:ring-line'}`}
+                    style={{ backgroundColor: c.hex }} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Options */}
+          {options.length > 0 && (
+            <section className="mt-8 border-t border-line pt-6">
+              <h2 className="text-[19px] font-semibold text-ink">
+                {t('product.options')}{locale === 'en' && '.'} <span className="text-ink-2">{t('product.optionsPrompt')}</span>
+              </h2>
+              <div className="mt-4 grid gap-3">
+                {options.map((opt, i) => (
+                  <button key={opt.id} onClick={() => setSelectedOption(i)}
+                    aria-pressed={i === selectedOption}
+                    className="choice flex items-center justify-between px-5 py-4 text-left">
+                    <span className="text-[17px] font-semibold">{opt.label}</span>
+                    <span className="text-[14px] text-ink-2">
+                      {formatPrice(calcDiscountedPrice(opt.price, product.sale_percent))}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Quantity + Add to bag */}
+          <section className="mt-8 border-t border-line pt-6">
+            <div className="flex items-center justify-between">
+              <span className="text-[17px] font-semibold text-ink">{t('product.quantity')}</span>
+              <div className="flex items-center gap-1 rounded-full bg-fill p-1">
+                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={quantity <= 1}
+                  aria-label="−" className="flex h-8 w-8 items-center justify-center rounded-full text-ink hover:bg-card disabled:opacity-30">
+                  <Minus className="h-4 w-4" />
+                </button>
+                <span className="w-8 text-center text-[17px] font-semibold tabular-nums text-ink">{quantity}</span>
+                <button onClick={() => setQuantity(quantity + 1)}
+                  aria-label="+" className="flex h-8 w-8 items-center justify-center rounded-full text-ink hover:bg-card">
+                  <Plus className="h-4 w-4" />
+                </button>
+              </div>
             </div>
-          </div>
-        )}
 
-        {/* Options */}
-        {options.length > 0 && (
-          <div>
-            <p className="text-sm font-semibold text-surface-700 dark:text-surface-300 mb-2">{t('product.options')}</p>
-            <div className="flex flex-wrap gap-2">
-              {options.map((opt, i) => (
-                <motion.button key={opt.id} whileTap={{ scale: 0.95 }} onClick={() => setSelectedOption(i)}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200
-                    ${i === selectedOption ? 'gradient-primary text-white shadow-lg' : 'glass-card hover:shadow-md text-surface-600 dark:text-surface-300'}`}>
-                  {opt.label} — {formatPrice(calcDiscountedPrice(opt.price, product.sale_percent))}
-                </motion.button>
-              ))}
+            <motion.button whileTap={{ scale: 0.98 }} onClick={handleAddToCart} className="btn btn-primary btn-block mt-6">
+              {t('common.addToCart')}
+            </motion.button>
+
+            <div className="mt-4 flex justify-center gap-8 text-[14px]">
+              <button
+                onClick={() => { toggleFavorite(product.id); toast(liked ? t('product.removedFromWishlist') : t('product.addedToWishlist'), { icon: liked ? undefined : toastIcons.wishlist }); }}
+                aria-pressed={liked}
+                className="link inline-flex items-center gap-1.5">
+                <Heart className={`h-4 w-4 ${liked ? 'fill-current' : ''}`} /> {t('nav.wishlist')}
+              </button>
+              <button onClick={handleShare} className="link inline-flex items-center gap-1.5">
+                <Share className="h-4 w-4" /> {t('common.share')}
+              </button>
             </div>
-          </div>
-        )}
+          </section>
 
-        {/* Quantity + Add to cart */}
-        <div className="flex items-center gap-3 pt-2">
-          <div className="flex items-center bg-surface-100 dark:bg-surface-800 rounded-xl overflow-hidden">
-            <button onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="w-10 h-10 flex items-center justify-center text-surface-500 hover:bg-surface-200 dark:hover:bg-surface-700 text-lg font-medium">−</button>
-            <span className="w-10 text-center font-bold text-surface-800 dark:text-surface-200">{quantity}</span>
-            <button onClick={() => setQuantity(quantity + 1)}
-              className="w-10 h-10 flex items-center justify-center text-surface-500 hover:bg-surface-200 dark:hover:bg-surface-700 text-lg font-medium">+</button>
-          </div>
-          <motion.button whileTap={{ scale: 0.97 }} onClick={handleAddToCart}
-            className="flex-1 gradient-primary text-white py-3.5 rounded-xl font-bold text-base
-              flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-shadow btn-ripple">
-            <ShoppingBag className="w-5 h-5" />
-            {t('common.addToCart')}
-          </motion.button>
+          {/* Perks */}
+          <ul className="mt-8 space-y-4 rounded-card bg-canvas-alt p-6 dark:bg-card">
+            {perks.map(({ Icon, title, desc }) => (
+              <li key={title} className="flex gap-4">
+                <Icon className="mt-0.5 h-6 w-6 flex-shrink-0 text-ink" strokeWidth={1.5} />
+                <span>
+                  <span className="block text-[14px] font-semibold text-ink">{title}</span>
+                  <span className="block text-[14px] text-ink-2">{desc}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
+      </div>
 
-        {/* Specs */}
-        {specs.length > 0 && (
-          <div className="glass-card rounded-xl overflow-hidden">
-            <div className="p-4 border-b border-surface-200 dark:border-surface-700">
-              <h3 className="font-bold text-surface-800 dark:text-surface-200">{t('product.specs')}</h3>
-            </div>
-            <div className="divide-y divide-surface-100 dark:divide-surface-800">
-              {specs.map((spec) => (
-                <div key={spec.id} className="flex items-center justify-between px-4 py-3">
-                  <span className="text-sm text-surface-500 dark:text-surface-400">{spec.spec_key}</span>
-                  <span className="text-sm font-medium text-surface-700 dark:text-surface-300">{spec.spec_value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </motion.div>
+      {/* ── Tech specs ── */}
+      {specs.length > 0 && (
+        <section className="page-width mt-20">
+          <h2 className="t-title border-b border-line pb-5 text-ink">{t('product.specs')}</h2>
+          <dl className="grid md:grid-cols-2 md:gap-x-14">
+            {specs.map((spec) => (
+              <div key={spec.id} className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-4 border-b border-line py-4">
+                <dt className="text-[14px] font-semibold text-ink">{spec.spec_key}</dt>
+                <dd className="text-[14px] text-ink-2">{spec.spec_value}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
 
-      <ProductReviews productId={product.id} reviews={reviews} />
+      <div className="page-width mt-20">
+        <ProductReviews productId={product.id} reviews={reviews} />
+      </div>
+
       <ProductRecommendations category={product.category} currentProductId={product.id} />
     </div>
   );

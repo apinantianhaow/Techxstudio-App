@@ -5,6 +5,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { LanguageProvider } from '@/context/LanguageContext';
 import TopBar from '@/components/layout/TopBar';
 import BottomNav from '@/components/layout/BottomNav';
+import Footer from '@/components/layout/Footer';
 import ComparePanel from '@/components/product/ComparePanel';
 
 export const metadata = {
@@ -20,10 +21,11 @@ export const metadata = {
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
+        {/* SF Pro is used on Apple devices; these cover everything else (incl. Thai) */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
       </head>
@@ -32,22 +34,24 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
           <LanguageProvider>
             <AuthProvider>
               <TopBar />
-              <main className="pt-12 min-h-screen">
+              <main className="min-h-screen pt-11">
                 {children}
               </main>
+              <Footer />
               <BottomNav />
               <ComparePanel />
               <Toaster
                 position="top-center"
+                offset={56}
                 toastOptions={{
                   style: {
-                    borderRadius: '0',
-                    fontSize: '13px',
+                    borderRadius: '14px',
+                    fontSize: '14px',
                     fontWeight: '500',
-                    background: '#ffffff',
-                    color: '#1e1b2e',
-                    boxShadow: '0 4px 20px rgba(124,58,237,0.1)',
-                    border: '1px solid #e2dff0',
+                    background: 'var(--card)',
+                    color: 'var(--ink)',
+                    boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+                    border: '1px solid var(--hairline)',
                   },
                 }}
               />
