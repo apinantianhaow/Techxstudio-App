@@ -21,19 +21,24 @@ export default function HomePage() {
   const { t } = useTranslation();
 
   useEffect(() => {
+    async function fetchCurated(list: string): Promise<Product[]> {
+      const res = await fetch(`/api/products/curated/${list}`);
+      // A non-OK response may be plain text (e.g. the proxy can't reach the Go API).
+      if (!res.ok) throw new Error(`GET /api/products/curated/${list} failed: ${res.status} ${res.statusText}`);
+      const data = await res.json();
+      return data.products || [];
+    }
+
     async function fetchData() {
       try {
-        const [fsRes, popRes, accRes] = await Promise.all([
-          fetch('/api/products/curated/flash_sale'),
-          fetch('/api/products/curated/popular'),
-          fetch('/api/products/curated/accessories'),
+        const [fsProducts, popProducts, accProducts] = await Promise.all([
+          fetchCurated('flash_sale'),
+          fetchCurated('popular'),
+          fetchCurated('accessories'),
         ]);
-        const [fsData, popData, accData] = await Promise.all([
-          fsRes.json(), popRes.json(), accRes.json(),
-        ]);
-        setFlashSale(fsData.products || []);
-        setPopular(popData.products   || []);
-        setAccessories(accData.products || []);
+        setFlashSale(fsProducts);
+        setPopular(popProducts);
+        setAccessories(accProducts);
       } catch (err) {
         console.error('Home fetch error:', err);
       } finally {
