@@ -6,6 +6,8 @@ import (
 	"github.com/apinantianhaow/techxstudio-app/backend/internal/models"
 )
 
+const orderItemColumns = "id, product_name, option_label, color_name, quantity, price, image_url"
+
 // GET /api/orders
 func (s *Server) listOrders(w http.ResponseWriter, r *http.Request) {
 	claims, ok := s.requireUser(w, r, "Please log in")
@@ -15,7 +17,7 @@ func (s *Server) listOrders(w http.ResponseWriter, r *http.Request) {
 
 	orders := []models.Order{}
 	err := s.db.From("orders").
-		Select("*, order_items(id, product_name, option_label, color_name, quantity, price, image_url)").
+		Select("*, order_items("+orderItemColumns+")").
 		Eq("user_id", claims.ID).
 		Order("created_at", false).
 		Get(r.Context(), &orders)

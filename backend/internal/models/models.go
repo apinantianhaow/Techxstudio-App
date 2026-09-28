@@ -183,3 +183,15 @@ type Order struct {
 	UpdatedAt       string      `json:"updated_at"`
 	OrderItems      []OrderItem `json:"order_items,omitempty"`
 }
+
+// OrderCustomer is the user summary embedded in admin order listings.
+type OrderCustomer struct {
+	Email    string  `json:"email"`
+	FullName *string `json:"full_name"`
+}
+
+// AdminOrder is an order plus the customer who placed it.
+type AdminOrder struct {
+	Order
+	Users *OrderCustomer `json:"users"`
+}

@@ -67,6 +67,25 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /api/orders", s.createOrder)
 	mux.HandleFunc("PATCH /api/orders/{id}", s.cancelOrder)
 
+	// Admin app (separate repo). Everything but login requires role = 'admin'.
+	mux.HandleFunc("POST /api/admin/login", s.adminLogin)
+	mux.HandleFunc("GET /api/admin/me", s.adminMe)
+
+	mux.HandleFunc("GET /api/admin/products", s.adminListProducts)
+	mux.HandleFunc("POST /api/admin/products", s.adminCreateProduct)
+	mux.HandleFunc("GET /api/admin/products/{id}", s.adminGetProduct)
+	mux.HandleFunc("PUT /api/admin/products/{id}", s.adminUpdateProduct)
+	mux.HandleFunc("PATCH /api/admin/products/{id}", s.adminSetProductActive)
+	mux.HandleFunc("DELETE /api/admin/products/{id}", s.adminDeleteProduct)
+
+	mux.HandleFunc("GET /api/admin/coupons", s.adminListCoupons)
+	mux.HandleFunc("POST /api/admin/coupons", s.adminCreateCoupon)
+	mux.HandleFunc("PUT /api/admin/coupons/{id}", s.adminUpdateCoupon)
+	mux.HandleFunc("DELETE /api/admin/coupons/{id}", s.adminDeleteCoupon)
+
+	mux.HandleFunc("GET /api/admin/orders", s.adminListOrders)
+	mux.HandleFunc("PATCH /api/admin/orders/{id}", s.adminUpdateOrderStatus)
+
 	return s.recoverPanics(s.logRequests(s.securityHeaders(mux)))
 }
 

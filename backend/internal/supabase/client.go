@@ -63,6 +63,12 @@ func (c *Client) From(table string) *Query {
 	return &Query{client: c, table: table, params: url.Values{}}
 }
 
+// RPC calls a Postgres function with named args (POST /rpc/fn) and decodes
+// its result into out. The function runs in a single transaction.
+func (c *Client) RPC(ctx context.Context, fn string, args, out any) error {
+	return c.From("rpc/"+fn).do(ctx, http.MethodPost, args, out)
+}
+
 // Query builds a PostgREST request. Filters are ANDed together.
 type Query struct {
 	client *Client

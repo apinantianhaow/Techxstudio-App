@@ -75,18 +75,28 @@ func (s *Server) signup(w http.ResponseWriter, r *http.Request) {
 
 // POST /api/auth/login
 func (s *Server) login(w http.ResponseWriter, r *http.Request) {
+	user, ok := s.checkCredentials(w, r)
+	if !ok {
+		return
+	}
+	s.issueToken(w, r, user)
+}
+
+// checkCredentials reads an { email, password } body and returns the matching
+// user, or writes a 400/401 response.
+func (s *Server) checkCredentials(w http.ResponseWriter, r *http.Request) (models.User, bool) {
 	var body struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
 	if !decodeJSON(w, r, &body) {
-		return
+		return models.User{}, false
 	}
 	var v validation
 	v.check(isEmail(body.Email), "Invalid email address")
 	v.check(body.Password != "", "Please enter your password")
 	if v.failed(w) {
-		return
+		return models.User{}, false
 	}
 
 	var rows []models.UserWithPassword
@@ -97,20 +107,24 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 			s.log.Error("login lookup failed", "err", err)
 		}
 		writeError(w, http.StatusUnauthorized, "Invalid email or password")
-		return
+		return models.User{}, false
 	}
 
 	if bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(body.Password)) != nil {
 		writeError(w, http.StatusUnauthorized, "Invalid email or password")
-		return
+		return models.User{}, false
 	}
+	return user.User, true
+}
 
+// issueToken responds 200 with the user and a fresh token.
+func (s *Server) issueToken(w http.ResponseWriter, r *http.Request, user models.User) {
 	token, err := s.tokens.Sign(user.ID, user.Email, user.FullName)
 	if err != nil {
 		s.fail(w, r, http.StatusInternalServerError, "Something went wrong", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, authResponse{User: user.User, Token: token})
+	writeJSON(w, http.StatusOK, authResponse{User: user, Token: token})
 }
 
 // GET /api/auth/me
