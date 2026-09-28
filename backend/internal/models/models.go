@@ -7,6 +7,7 @@ import "sort"
 type User struct {
 	ID        string  `json:"id"`
 	Email     string  `json:"email"`
+	Username  string  `json:"username"`
 	FullName  *string `json:"full_name"`
 	Phone     *string `json:"phone"`
 	AvatarURL *string `json:"avatar_url"`
@@ -14,7 +15,7 @@ type User struct {
 }
 
 // UserColumns is the public projection of a user row (no password hash).
-const UserColumns = "id, email, full_name, phone, avatar_url, created_at"
+const UserColumns = "id, email, username, full_name, phone, avatar_url, created_at"
 
 type UserWithPassword struct {
 	User
@@ -85,6 +86,7 @@ type SearchResult struct {
 }
 
 type ReviewAuthor struct {
+	Username  string  `json:"username"`
 	FullName  *string `json:"full_name"`
 	AvatarURL *string `json:"avatar_url"`
 }
@@ -200,7 +202,15 @@ type LoginChallenge struct {
 // OrderCustomer is the user summary embedded in admin order listings.
 type OrderCustomer struct {
 	Email    string  `json:"email"`
+	Username string  `json:"username"`
 	FullName *string `json:"full_name"`
+}
+
+// UsernameChange is one row of a user's username history.
+type UsernameChange struct {
+	OldUsername string `json:"old_username"`
+	NewUsername string `json:"new_username"`
+	ChangedAt   string `json:"changed_at"`
 }
 
 // AdminOrder is an order plus the customer who placed it.

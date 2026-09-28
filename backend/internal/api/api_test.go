@@ -24,9 +24,10 @@ const testUserID = "11111111-1111-1111-1111-111111111111"
 // restCall is one request the API made to the fake PostgREST server.
 type restCall struct {
 	Method string
-	Table  string
+	Table  string // table name, or the full path for non-PostgREST calls (storage)
 	Query  url.Values
 	Body   string
+	Header http.Header
 }
 
 // fakeRest stands in for Supabase's PostgREST endpoint.
@@ -44,6 +45,7 @@ func (f *fakeRest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Table:  strings.TrimPrefix(r.URL.Path, "/rest/v1/"),
 		Query:  r.URL.Query(),
 		Body:   string(body),
+		Header: r.Header,
 	}
 	f.mu.Lock()
 	f.calls = append(f.calls, c)
@@ -71,6 +73,7 @@ func (f *fakeRest) find(method, table string) []restCall {
 }
 
 type testEnv struct {
+	baseURL string // the fake Supabase project URL
 	handler http.Handler
 	rest    *fakeRest
 	tokens  *auth.Tokens
@@ -88,7 +91,7 @@ func newEnv(t *testing.T, respond func(c restCall) (int, string)) *testEnv {
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	mailer, google := &fakeMailer{}, &fakeGoogle{ids: map[string]*auth.GoogleIdentity{}}
 	s := NewServer(supabase.New(srv.URL, "service-key"), tokens, google, mailer, logger, "http://localhost:3000")
-	return &testEnv{handler: s.Handler(), rest: rest, tokens: tokens, mail: mailer, google: google}
+	return &testEnv{baseURL: srv.URL, handler: s.Handler(), rest: rest, tokens: tokens, mail: mailer, google: google}
 }
 
 func (e *testEnv) token(t *testing.T) string {

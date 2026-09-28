@@ -9,6 +9,7 @@ interface AuthResponse {
 }
 
 interface ProfileUpdate {
+  username?: string;
   full_name?: string;
   phone?: string;
 }
@@ -29,6 +30,9 @@ interface AuthContextValue {
   loginWithGoogle: (credential: string) => Promise<AuthResponse>;
   logout: () => void;
   updateProfile: (data: ProfileUpdate) => Promise<{ user: User }>;
+  /** Uploads a prepared (square, resized) profile photo. */
+  uploadAvatar: (photo: Blob) => Promise<User>;
+  removeAvatar: () => Promise<User>;
   deleteAccount: () => Promise<{ success: boolean }>;
   authFetch: AuthFetch;
 }
@@ -133,6 +137,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return result;
   };
 
+  const uploadAvatar = async (photo: Blob): Promise<User> => {
+    const res = await authFetch('/api/auth/me/avatar', {
+      method: 'PUT',
+      headers: { 'Content-Type': photo.type || 'application/octet-stream' },
+      body: photo,
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || 'Upload failed');
+    setUser(result.user);
+    return result.user;
+  };
+
+  const removeAvatar = async (): Promise<User> => {
+    const res = await authFetch('/api/auth/me/avatar', { method: 'DELETE' });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || 'Could not remove the photo');
+    setUser(result.user);
+    return result.user;
+  };
+
   const deleteAccount = async (): Promise<{ success: boolean }> => {
     const res = await authFetch('/api/auth/me', { method: 'DELETE' });
     const result = await res.json();
@@ -145,7 +169,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user, token, loading, login, signup, verifyCode, resendCode, loginWithGoogle,
-        logout, updateProfile, deleteAccount, authFetch, isLoggedIn: !!user,
+        logout, updateProfile, uploadAvatar, removeAvatar, deleteAccount, authFetch, isLoggedIn: !!user,
       }}
     >
       {children}

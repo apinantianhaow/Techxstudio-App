@@ -41,9 +41,10 @@ func IsCode(err error, code string) bool {
 }
 
 type Client struct {
-	restURL string
-	key     string
-	http    *http.Client
+	restURL    string
+	storageURL string
+	key        string
+	http       *http.Client
 }
 
 // New returns a client for the project at baseURL. Missing credentials yield a
@@ -51,7 +52,9 @@ type Client struct {
 func New(baseURL, serviceKey string) *Client {
 	c := &Client{key: serviceKey, http: &http.Client{Timeout: 15 * time.Second}}
 	if baseURL != "" && serviceKey != "" {
-		c.restURL = strings.TrimRight(baseURL, "/") + "/rest/v1"
+		base := strings.TrimRight(baseURL, "/")
+		c.restURL = base + "/rest/v1"
+		c.storageURL = base + "/storage/v1"
 	}
 	return c
 }
@@ -89,6 +92,12 @@ func (q *Query) Eq(column string, value any) *Query {
 // IsNull filters column to NULL.
 func (q *Query) IsNull(column string) *Query {
 	q.params.Add(column, "is.null")
+	return q
+}
+
+// Neq filters column to values other than value.
+func (q *Query) Neq(column string, value any) *Query {
+	q.params.Add(column, "neq."+fmt.Sprint(value))
 	return q
 }
 

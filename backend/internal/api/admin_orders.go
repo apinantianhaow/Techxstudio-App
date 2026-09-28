@@ -17,7 +17,7 @@ func (s *Server) adminListOrders(w http.ResponseWriter, r *http.Request) {
 
 	orders := []models.AdminOrder{}
 	err := s.db.From("orders").
-		Select("*, order_items("+orderItemColumns+"), users(email, full_name)").
+		Select("*, order_items("+orderItemColumns+"), users(email, username, full_name)").
 		Order("created_at", false).
 		Get(r.Context(), &orders)
 	if err != nil {

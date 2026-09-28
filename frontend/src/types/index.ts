@@ -54,16 +54,25 @@ export interface Review {
   title: string | null;
   comment: string | null;
   created_at: string;
-  users?: { full_name: string | null; avatar_url?: string | null } | null;
+  users?: { username?: string; full_name: string | null; avatar_url?: string | null } | null;
 }
 
 export interface User {
   id: string;
   email: string;
+  /** Unique ignoring case; shown as typed, e.g. "APXNAN" */
+  username: string;
   full_name: string | null;
   phone?: string | null;
   avatar_url: string | null;
   created_at: string;
+}
+
+/** One rename from GET /api/auth/me/username-history. */
+export interface UsernameChange {
+  old_username: string;
+  new_username: string;
+  changed_at: string;
 }
 
 /** Cart line as stored client-side in the cart store. */

@@ -12,12 +12,13 @@ import { toastIcons } from '@/components/ui/toastIcons';
 import { errorMessage } from '@/lib/utils';
 import OtpStep from '@/components/auth/OtpStep';
 import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
+import ProfileHeader from '@/components/account/ProfileHeader';
 import type { OtpChallenge } from '@/types';
 
 const spinner = 'h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent';
 
 export default function AccountPage() {
-  const { user, isLoggedIn, loading, login, signup, loginWithGoogle, logout, updateProfile, deleteAccount } = useAuth();
+  const { isLoggedIn, loading, login, signup, loginWithGoogle, logout, deleteAccount } = useAuth();
   const { t } = useTranslation();
   const [mode, setMode] = useState('login');
   const [email, setEmail] = useState('');
@@ -27,10 +28,6 @@ export default function AccountPage() {
   const [submitting, setSubmitting] = useState(false);
   // Set once the password is accepted and a code has been emailed.
   const [challenge, setChallenge] = useState<OtpChallenge | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editName, setEditName] = useState('');
-  const [editPhone, setEditPhone] = useState('');
-  const [saving, setSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const favCount = useFavoritesCount();
@@ -61,22 +58,6 @@ export default function AccountPage() {
       toast.success(t('account.loginSuccess'), { icon: toastIcons.welcome });
     } catch (err) {
       toast.error(errorMessage(err) || t('account.googleFailed'));
-    }
-  };
-
-  const handleSaveProfile = async () => {
-    setSaving(true);
-    try {
-      const updates: { full_name?: string; phone?: string } = {};
-      if (editName.trim()) updates.full_name = editName.trim();
-      if (editPhone !== undefined) updates.phone = editPhone.trim();
-      await updateProfile(updates);
-      setIsEditing(false);
-      toast.success(t('account.profileUpdated'), { icon: toastIcons.edit });
-    } catch (err) {
-      toast.error(errorMessage(err));
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -111,43 +92,7 @@ export default function AccountPage() {
     return (
       <div className="min-h-[calc(100dvh-2.75rem)] bg-canvas-alt">
         <div className="mx-auto max-w-[560px] space-y-8 px-5 py-12 md:py-16">
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="text-center">
-            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-b from-[#a1a1a6] to-[#6e6e73]">
-              <span className="text-[40px] font-semibold text-white">
-                {(editName || user?.full_name)?.charAt(0)?.toUpperCase() || 'U'}
-              </span>
-            </div>
-
-            {isEditing ? (
-              <div className="mt-6 space-y-3 text-left">
-                <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)}
-                  placeholder={t('account.fullName')} aria-label={t('account.fullName')} className="field" />
-                <input type="tel" value={editPhone} onChange={(e) => setEditPhone(e.target.value)}
-                  placeholder={t('account.phone')} aria-label={t('account.phone')} className="field" />
-                <div className="flex gap-3 pt-1">
-                  <button onClick={handleSaveProfile} disabled={saving} className="btn btn-primary flex-1">
-                    {saving ? <span className={spinner} /> : t('common.save')}
-                  </button>
-                  <button
-                    onClick={() => { setIsEditing(false); setEditName(user?.full_name || ''); setEditPhone(user?.phone || ''); }}
-                    className="btn btn-tinted">
-                    {t('common.cancel')}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <h1 className="t-title mt-5 text-ink">{user?.full_name}</h1>
-                <p className="mt-1 text-[17px] text-ink-2">{user?.email}</p>
-                {user?.phone && <p className="text-[14px] text-ink-3">{user.phone}</p>}
-                <button
-                  onClick={() => { setIsEditing(true); setEditName(user?.full_name || ''); setEditPhone(user?.phone || ''); }}
-                  className="link mt-3 text-[15px]">
-                  {t('account.editProfile')}
-                </button>
-              </>
-            )}
-          </motion.div>
+          <ProfileHeader />
 
           {/* Inset grouped list */}
           <ul className="overflow-hidden rounded-card bg-card">

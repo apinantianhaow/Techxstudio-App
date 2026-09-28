@@ -2,11 +2,13 @@ package api
 
 import (
 	"net/http"
+	"strings"
 	"unicode/utf8"
 
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/apinantianhaow/techxstudio-app/backend/internal/models"
+	"github.com/apinantianhaow/techxstudio-app/backend/internal/supabase"
 )
 
 const bcryptCost = 10
@@ -142,7 +144,8 @@ func (s *Server) getMe(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"user": user})
 }
 
-// PUT /api/auth/me
+// PUT /api/auth/me  body: { username?, full_name?, phone? } — renames are
+// logged in username_history by a database trigger.
 func (s *Server) updateMe(w http.ResponseWriter, r *http.Request) {
 	claims, ok := s.requireUser(w, r, "Unauthorized")
 	if !ok {
@@ -150,6 +153,7 @@ func (s *Server) updateMe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var body struct {
+		Username *string `json:"username"`
 		FullName *string `json:"full_name"`
 		Phone    *string `json:"phone"`
 	}
@@ -169,6 +173,19 @@ func (s *Server) updateMe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	updates := map[string]any{}
+	if body.Username != nil {
+		name := strings.TrimSpace(*body.Username)
+		problem, status, err := s.usernameProblem(r.Context(), claims.ID, name)
+		if err != nil {
+			s.fail(w, r, http.StatusInternalServerError, "Unable to update profile", err)
+			return
+		}
+		if problem != "" {
+			writeError(w, status, problem)
+			return
+		}
+		updates["username"] = name
+	}
 	if body.FullName != nil {
 		updates["full_name"] = *body.FullName
 	}
@@ -183,22 +200,32 @@ func (s *Server) updateMe(w http.ResponseWriter, r *http.Request) {
 	var rows []models.User
 	err := s.db.From("users").Select(models.UserColumns).Eq("id", claims.ID).Update(r.Context(), updates, &rows)
 	user, found := first(rows)
-	if err != nil || !found {
+	switch {
+	case supabase.IsCode(err, "23505"): // taken between the check and the update
+		writeError(w, http.StatusConflict, "This username is already taken")
+	case err != nil || !found:
 		s.fail(w, r, http.StatusInternalServerError, "Unable to update profile", err)
-		return
+	default:
+		writeJSON(w, http.StatusOK, map[string]any{"user": user})
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"user": user})
 }
 
-// DELETE /api/auth/me — related rows go via ON DELETE CASCADE.
+// DELETE /api/auth/me — related rows go via ON DELETE CASCADE; the profile
+// photo file is removed from storage too.
 func (s *Server) deleteMe(w http.ResponseWriter, r *http.Request) {
 	claims, ok := s.requireUser(w, r, "Unauthorized")
 	if !ok {
+		return
+	}
+	current, _, err := s.userByID(r.Context(), claims.ID)
+	if err != nil {
+		s.fail(w, r, http.StatusInternalServerError, "Unable to delete account", err)
 		return
 	}
 	if err := s.db.From("users").Eq("id", claims.ID).Delete(r.Context()); err != nil {
 		s.fail(w, r, http.StatusInternalServerError, "Unable to delete account", err)
 		return
 	}
+	s.removeAvatarFile(r.Context(), claims.ID, current.AvatarURL)
 	writeJSON(w, http.StatusOK, map[string]any{"success": true})
 }

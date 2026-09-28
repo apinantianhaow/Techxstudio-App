@@ -43,7 +43,7 @@ export default function ProductReviews({ productId, reviews = [] }: { productId:
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      setLocalReviews([{ ...data.review, user_id: user?.id ?? '', users: { full_name: user?.full_name || 'You' } }, ...localReviews]);
+      setLocalReviews([{ ...data.review, user_id: user?.id ?? '', users: { username: user?.username, full_name: user?.full_name || 'You' } }, ...localReviews]);
       setShowForm(false);
       setRating(0);
       setTitle('');
@@ -183,7 +183,7 @@ export default function ProductReviews({ productId, reviews = [] }: { productId:
                     <p className="mt-1.5 text-[15px] leading-relaxed text-ink-2">{review.comment}</p>
                   )}
                   <p className="mt-3 text-[12px] text-ink-3">
-                    {review.users?.full_name || 'User'} · {formatDate(review.created_at)}
+                    {review.users?.username ? `@${review.users.username}` : review.users?.full_name || 'User'} · {formatDate(review.created_at)}
                   </p>
                   {isOwner(review) && (
                     <div className="mt-3 flex items-center gap-5 text-[14px]">

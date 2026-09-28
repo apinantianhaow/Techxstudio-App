@@ -41,7 +41,7 @@ func (in reviewInput) fields() map[string]any {
 func (s *Server) listReviews(w http.ResponseWriter, r *http.Request) {
 	reviews := []models.Review{}
 	err := s.db.From("product_reviews").
-		Select("id, user_id, rating, title, comment, created_at, users(full_name, avatar_url)").
+		Select("id, user_id, rating, title, comment, created_at, users(username, full_name, avatar_url)").
 		Eq("product_id", r.PathValue("id")).
 		Order("created_at", false).
 		Limit(20).

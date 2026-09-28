@@ -46,6 +46,10 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /api/auth/me", s.getMe)
 	mux.HandleFunc("PUT /api/auth/me", s.updateMe)
 	mux.HandleFunc("DELETE /api/auth/me", s.deleteMe)
+	mux.HandleFunc("PUT /api/auth/me/avatar", s.uploadAvatar)
+	mux.HandleFunc("DELETE /api/auth/me/avatar", s.deleteAvatar)
+	mux.HandleFunc("GET /api/auth/me/username-history", s.usernameHistory)
+	mux.HandleFunc("GET /api/auth/username-available", s.usernameAvailable)
 
 	mux.HandleFunc("GET /api/products", s.listProducts)
 	mux.HandleFunc("GET /api/products/search", s.searchProducts)
