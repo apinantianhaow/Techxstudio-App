@@ -30,6 +30,7 @@ CREATE OR REPLACE FUNCTION admin_save_product(
 )
 RETURNS UUID
 LANGUAGE plpgsql
+SET search_path = public
 AS $$
 DECLARE
   v_id UUID := p_id;

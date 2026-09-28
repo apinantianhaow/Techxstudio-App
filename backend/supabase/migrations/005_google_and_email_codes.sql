@@ -20,7 +20,7 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS google_sub TEXT UNIQUE;
 -- the code itself is never stored.
 -- ============================================================
 CREATE TABLE IF NOT EXISTS login_challenges (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   code_hash TEXT NOT NULL,
   attempts INTEGER NOT NULL DEFAULT 0,

@@ -3,13 +3,15 @@
 -- Run this in Supabase SQL Editor (first)
 -- ============================================================
 
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- IDs use gen_random_uuid(), built into Postgres 13+, so no extension is
+-- needed (on Supabase, uuid-ossp lives in the "extensions" schema, which
+-- `supabase db push` does not have on its search_path).
 
 -- ============================================================
 -- 1. Users
 -- ============================================================
 CREATE TABLE IF NOT EXISTS users (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
   full_name TEXT,
@@ -25,7 +27,7 @@ CREATE INDEX idx_users_email ON users(email);
 -- 2. Products
 -- ============================================================
 CREATE TABLE IF NOT EXISTS products (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
   category TEXT NOT NULL CHECK (category IN ('phone', 'tablet', 'accessory')),
@@ -51,7 +53,7 @@ CREATE INDEX idx_products_name_search ON products USING GIN(to_tsvector('simple'
 -- 3. Product Colors
 -- ============================================================
 CREATE TABLE IF NOT EXISTS product_colors (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   hex TEXT NOT NULL,
@@ -65,7 +67,7 @@ CREATE INDEX idx_product_colors_product ON product_colors(product_id);
 -- 4. Product Options
 -- ============================================================
 CREATE TABLE IF NOT EXISTS product_options (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   label TEXT NOT NULL,
   price DECIMAL(12,2) NOT NULL,
@@ -78,7 +80,7 @@ CREATE INDEX idx_product_options_product ON product_options(product_id);
 -- 5. Product Specs
 -- ============================================================
 CREATE TABLE IF NOT EXISTS product_specs (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   spec_key TEXT NOT NULL,
   spec_value TEXT NOT NULL,
@@ -91,7 +93,7 @@ CREATE INDEX idx_product_specs_product ON product_specs(product_id);
 -- 6. Product Reviews (NEW in v2)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS product_reviews (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
@@ -108,7 +110,7 @@ CREATE INDEX idx_product_reviews_user ON product_reviews(user_id);
 -- 7. Cart Items
 -- ============================================================
 CREATE TABLE IF NOT EXISTS cart_items (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   option_label TEXT,
@@ -126,7 +128,7 @@ CREATE INDEX idx_cart_items_user ON cart_items(user_id);
 -- 8. Wishlist Items
 -- ============================================================
 CREATE TABLE IF NOT EXISTS wishlist_items (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -139,7 +141,7 @@ CREATE INDEX idx_wishlist_items_user ON wishlist_items(user_id);
 -- 9. Coupons (NEW in v2)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS coupons (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   code TEXT UNIQUE NOT NULL,
   discount_percent INTEGER DEFAULT 0,
   discount_amount DECIMAL(12,2) DEFAULT 0,
@@ -158,7 +160,7 @@ CREATE INDEX idx_coupons_code ON coupons(code);
 -- 10. Orders
 -- ============================================================
 CREATE TABLE IF NOT EXISTS orders (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   status TEXT NOT NULL DEFAULT 'confirmed' CHECK (status IN ('confirmed', 'processing', 'shipped', 'delivered', 'cancelled')),
   total_amount DECIMAL(12,2) NOT NULL,
@@ -177,7 +179,7 @@ CREATE INDEX idx_orders_status ON orders(status);
 -- 11. Order Items
 -- ============================================================
 CREATE TABLE IF NOT EXISTS order_items (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
   product_id UUID REFERENCES products(id) ON DELETE SET NULL,
   product_name TEXT NOT NULL,
