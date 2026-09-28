@@ -1,0 +1,2 @@
+# macOS folder metadata (each app has its own .gitignore for the rest)
+.DS_Store

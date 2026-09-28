@@ -78,7 +78,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /api/orders", s.createOrder)
 	mux.HandleFunc("PATCH /api/orders/{id}", s.cancelOrder)
 
-	// Admin app (separate repo). Everything but login requires role = 'admin'.
+	// Admin app (admin/). Everything but the login routes requires role = 'admin'.
 	mux.HandleFunc("POST /api/admin/login", s.adminLogin)
 	mux.HandleFunc("POST /api/admin/login/verify", s.adminVerifyLogin)
 	mux.HandleFunc("POST /api/admin/login/google", s.adminGoogleLogin)

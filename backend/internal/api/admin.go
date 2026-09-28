@@ -1,7 +1,7 @@
 package api
 
-// Admin API for the separate TechXStudio Admin app. Every route except
-// /api/admin/login requires a token for a user whose users.role is 'admin'
+// Admin API for the admin app in admin/. Every route except the
+// /api/admin/login* routes requires a token for a user whose users.role is 'admin'
 // (supabase/migrations/004_admin.sql).
 
 import (
