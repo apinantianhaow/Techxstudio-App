@@ -10,8 +10,8 @@ import (
 	"strings"
 )
 
-// Upload stores data at bucket/path in Supabase Storage. Paths should be
-// unique (it never overwrites), so the files can be cached forever.
+// Upload stores data at bucket/path in Supabase Storage. It never
+// overwrites, so give each upload a new path.
 func (c *Client) Upload(ctx context.Context, bucket, path, contentType string, data []byte) error {
 	if !c.Configured() {
 		return ErrNotConfigured
@@ -21,7 +21,9 @@ func (c *Client) Upload(ctx context.Context, bucket, path, contentType string, d
 		return err
 	}
 	req.Header.Set("Content-Type", contentType)
-	req.Header.Set("Cache-Control", "max-age=31536000")
+	// Short on purpose: Supabase's CDN keeps serving a deleted file until its
+	// cached copy expires, so a removed photo stays reachable for up to this long.
+	req.Header.Set("Cache-Control", "max-age=3600")
 	req.Header.Set("x-upsert", "false")
 	return c.storageDo(req, "upload "+bucket+"/"+path)
 }
