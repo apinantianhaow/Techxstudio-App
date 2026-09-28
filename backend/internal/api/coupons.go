@@ -114,7 +114,8 @@ func formatNumber(n float64) string {
 		b.WriteRune(digit)
 	}
 	if hasFrac {
-		b.WriteString("." + frac)
+		b.WriteByte('.')
+		b.WriteString(frac)
 	}
 	return sign + b.String()
 }
