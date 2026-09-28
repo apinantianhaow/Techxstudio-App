@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useId, useReducer } from 'react';
 import type { Product, ProductColor } from '@/types';
 
 export type DeviceKind =
@@ -47,14 +47,21 @@ interface ProductImageProps {
   className?: string;
 }
 
+// Photo URLs that failed to load, shared by every ProductImage so a missing file
+// is requested once per visit, not again on every color switch or remount.
+const failedSrcs = new Set<string>();
+
 /**
  * The photo at `src`, or the device illustration when there's no photo or it
  * fails to load — so an image_url whose file isn't in public/ yet still looks fine.
  */
 export function ProductImage({ src, alt, kind, tint, className = '' }: ProductImageProps) {
-  const [failedSrc, setFailedSrc] = useState<string | null>(null);
-  if (src && src !== failedSrc) {
-    return <img src={src} alt={alt} className={`object-contain ${className}`} onError={() => setFailedSrc(src)} />;
+  const [, rerender] = useReducer((n: number) => n + 1, 0);
+  if (src && !failedSrcs.has(src)) {
+    return (
+      <img src={src} alt={alt} className={`object-contain ${className}`}
+        onError={() => { failedSrcs.add(src); rerender(); }} />
+    );
   }
   return <DeviceArt kind={kind} tint={tint} className={className} />;
 }
