@@ -44,19 +44,51 @@ func (s *Server) isAdmin(ctx context.Context, userID string) (bool, error) {
 	return found && user.Role == "admin", nil
 }
 
-// POST /api/admin/login — like /api/auth/login, but only admins get a token.
-func (s *Server) adminLogin(w http.ResponseWriter, r *http.Request) {
-	user, ok := s.checkCredentials(w, r)
-	if !ok {
-		return
-	}
-	admin, err := s.isAdmin(r.Context(), user.ID)
+// ensureAdmin writes a 403 (or 500) and returns false unless userID is an admin.
+func (s *Server) ensureAdmin(w http.ResponseWriter, r *http.Request, userID string) bool {
+	admin, err := s.isAdmin(r.Context(), userID)
 	if err != nil {
 		s.fail(w, r, http.StatusInternalServerError, "Something went wrong", err)
-		return
+		return false
 	}
 	if !admin {
 		writeError(w, http.StatusForbidden, "This account does not have admin access")
+		return false
+	}
+	return true
+}
+
+// POST /api/admin/login — like /api/auth/login (password, then an emailed
+// code via /api/admin/login/verify), but only for admins.
+func (s *Server) adminLogin(w http.ResponseWriter, r *http.Request) {
+	user, ok := s.checkCredentials(w, r)
+	if !ok || !s.ensureAdmin(w, r, user.ID) {
+		return
+	}
+	s.startChallenge(w, r, user, http.StatusOK)
+}
+
+// POST /api/admin/login/verify  body: { challenge_id, code }
+func (s *Server) adminVerifyLogin(w http.ResponseWriter, r *http.Request) {
+	user, ok := s.verifyChallenge(w, r)
+	if !ok || !s.ensureAdmin(w, r, user.ID) {
+		return
+	}
+	s.issueToken(w, r, user)
+}
+
+// POST /api/admin/login/google  body: { credential } — Google sign-in for
+// existing admins (it never creates accounts).
+func (s *Server) adminGoogleLogin(w http.ResponseWriter, r *http.Request) {
+	user, found, ok := s.googleUser(w, r, false)
+	if !ok {
+		return
+	}
+	if !found {
+		writeError(w, http.StatusForbidden, "This account does not have admin access")
+		return
+	}
+	if !s.ensureAdmin(w, r, user.ID) {
 		return
 	}
 	s.issueToken(w, r, user)

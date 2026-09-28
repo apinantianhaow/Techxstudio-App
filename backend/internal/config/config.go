@@ -17,6 +17,16 @@ type Config struct {
 	SupabaseURL        string
 	SupabaseServiceKey string
 	JWTSecret          string
+
+	// Google sign-in (empty = off). The client id is public.
+	GoogleClientID string
+
+	// SMTP for emailed sign-in codes (empty host = print codes to the log).
+	SMTPHost     string
+	SMTPPort     string
+	SMTPUsername string
+	SMTPPassword string
+	SMTPFrom     string
 }
 
 // Load reads .env from the working directory (without overriding variables
@@ -30,6 +40,12 @@ func Load() Config {
 		SupabaseURL:        strings.TrimRight(os.Getenv("SUPABASE_URL"), "/"),
 		SupabaseServiceKey: os.Getenv("SUPABASE_SERVICE_ROLE_KEY"),
 		JWTSecret:          getenv("JWT_SECRET", DefaultJWTSecret),
+		GoogleClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
+		SMTPHost:           os.Getenv("SMTP_HOST"),
+		SMTPPort:           getenv("SMTP_PORT", "587"),
+		SMTPUsername:       os.Getenv("SMTP_USERNAME"),
+		SMTPPassword:       os.Getenv("SMTP_PASSWORD"),
+		SMTPFrom:           getenv("SMTP_FROM", os.Getenv("SMTP_USERNAME")),
 	}
 }
 

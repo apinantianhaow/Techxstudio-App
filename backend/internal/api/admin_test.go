@@ -68,7 +68,11 @@ func TestAdminRoutesRejectCustomers(t *testing.T) {
 func TestAdminLoginOnlyForAdmins(t *testing.T) {
 	hash, _ := bcrypt.GenerateFromPassword([]byte("secret1"), bcrypt.MinCost)
 	role := "customer"
+	challenges := newChallengeTable()
 	env := newEnv(t, func(c restCall) (int, string) {
+		if status, body, ok := challenges.handle(c); ok {
+			return status, body
+		}
 		if c.Query.Get("select") == "role" {
 			return 200, `[{"role":"` + role + `"}]`
 		}
@@ -82,10 +86,23 @@ func TestAdminLoginOnlyForAdmins(t *testing.T) {
 	status, body = call(t, env.handler, "POST", "/api/admin/login", "", creds)
 	wantError(t, status, body, 403, "This account does not have admin access")
 
+	if len(env.mail.sent) != 0 {
+		t.Fatal("non-admins must not get a code")
+	}
+
+	// A customer's store sign-in code can't be redeemed on the admin endpoint.
+	status, body = call(t, env.handler, "POST", "/api/auth/login", "", creds)
+	status, body = call(t, env.handler, "POST", "/api/admin/login/verify", "", map[string]string{"challenge_id": body["challenge_id"].(string), "code": env.mail.lastCode(t)})
+	wantError(t, status, body, 403, "This account does not have admin access")
+
 	role = "admin"
 	status, body = call(t, env.handler, "POST", "/api/admin/login", "", creds)
+	if status != 200 || body["otp_required"] != true || body["token"] != nil {
+		t.Fatalf("admin login step 1: got %d %v", status, body)
+	}
+	status, body = call(t, env.handler, "POST", "/api/admin/login/verify", "", map[string]string{"challenge_id": body["challenge_id"].(string), "code": env.mail.lastCode(t)})
 	if status != 200 || body["token"] == nil {
-		t.Fatalf("admin login: got %d %v", status, body)
+		t.Fatalf("admin login step 2: got %d %v", status, body)
 	}
 	if _, leaked := body["user"].(map[string]any)["password_hash"]; leaked {
 		t.Fatal("admin login response leaks password_hash")

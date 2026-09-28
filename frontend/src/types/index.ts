@@ -124,6 +124,16 @@ export interface CouponValidation {
   calculated_discount: number;
 }
 
+/** Password sign-in step 1: a code was emailed; verify it to get the token. */
+export interface OtpChallenge {
+  otp_required: true;
+  challenge_id: string;
+  /** Masked address, e.g. "a•••@gmail.com" */
+  email: string;
+  expires_in: number;
+  resend_in: number;
+}
+
 /** Every error response from the API has this shape. */
 export interface ApiError {
   error: string;

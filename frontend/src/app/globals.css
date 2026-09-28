@@ -319,12 +319,11 @@
 }
 
 /* ============================================================
-   Scrollbar
+   Scrollbar — hidden everywhere. Pages still scroll with the
+   wheel, trackpad, touch and keyboard.
    ============================================================ */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.18); border-radius: 8px; }
-.dark ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); }
+* { scrollbar-width: none; }
+::-webkit-scrollbar { display: none; }
 
 /* ============================================================
    Animations

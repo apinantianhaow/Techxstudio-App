@@ -10,11 +10,14 @@ import { useFavoritesCount } from '@/stores/useWishlistStore';
 import { toast } from 'sonner';
 import { toastIcons } from '@/components/ui/toastIcons';
 import { errorMessage } from '@/lib/utils';
+import OtpStep from '@/components/auth/OtpStep';
+import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
+import type { OtpChallenge } from '@/types';
 
 const spinner = 'h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent';
 
 export default function AccountPage() {
-  const { user, isLoggedIn, loading, login, signup, logout, updateProfile, deleteAccount } = useAuth();
+  const { user, isLoggedIn, loading, login, signup, loginWithGoogle, logout, updateProfile, deleteAccount } = useAuth();
   const { t } = useTranslation();
   const [mode, setMode] = useState('login');
   const [email, setEmail] = useState('');
@@ -22,6 +25,8 @@ export default function AccountPage() {
   const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  // Set once the password is accepted and a code has been emailed.
+  const [challenge, setChallenge] = useState<OtpChallenge | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState('');
   const [editPhone, setEditPhone] = useState('');
@@ -34,17 +39,28 @@ export default function AccountPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      if (mode === 'signup') {
-        await signup(email, password, fullName);
-        toast.success(t('account.signupSuccess'), { icon: toastIcons.celebrate });
-      } else {
-        await login(email, password);
-        toast.success(t('account.loginSuccess'), { icon: toastIcons.welcome });
-      }
+      setChallenge(mode === 'signup' ? await signup(email, password, fullName) : await login(email, password));
     } catch (err) {
       toast.error(errorMessage(err));
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleVerified = () => {
+    setChallenge(null);
+    setPassword('');
+    if (mode === 'signup') toast.success(t('account.signupSuccess'), { icon: toastIcons.celebrate });
+    else toast.success(t('account.loginSuccess'), { icon: toastIcons.welcome });
+    setMode('login'); // after logging out, offer "log in" rather than "sign up" again
+  };
+
+  const handleGoogle = async (credential: string) => {
+    try {
+      await loginWithGoogle(credential);
+      toast.success(t('account.loginSuccess'), { icon: toastIcons.welcome });
+    } catch (err) {
+      toast.error(errorMessage(err) || t('account.googleFailed'));
     }
   };
 
@@ -190,6 +206,17 @@ export default function AccountPage() {
     );
   }
 
+  // Password accepted — enter the emailed code
+  if (challenge) {
+    return (
+      <div className="mx-auto max-w-[440px] px-5 py-16 md:py-24">
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
+          <OtpStep challenge={challenge} onVerified={handleVerified} onBack={() => setChallenge(null)} />
+        </motion.div>
+      </div>
+    );
+  }
+
   // Not logged in — Sign in / Sign up
   return (
     <div className="mx-auto max-w-[440px] px-5 py-16 md:py-24">
@@ -232,6 +259,13 @@ export default function AccountPage() {
             {submitting ? <span className={spinner} /> : mode === 'login' ? t('account.login') : t('account.signup')}
           </button>
         </form>
+
+        <div className="mt-6 space-y-5">
+          <div className="flex items-center gap-3 text-[13px] text-ink-3" aria-hidden="true">
+            <span className="h-px flex-1 bg-hairline" />{t('account.or')}<span className="h-px flex-1 bg-hairline" />
+          </div>
+          <GoogleSignInButton onCredential={handleGoogle} text={mode === 'signup' ? 'signup_with' : 'signin_with'} />
+        </div>
 
         <div className="mt-6 text-center">
           <button type="button" onClick={() => setMode(mode === 'login' ? 'signup' : 'login')} className="link text-[15px]">

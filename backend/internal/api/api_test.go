@@ -15,6 +15,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/apinantianhaow/techxstudio-app/backend/internal/auth"
+	"github.com/apinantianhaow/techxstudio-app/backend/internal/mail"
 	"github.com/apinantianhaow/techxstudio-app/backend/internal/supabase"
 )
 
@@ -73,6 +74,8 @@ type testEnv struct {
 	handler http.Handler
 	rest    *fakeRest
 	tokens  *auth.Tokens
+	mail    *fakeMailer
+	google  *fakeGoogle
 }
 
 func newEnv(t *testing.T, respond func(c restCall) (int, string)) *testEnv {
@@ -83,8 +86,9 @@ func newEnv(t *testing.T, respond func(c restCall) (int, string)) *testEnv {
 
 	tokens := auth.NewTokens("test-secret")
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	s := NewServer(supabase.New(srv.URL, "service-key"), tokens, logger, "http://localhost:3000")
-	return &testEnv{handler: s.Handler(), rest: rest, tokens: tokens}
+	mailer, google := &fakeMailer{}, &fakeGoogle{ids: map[string]*auth.GoogleIdentity{}}
+	s := NewServer(supabase.New(srv.URL, "service-key"), tokens, google, mailer, logger, "http://localhost:3000")
+	return &testEnv{handler: s.Handler(), rest: rest, tokens: tokens, mail: mailer, google: google}
 }
 
 func (e *testEnv) token(t *testing.T) string {
@@ -133,7 +137,7 @@ func wantError(t *testing.T, gotStatus int, got map[string]any, status int, mess
 
 func TestCuratedFallsBackToMockWithoutSupabase(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	h := NewServer(supabase.New("", ""), auth.NewTokens("x"), logger, "").Handler()
+	h := NewServer(supabase.New("", ""), auth.NewTokens("x"), auth.NewGoogleVerifier(""), mail.Log{Logger: logger}, logger, "").Handler()
 
 	status, body := call(t, h, "GET", "/api/products/curated/flash_sale", "", nil)
 	products, _ := body["products"].([]any)
@@ -197,11 +201,17 @@ func TestSignupValidation(t *testing.T) {
 
 func TestSignupThenLogin(t *testing.T) {
 	var storedHash string
+	challenges := newChallengeTable()
 	env := newEnv(t, func(c restCall) (int, string) {
+		if status, body, ok := challenges.handle(c); ok {
+			return status, body
+		}
 		switch {
 		case c.Method == "GET" && strings.Contains(c.Query.Get("select"), "password_hash"):
 			row, _ := json.Marshal(map[string]any{"id": testUserID, "email": "a@b.co", "full_name": "Ann", "password_hash": storedHash})
 			return 200, "[" + string(row) + "]"
+		case c.Method == "GET" && c.Query.Get("id") == "eq."+testUserID:
+			return 200, `[{"id":"` + testUserID + `","email":"a@b.co","full_name":"Ann"}]`
 		case c.Method == "GET":
 			return 200, "[]" // email not taken
 		case c.Method == "POST":
@@ -216,30 +226,49 @@ func TestSignupThenLogin(t *testing.T) {
 	status, body := call(t, env.handler, "POST", "/api/auth/signup", "", map[string]string{
 		"email": "a@b.co", "password": "secret1", "full_name": "Ann",
 	})
-	if status != 201 {
+	// Sign-up doesn't hand out a token: it emails a code first.
+	if status != 201 || body["otp_required"] != true || body["token"] != nil || body["email"] != "a•••@b.co" {
 		t.Fatalf("signup: got %d %v", status, body)
 	}
 	if bcrypt.CompareHashAndPassword([]byte(storedHash), []byte("secret1")) != nil {
 		t.Fatal("stored password_hash is not a bcrypt hash of the password")
 	}
-	claims, err := env.tokens.Verify(body["token"].(string))
-	if err != nil || claims.ID != testUserID || *claims.FullName != "Ann" {
-		t.Fatalf("signup token: %v %+v", err, claims)
+	signupChallenge := body["challenge_id"].(string)
+	msg := env.mail.last(t)
+	if msg.To != "a@b.co" || !strings.Contains(msg.HTML, env.mail.lastCode(t)) {
+		t.Fatalf("code email: %+v", msg)
 	}
-	if user := body["user"].(map[string]any); user["email"] != "a@b.co" || user["password_hash"] != nil {
-		t.Fatalf("signup user: %v", user)
+	if challenges.rows[signupChallenge]["code_hash"] == env.mail.lastCode(t) {
+		t.Fatal("the code itself must not be stored")
 	}
 
-	status, body = call(t, env.handler, "POST", "/api/auth/login", "", map[string]string{"email": "a@b.co", "password": "secret1"})
+	status, body = call(t, env.handler, "POST", "/api/auth/login/verify", "", map[string]string{"challenge_id": signupChallenge, "code": "000000"})
+	wantError(t, status, body, 400, "Incorrect code. 4 attempts left.")
+	status, body = call(t, env.handler, "POST", "/api/auth/login/verify", "", map[string]string{"challenge_id": signupChallenge, "code": env.mail.lastCode(t)})
 	if status != 200 || body["token"] == nil {
+		t.Fatalf("verify: got %d %v", status, body)
+	}
+	claims, err := env.tokens.Verify(body["token"].(string))
+	if err != nil || claims.ID != testUserID || *claims.FullName != "Ann" {
+		t.Fatalf("token: %v %+v", err, claims)
+	}
+	status, body = call(t, env.handler, "POST", "/api/auth/login/verify", "", map[string]string{"challenge_id": signupChallenge, "code": env.mail.lastCode(t)})
+	wantError(t, status, body, 400, "This code has expired. Request a new one or sign in again.")
+
+	// Login: password first, then a new code.
+	status, body = call(t, env.handler, "POST", "/api/auth/login", "", map[string]string{"email": "a@b.co", "password": "wrong"})
+	wantError(t, status, body, 401, "Invalid email or password")
+	status, body = call(t, env.handler, "POST", "/api/auth/login", "", map[string]string{"email": "a@b.co", "password": "secret1"})
+	if status != 200 || body["otp_required"] != true || body["token"] != nil || body["challenge_id"] == signupChallenge {
 		t.Fatalf("login: got %d %v", status, body)
+	}
+	status, body = call(t, env.handler, "POST", "/api/auth/login/verify", "", map[string]string{"challenge_id": body["challenge_id"].(string), "code": env.mail.lastCode(t)})
+	if status != 200 || body["token"] == nil {
+		t.Fatalf("login verify: got %d %v", status, body)
 	}
 	if _, leaked := body["user"].(map[string]any)["password_hash"]; leaked {
 		t.Fatal("login response leaks password_hash")
 	}
-
-	status, body = call(t, env.handler, "POST", "/api/auth/login", "", map[string]string{"email": "a@b.co", "password": "wrong"})
-	wantError(t, status, body, 401, "Invalid email or password")
 }
 
 func TestListProductsBuildsQueryAndSortsRelations(t *testing.T) {

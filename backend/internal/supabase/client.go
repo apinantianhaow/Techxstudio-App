@@ -86,6 +86,18 @@ func (q *Query) Eq(column string, value any) *Query {
 	return q
 }
 
+// IsNull filters column to NULL.
+func (q *Query) IsNull(column string) *Query {
+	q.params.Add(column, "is.null")
+	return q
+}
+
+// Gte filters column to values >= value.
+func (q *Query) Gte(column string, value any) *Query {
+	q.params.Add(column, "gte."+fmt.Sprint(value))
+	return q
+}
+
 // In filters column to one of values.
 func (q *Query) In(column string, values []string) *Query {
 	quoted := make([]string, len(values))

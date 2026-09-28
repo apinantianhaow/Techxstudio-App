@@ -184,6 +184,19 @@ type Order struct {
 	OrderItems      []OrderItem `json:"order_items,omitempty"`
 }
 
+// LoginChallenge is step 2 of a password sign-in: an emailed code that must
+// be verified before a token is issued. CodeHash is an HMAC, never the code.
+type LoginChallenge struct {
+	ID         string  `json:"id"`
+	UserID     string  `json:"user_id"`
+	CodeHash   string  `json:"code_hash"`
+	Attempts   int     `json:"attempts"`
+	Sends      int     `json:"sends"`
+	ExpiresAt  string  `json:"expires_at"`
+	LastSentAt string  `json:"last_sent_at"`
+	UsedAt     *string `json:"used_at"`
+}
+
 // OrderCustomer is the user summary embedded in admin order listings.
 type OrderCustomer struct {
 	Email    string  `json:"email"`

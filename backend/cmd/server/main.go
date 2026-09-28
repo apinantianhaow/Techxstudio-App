@@ -16,6 +16,7 @@ import (
 	"github.com/apinantianhaow/techxstudio-app/backend/internal/api"
 	"github.com/apinantianhaow/techxstudio-app/backend/internal/auth"
 	"github.com/apinantianhaow/techxstudio-app/backend/internal/config"
+	"github.com/apinantianhaow/techxstudio-app/backend/internal/mail"
 	"github.com/apinantianhaow/techxstudio-app/backend/internal/supabase"
 )
 
@@ -31,7 +32,20 @@ func main() {
 		logger.Warn("JWT_SECRET not set — using the development default")
 	}
 
-	server := api.NewServer(db, auth.NewTokens(cfg.JWTSecret), logger, cfg.AppURL)
+	google := auth.NewGoogleVerifier(cfg.GoogleClientID)
+	if !google.Enabled() {
+		logger.Info("GOOGLE_CLIENT_ID not set — Google sign-in is off")
+	}
+
+	var mailer mail.Sender = mail.SMTP{
+		Host: cfg.SMTPHost, Port: cfg.SMTPPort, Username: cfg.SMTPUsername, Password: cfg.SMTPPassword, From: cfg.SMTPFrom,
+	}
+	if cfg.SMTPHost == "" {
+		logger.Warn("SMTP_HOST not set — sign-in codes will be printed to this log instead of emailed")
+		mailer = mail.Log{Logger: logger}
+	}
+
+	server := api.NewServer(db, auth.NewTokens(cfg.JWTSecret), google, mailer, logger, cfg.AppURL)
 	httpServer := &http.Server{
 		Addr:              ":" + cfg.Port,
 		Handler:           server.Handler(),

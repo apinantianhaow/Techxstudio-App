@@ -12,18 +12,21 @@ import (
 	"time"
 
 	"github.com/apinantianhaow/techxstudio-app/backend/internal/auth"
+	"github.com/apinantianhaow/techxstudio-app/backend/internal/mail"
 	"github.com/apinantianhaow/techxstudio-app/backend/internal/supabase"
 )
 
 type Server struct {
 	db     *supabase.Client
 	tokens *auth.Tokens
+	google GoogleVerifier
+	mailer mail.Sender
 	log    *slog.Logger
 	appURL string
 }
 
-func NewServer(db *supabase.Client, tokens *auth.Tokens, logger *slog.Logger, appURL string) *Server {
-	return &Server{db: db, tokens: tokens, log: logger, appURL: appURL}
+func NewServer(db *supabase.Client, tokens *auth.Tokens, google GoogleVerifier, mailer mail.Sender, logger *slog.Logger, appURL string) *Server {
+	return &Server{db: db, tokens: tokens, google: google, mailer: mailer, log: logger, appURL: appURL}
 }
 
 // Handler returns the router wrapped in the standard middleware.
@@ -36,6 +39,10 @@ func (s *Server) Handler() http.Handler {
 
 	mux.HandleFunc("POST /api/auth/signup", s.signup)
 	mux.HandleFunc("POST /api/auth/login", s.login)
+	mux.HandleFunc("POST /api/auth/login/verify", s.verifyLogin)
+	mux.HandleFunc("POST /api/auth/login/resend", s.resendCode)
+	mux.HandleFunc("POST /api/auth/google", s.googleLogin)
+	mux.HandleFunc("GET /api/auth/providers", s.authProviders)
 	mux.HandleFunc("GET /api/auth/me", s.getMe)
 	mux.HandleFunc("PUT /api/auth/me", s.updateMe)
 	mux.HandleFunc("DELETE /api/auth/me", s.deleteMe)
@@ -69,6 +76,8 @@ func (s *Server) Handler() http.Handler {
 
 	// Admin app (separate repo). Everything but login requires role = 'admin'.
 	mux.HandleFunc("POST /api/admin/login", s.adminLogin)
+	mux.HandleFunc("POST /api/admin/login/verify", s.adminVerifyLogin)
+	mux.HandleFunc("POST /api/admin/login/google", s.adminGoogleLogin)
 	mux.HandleFunc("GET /api/admin/me", s.adminMe)
 
 	mux.HandleFunc("GET /api/admin/products", s.adminListProducts)

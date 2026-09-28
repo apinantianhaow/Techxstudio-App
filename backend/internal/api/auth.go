@@ -16,7 +16,8 @@ type authResponse struct {
 	Token string      `json:"token"`
 }
 
-// POST /api/auth/signup
+// POST /api/auth/signup — creates the account and emails a code; the token
+// comes from POST /api/auth/login/verify, which also proves the email is real.
 func (s *Server) signup(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Email    string `json:"email"`
@@ -65,21 +66,17 @@ func (s *Server) signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := s.tokens.Sign(user.ID, user.Email, user.FullName)
-	if err != nil {
-		s.fail(w, r, http.StatusInternalServerError, "Something went wrong", err)
-		return
-	}
-	writeJSON(w, http.StatusCreated, authResponse{User: user, Token: token})
+	s.startChallenge(w, r, user, http.StatusCreated)
 }
 
-// POST /api/auth/login
+// POST /api/auth/login — step 1 of 2: checks the password and emails a code
+// (see signin.go). Step 2 is POST /api/auth/login/verify.
 func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 	user, ok := s.checkCredentials(w, r)
 	if !ok {
 		return
 	}
-	s.issueToken(w, r, user)
+	s.startChallenge(w, r, user, http.StatusOK)
 }
 
 // checkCredentials reads an { email, password } body and returns the matching
@@ -110,7 +107,8 @@ func (s *Server) checkCredentials(w http.ResponseWriter, r *http.Request) (model
 		return models.User{}, false
 	}
 
-	if bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(body.Password)) != nil {
+	// Google-only accounts have no password hash, so they never match.
+	if user.PasswordHash == "" || bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(body.Password)) != nil {
 		writeError(w, http.StatusUnauthorized, "Invalid email or password")
 		return models.User{}, false
 	}
