@@ -2,7 +2,7 @@
 
 import { Minus, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { DeviceArt, deviceKindFor } from '@/components/product/ProductVisual';
+import { ProductImage, deviceKindFor } from '@/components/product/ProductVisual';
 import useCartStore from '@/stores/useCartStore';
 import { useTranslation } from '@/context/LanguageContext';
 import { formatPrice } from '@/lib/utils';
@@ -24,11 +24,7 @@ export default function CartItem({ item, index = 0 }: { item: CartItemData; inde
     >
       <div className="flex gap-5 py-6 md:gap-8 md:py-8">
         <div className="flex h-24 w-24 flex-shrink-0 items-center justify-center rounded-control bg-canvas-alt p-3 md:h-32 md:w-32 md:p-4">
-          {item.image_url ? (
-            <img src={item.image_url} alt={item.name} className="h-full w-full object-contain" />
-          ) : (
-            <DeviceArt kind={deviceKindFor(item)} className="h-full w-full" />
-          )}
+          <ProductImage src={item.image_url} alt={item.name} kind={deviceKindFor(item)} className="h-full w-full" />
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col">

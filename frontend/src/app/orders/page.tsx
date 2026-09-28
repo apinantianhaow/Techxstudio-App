@@ -5,7 +5,7 @@ import { Package, ShoppingBag } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import OrderTimeline from '@/components/orders/OrderTimeline';
-import { DeviceArt, deviceKindFor } from '@/components/product/ProductVisual';
+import { ProductImage, deviceKindFor } from '@/components/product/ProductVisual';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/context/LanguageContext';
 import { formatPrice, formatDateTime, errorMessage } from '@/lib/utils';
@@ -120,11 +120,8 @@ export default function OrdersPage() {
                   {order.order_items?.map((item) => (
                     <li key={item.id} className="flex items-center gap-4 border-b border-line py-4 last:border-b-0">
                       <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl bg-canvas-alt p-2">
-                        {item.image_url ? (
-                          <img src={item.image_url} alt={item.product_name} className="h-full w-full object-contain" />
-                        ) : (
-                          <DeviceArt kind={deviceKindFor({ name: item.product_name })} className="h-full w-full" />
-                        )}
+                        <ProductImage src={item.image_url} alt={item.product_name}
+                          kind={deviceKindFor({ name: item.product_name })} className="h-full w-full" />
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-[15px] font-semibold text-ink">{item.product_name}</span>

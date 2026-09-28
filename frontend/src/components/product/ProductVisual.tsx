@@ -1,4 +1,6 @@
-import { useId } from 'react';
+'use client';
+
+import { useId, useState } from 'react';
 import type { Product, ProductColor } from '@/types';
 
 export type DeviceKind =
@@ -31,10 +33,30 @@ interface ProductVisualProps {
 /** Product photo when one exists, otherwise a device illustration in the product's color. */
 export default function ProductVisual({ product, color, className = '' }: ProductVisualProps) {
   const c = color ?? product.product_colors?.[0];
-  if (c?.image_url) {
-    return <img src={c.image_url} alt={product.name} className={`object-contain ${className}`} />;
+  return (
+    <ProductImage src={c?.image_url} alt={product.name} kind={deviceKindFor(product)} tint={c?.hex}
+      className={className} />
+  );
+}
+
+interface ProductImageProps {
+  src?: string | null;
+  alt: string;
+  kind: DeviceKind;
+  tint?: string;
+  className?: string;
+}
+
+/**
+ * The photo at `src`, or the device illustration when there's no photo or it
+ * fails to load — so an image_url whose file isn't in public/ yet still looks fine.
+ */
+export function ProductImage({ src, alt, kind, tint, className = '' }: ProductImageProps) {
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  if (src && src !== failedSrc) {
+    return <img src={src} alt={alt} className={`object-contain ${className}`} onError={() => setFailedSrc(src)} />;
   }
-  return <DeviceArt kind={deviceKindFor(product)} tint={c?.hex} className={className} />;
+  return <DeviceArt kind={kind} tint={tint} className={className} />;
 }
 
 // ── Illustrations ──────────────────────────────────────────────
