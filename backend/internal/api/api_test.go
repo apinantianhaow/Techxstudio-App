@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -16,6 +17,7 @@ import (
 
 	"github.com/apinantianhaow/techxstudio-app/backend/internal/auth"
 	"github.com/apinantianhaow/techxstudio-app/backend/internal/mail"
+	"github.com/apinantianhaow/techxstudio-app/backend/internal/models"
 	"github.com/apinantianhaow/techxstudio-app/backend/internal/supabase"
 )
 
@@ -160,6 +162,7 @@ func TestProtectedRoutesRequireToken(t *testing.T) {
 	env := newEnv(t, nil)
 	for _, tc := range []struct{ method, path, message string }{
 		{"GET", "/api/cart", "Please log in"},
+		{"PUT", "/api/cart", "Please log in"},
 		{"POST", "/api/orders", "Please log in"},
 		{"GET", "/api/wishlist", "Please log in"},
 		{"GET", "/api/auth/me", "Unauthorized"},
@@ -338,46 +341,210 @@ func TestValidateCoupon(t *testing.T) {
 	wantError(t, status, body, 400, "Coupon has expired")
 }
 
+const (
+	productA = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+	productB = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
+)
+
+// rpcArgs decodes the named arguments of the only call to the SQL function fn.
+func rpcArgs(t *testing.T, env *testEnv, fn string) map[string]any {
+	t.Helper()
+	calls := env.rest.find("POST", "rpc/"+fn)
+	if len(calls) != 1 {
+		t.Fatalf("want 1 call to %s, got %d (all calls: %v)", fn, len(calls), env.rest.calls)
+	}
+	var args map[string]any
+	if err := json.Unmarshal([]byte(calls[0].Body), &args); err != nil {
+		t.Fatalf("%s args: %v", fn, err)
+	}
+	return args
+}
+
 func TestCreateOrder(t *testing.T) {
 	env := newEnv(t, func(c restCall) (int, string) {
 		switch c.Method + " " + c.Table {
-		case "GET cart_items":
-			return 200, `[{"id":"ci1","product_id":"p1","quantity":2,"price":1000,"option_label":"128GB","color_name":"Black","image_url":null},
-				{"id":"ci2","product_id":"p2","quantity":1,"price":500,"option_label":"","color_name":"","image_url":"/x.png"}]`
-		case "GET coupons":
-			return 200, `[{"id":"k1","code":"FLAT100","discount_percent":0,"discount_amount":100,"current_uses":3,"is_active":true}]`
-		case "POST orders":
-			return 201, `[{"id":"o1","user_id":"` + testUserID + `","status":"confirmed","total_amount":2400,"discount_amount":100}]`
-		case "GET products":
-			return 200, `[{"id":"p1","name":"iPhone 16"}]`
+		case "POST rpc/create_order":
+			return 200, `"o1"`
+		case "GET orders":
+			return 200, `[{"id":"o1","user_id":"` + testUserID + `","status":"confirmed","total_amount":2400,"discount_amount":100,
+				"order_items":[{"id":"oi1","product_name":"iPhone 16","quantity":2,"price":1250}]}]`
 		}
-		return 201, "[]"
+		return 500, `{"message":"unexpected"}`
 	})
 
 	status, body := call(t, env.handler, "POST", "/api/orders", env.token(t), map[string]any{
-		"shipping_address": "Bangkok", "coupon_code": "FLAT100",
+		"shipping_address": "  Bangkok ", "coupon_code": " flat100 ", "payment_method": "cod",
+		"items": []map[string]any{
+			{"product_id": productA, "option_label": "128GB", "color_name": "Black", "quantity": 2, "price": 1},
+			{"product_id": productB, "quantity": 1},
+		},
 	})
-	if status != 201 || body["order"].(map[string]any)["id"] != "o1" {
+	order, _ := body["order"].(map[string]any)
+	if status != 201 || order["id"] != "o1" || len(order["order_items"].([]any)) != 1 {
 		t.Fatalf("got %d %v", status, body)
 	}
 
-	var order map[string]any
-	json.Unmarshal([]byte(env.rest.find("POST", "orders")[0].Body), &order)
-	if order["total_amount"] != 2400.0 || order["discount_amount"] != 100.0 || order["payment_method"] != "credit_card" || order["user_id"] != testUserID {
-		t.Fatalf("order insert: %v", order)
+	args := rpcArgs(t, env, "create_order")
+	var items []cartLineArg
+	raw, _ := json.Marshal(args["p_items"])
+	json.Unmarshal(raw, &items)
+	wantItems := []cartLineArg{
+		{ProductID: productA, OptionLabel: "128GB", ColorName: "Black", Quantity: 2},
+		{ProductID: productB, Quantity: 1},
+	}
+	if args["p_user_id"] != testUserID || !slices.Equal(items, wantItems) || strings.Contains(string(raw), "price") ||
+		args["p_coupon_code"] != "FLAT100" || args["p_shipping_address"] != "Bangkok" || args["p_payment_method"] != "cod" {
+		t.Fatalf("create_order args: %v (items %s)", args, raw)
+	}
+	if q := env.rest.find("GET", "orders")[0].Query; q.Get("id") != "eq.o1" {
+		t.Fatalf("reload query: %v", q)
+	}
+	// Prices, the coupon and the cart are the database's job (one transaction).
+	for _, table := range []string{"orders", "order_items", "coupons", "cart_items"} {
+		for _, method := range []string{"POST", "PATCH", "DELETE"} {
+			if calls := env.rest.find(method, table); len(calls) > 0 {
+				t.Fatalf("unexpected %s %s outside create_order: %v", method, table, calls)
+			}
+		}
+	}
+}
+
+func TestCreateOrderValidation(t *testing.T) {
+	env := newEnv(t, nil)
+	line := func(quantity any) map[string]any {
+		return map[string]any{"product_id": productA, "option_label": "", "color_name": "", "quantity": quantity}
+	}
+	tooMany := make([]map[string]any, 51)
+	for i := range tooMany {
+		tooMany[i] = line(1)
+	}
+	for _, tc := range []struct {
+		body    map[string]any
+		message string
+	}{
+		{map[string]any{"shipping_address": " ", "items": []any{line(1)}}, "Please enter a shipping address"},
+		{map[string]any{"shipping_address": "BKK", "payment_method": "free", "items": []any{line(1)}}, "Please choose a payment method"},
+		{map[string]any{"shipping_address": "BKK", "items": []any{}}, "Cart is empty"},
+		{map[string]any{"shipping_address": "BKK", "items": []any{line(0)}}, "Quantity must be a whole number from 1 to 99"},
+		{map[string]any{"shipping_address": "BKK", "items": []any{line(1.5)}}, "Quantity must be a whole number from 1 to 99"},
+		{map[string]any{"shipping_address": "BKK", "items": []any{line(100)}}, "Quantity must be a whole number from 1 to 99"},
+		{map[string]any{"shipping_address": "BKK", "items": []any{map[string]any{"product_id": "p1", "quantity": 1}}}, "Invalid product ID"},
+		{map[string]any{"shipping_address": "BKK", "items": []any{line(1), line(2)}}, "Each product option can only be listed once"},
+		{map[string]any{"shipping_address": "BKK", "items": tooMany}, "A cart can hold at most 50 items"},
+	} {
+		status, body := call(t, env.handler, "POST", "/api/orders", env.token(t), tc.body)
+		wantError(t, status, body, 400, tc.message)
+	}
+	if len(env.rest.calls) != 0 {
+		t.Fatalf("invalid orders reached the database: %v", env.rest.calls)
+	}
+}
+
+func TestCreateOrderErrors(t *testing.T) {
+	var reply string
+	env := newEnv(t, func(c restCall) (int, string) { return 400, reply })
+	order := map[string]any{"shipping_address": "BKK", "items": []any{map[string]any{"product_id": productA, "quantity": 1}}}
+
+	for _, tc := range []struct {
+		reply, message string
+		status         int
+	}{
+		{`{"code":"P0001","message":"Some items are no longer available. Please review your cart."}`, "Some items are no longer available. Please review your cart.", 400},
+		{`{"code":"P0001","message":"Coupon has expired"}`, "Coupon has expired", 400},
+		{`{"code":"TXMIN","message":"Subtotal is below the coupon minimum","details":"2000.00"}`, "Minimum purchase ฿2,000", 400},
+		{`{"code":"23503","message":"insert or update violates foreign key constraint"}`, "Unable to create order", 500},
+	} {
+		reply = tc.reply
+		status, body := call(t, env.handler, "POST", "/api/orders", env.token(t), order)
+		wantError(t, status, body, tc.status, tc.message)
+	}
+}
+
+func TestCartUsesTheDatabasePrices(t *testing.T) {
+	var created bool
+	env := newEnv(t, func(c restCall) (int, string) {
+		switch c.Table {
+		case "rpc/get_cart":
+			return 200, `[{"id":"c1","product_id":"` + productA + `","name":"iPhone 16","slug":"iphone-16","option_label":"128GB","color_name":"Black","quantity":1,"price":33155,"image_url":""}]`
+		case "rpc/replace_cart":
+			return 200, `{"items":[],"skipped":1}`
+		case "rpc/add_cart_item":
+			if created {
+				return 200, `{"item":{"id":"c2","price":4990},"created":true}`
+			}
+			return 200, `{"item":{"id":"c2","price":4990},"created":false}`
+		}
+		return 500, `{"message":"unexpected"}`
+	})
+	tok := env.token(t)
+
+	status, body := call(t, env.handler, "GET", "/api/cart", tok, nil)
+	items, _ := body["items"].([]any)
+	if status != 200 || len(items) != 1 || items[0].(map[string]any)["price"] != 33155.0 {
+		t.Fatalf("GET: got %d %v", status, body)
+	}
+	if args := rpcArgs(t, env, "get_cart"); args["p_user_id"] != testUserID {
+		t.Fatalf("get_cart args: %v", args)
 	}
 
-	var items []map[string]any
-	json.Unmarshal([]byte(env.rest.find("POST", "order_items")[0].Body), &items)
-	if len(items) != 2 || items[0]["product_name"] != "iPhone 16" || items[1]["product_name"] != "Unknown Product" || items[0]["order_id"] != "o1" {
-		t.Fatalf("order items: %v", items)
+	// PUT forwards the lines without any client price; repeated lines are the database's to merge.
+	status, body = call(t, env.handler, "PUT", "/api/cart", tok, map[string]any{"items": []any{
+		map[string]any{"product_id": productA, "option_label": "128GB", "color_name": "Black", "quantity": 2, "price": 1},
+		map[string]any{"product_id": productA, "option_label": "128GB", "color_name": "Black", "quantity": 1},
+	}})
+	if status != 200 || body["skipped"] != 1.0 {
+		t.Fatalf("PUT: got %d %v", status, body)
+	}
+	lines, _ := json.Marshal(rpcArgs(t, env, "replace_cart")["p_items"])
+	if strings.Contains(string(lines), "price") || strings.Count(string(lines), productA) != 2 {
+		t.Fatalf("replace_cart lines: %s", lines)
 	}
 
-	if patch := env.rest.find("PATCH", "coupons"); len(patch) != 1 || patch[0].Body != `{"current_uses":4}` {
-		t.Fatalf("coupon use not recorded: %v", patch)
+	status, body = call(t, env.handler, "PUT", "/api/cart", tok, map[string]any{})
+	wantError(t, status, body, 400, "Please send the cart items")
+	status, body = call(t, env.handler, "PUT", "/api/cart", tok, map[string]any{"items": []any{map[string]any{"product_id": productA, "quantity": 100}}})
+	wantError(t, status, body, 400, "Quantity must be a whole number from 1 to 99")
+
+	// POST ignores price and image_url and answers 201 only for a new line.
+	status, body = call(t, env.handler, "POST", "/api/cart", tok, map[string]any{
+		"product_id": productB, "quantity": 2, "price": 1, "image_url": "/cheap.png",
+	})
+	if status != 200 || body["item"].(map[string]any)["price"] != 4990.0 {
+		t.Fatalf("POST bump: got %d %v", status, body)
 	}
-	if del := env.rest.find("DELETE", "cart_items"); len(del) != 1 || del[0].Query.Get("user_id") != "eq."+testUserID {
-		t.Fatalf("cart not cleared: %v", del)
+	args := rpcArgs(t, env, "add_cart_item")
+	if len(args) != 5 || args["p_product_id"] != productB || args["p_quantity"] != 2.0 || args["p_option_label"] != "" {
+		t.Fatalf("add_cart_item args: %v", args)
+	}
+	created = true
+	if status, _ := call(t, env.handler, "POST", "/api/cart", tok, map[string]any{"product_id": productB}); status != 201 {
+		t.Fatalf("POST new line: got %d", status)
+	}
+}
+
+func TestAddToCartUnavailable(t *testing.T) {
+	env := newEnv(t, func(c restCall) (int, string) {
+		return 400, `{"code":"P0001","message":"This item is no longer available"}`
+	})
+	status, body := call(t, env.handler, "POST", "/api/cart", env.token(t), map[string]any{"product_id": productA, "option_label": "9TB"})
+	wantError(t, status, body, 400, "This item is no longer available")
+}
+
+func TestCouponDiscount(t *testing.T) {
+	maxDiscount := 5000.0
+	for _, tc := range []struct {
+		coupon      models.Coupon
+		total, want float64
+	}{
+		{models.Coupon{DiscountAmount: 500}, 300, 300}, // never more than the order
+		{models.Coupon{DiscountAmount: 500}, 2000, 500},
+		{models.Coupon{DiscountAmount: 500}, 0, 500}, // total unknown (coupon preview)
+		{models.Coupon{DiscountPercent: 10, MaxDiscount: &maxDiscount}, 54188, 5000},
+		{models.Coupon{DiscountPercent: 10}, 33155, 3316},
+	} {
+		if got := couponDiscount(tc.coupon, tc.total); got != tc.want {
+			t.Errorf("couponDiscount(%+v, %v) = %v, want %v", tc.coupon, tc.total, got, tc.want)
+		}
 	}
 }
 
@@ -402,8 +569,45 @@ func TestWishlistDuplicate(t *testing.T) {
 	env := newEnv(t, func(c restCall) (int, string) {
 		return 409, `{"code":"23505","message":"duplicate key value violates unique constraint"}`
 	})
-	status, body := call(t, env.handler, "POST", "/api/wishlist", env.token(t), map[string]string{"product_id": "p1"})
+	status, body := call(t, env.handler, "POST", "/api/wishlist", env.token(t), map[string]string{"product_id": productA})
 	wantError(t, status, body, 409, "Product already in wishlist")
+}
+
+func TestWishlistNeedsAProductID(t *testing.T) {
+	env := newEnv(t, nil)
+	status, body := call(t, env.handler, "POST", "/api/wishlist", env.token(t), map[string]string{"product_id": "p1"})
+	wantError(t, status, body, 400, "Please specify a product")
+	status, body = call(t, env.handler, "DELETE", "/api/wishlist?product_id=1%20or%201=1", env.token(t), nil)
+	wantError(t, status, body, 400, "Please specify a product")
+	if len(env.rest.calls) != 0 {
+		t.Fatalf("invalid ids reached the database: %v", env.rest.calls)
+	}
+}
+
+func TestEmailsAreCaseInsensitive(t *testing.T) {
+	env := newEnv(t, func(c restCall) (int, string) {
+		if c.Method == "POST" && c.Table == "users" {
+			return 201, `[{"id":"` + testUserID + `","email":"ann@example.com","full_name":"Ann"}]`
+		}
+		return 200, "[]"
+	})
+
+	call(t, env.handler, "POST", "/api/auth/signup", "", map[string]string{"email": " Ann@Example.COM ", "password": "secret1", "full_name": "Ann"})
+	if q := env.rest.find("GET", "users")[0].Query.Get("email"); q != "eq.ann@example.com" {
+		t.Fatalf("signup looked up %q", q)
+	}
+	var row map[string]any
+	json.Unmarshal([]byte(env.rest.find("POST", "users")[0].Body), &row)
+	if row["email"] != "ann@example.com" {
+		t.Fatalf("signup stored %v", row["email"])
+	}
+
+	status, body := call(t, env.handler, "POST", "/api/auth/login", "", map[string]string{"email": "ANN@example.com", "password": "secret1"})
+	wantError(t, status, body, 401, "Invalid email or password")
+	logins := env.rest.find("GET", "users")
+	if q := logins[len(logins)-1].Query.Get("email"); q != "eq.ann@example.com" {
+		t.Fatalf("login looked up %q", q)
+	}
 }
 
 func TestCreateReviewRecalculatesRating(t *testing.T) {

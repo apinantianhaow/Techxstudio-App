@@ -304,7 +304,7 @@ func (s *Server) googleUser(w http.ResponseWriter, r *http.Request, create bool)
 		writeError(w, http.StatusForbidden, "Your Google account's email address is not verified")
 		return models.User{}, false, false
 	}
-	email := strings.ToLower(id.Email)
+	email := normalizeEmail(id.Email)
 
 	type googleRow struct {
 		models.User

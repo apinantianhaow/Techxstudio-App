@@ -75,18 +75,27 @@ export interface UsernameChange {
   changed_at: string;
 }
 
-/** Cart line as stored client-side in the cart store. */
+/**
+ * A cart line as the cart store keeps it: priced by the API (GET/PUT /api/cart)
+ * when signed in, or estimated from the product page in a guest's cart.
+ */
 export interface CartItem {
   id: string;
   product_id: string;
   name: string;
+  /** '' when the product has no options */
   option_label: string;
+  /** '' when the product has no colors */
   color_name: string;
   quantity: number;
+  /** Current unit price (after any sale) */
   price: number;
   image_url: string;
   slug: string;
 }
+
+/** Cart line as sent to PUT /api/cart and POST /api/orders; the server prices it. */
+export type CartLineInput = Pick<CartItem, 'product_id' | 'option_label' | 'color_name' | 'quantity'>;
 
 export type OrderStatus = 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 

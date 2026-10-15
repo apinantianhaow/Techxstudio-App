@@ -195,8 +195,8 @@ BEGIN
            'price',        l.unit_price,
            'image_url',    l.image_url,
            'ord',          m.ord
-         ) ORDER BY m.ord) FILTER (WHERE l.unit_price IS NOT NULL), '[]'),
-         COALESCE(sum(m.input_lines) FILTER (WHERE l.unit_price IS NULL), 0)
+         ) ORDER BY m.ord) FILTER (WHERE l.unit_price IS NOT NULL AND m.quantity >= 1), '[]'),
+         COALESCE(sum(m.input_lines) FILTER (WHERE l.unit_price IS NULL OR m.quantity < 1), 0)
   INTO v_lines, v_skipped
   FROM (
     SELECT i.product_id, i.option_label, i.color_name,
@@ -320,7 +320,7 @@ BEGIN
            'price',        l.unit_price,
            'image_url',    l.image_url
          ) ORDER BY i.ord),
-         count(*) FILTER (WHERE l.unit_price IS NULL),
+         count(*) FILTER (WHERE l.unit_price IS NULL OR i.quantity NOT BETWEEN 1 AND 99),
          COALESCE(sum(l.unit_price * i.quantity), 0)
   INTO v_lines, v_invalid, v_subtotal
   FROM cart_input(p_items) i
@@ -337,12 +337,15 @@ BEGIN
     -- FOR UPDATE makes concurrent checkouts with this coupon take
     -- turns, so max_uses can't be exceeded.
     SELECT * INTO v_coupon FROM coupons c WHERE c.code = v_code AND c.is_active FOR UPDATE;
+    -- The same messages as POST /api/coupons/validate.
     IF NOT FOUND THEN
-      RAISE EXCEPTION 'Invalid coupon code' USING ERRCODE = 'P0001';
+      RAISE EXCEPTION 'Coupon not found' USING ERRCODE = 'P0001';
     END IF;
-    IF v_coupon.expires_at < now()
-       OR (v_coupon.max_uses > 0 AND COALESCE(v_coupon.current_uses, 0) >= v_coupon.max_uses) THEN
+    IF v_coupon.expires_at < now() THEN
       RAISE EXCEPTION 'Coupon has expired' USING ERRCODE = 'P0001';
+    END IF;
+    IF v_coupon.max_uses > 0 AND COALESCE(v_coupon.current_uses, 0) >= v_coupon.max_uses THEN
+      RAISE EXCEPTION 'Coupon fully redeemed' USING ERRCODE = 'P0001';
     END IF;
     IF v_coupon.min_purchase > 0 AND v_subtotal < v_coupon.min_purchase THEN
       RAISE EXCEPTION 'Subtotal is below the coupon minimum'

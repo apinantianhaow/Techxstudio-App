@@ -45,7 +45,7 @@ export default function WishlistPage() {
       <div className="page-width">
         <h1 className="t-headline pt-12 pb-8 md:pt-16">
           <span className="text-ink">{t('wishlist.title')}</span>{' '}
-          <span className="text-ink-2">{favorites.length} {t('common.items')}</span>
+          <span className="text-ink-2">{favorites.length} {favorites.length === 1 ? t('common.item') : t('common.items')}</span>
         </h1>
         {loading ? (
           <LoadingSkeleton count={4} type="card" />

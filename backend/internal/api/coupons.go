@@ -76,6 +76,9 @@ func couponDiscount(c models.Coupon, total float64) float64 {
 		return discount
 	}
 	if c.DiscountAmount > 0 {
+		if total > 0 {
+			return math.Min(c.DiscountAmount, total)
+		}
 		return c.DiscountAmount
 	}
 	return 0

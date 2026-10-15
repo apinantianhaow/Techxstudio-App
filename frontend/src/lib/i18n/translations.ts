@@ -19,6 +19,7 @@ export const translations = {
       close: 'Close',
       share: 'Share',
       linkCopied: 'Link copied!',
+      item: 'item',
       items: 'items',
     },
 
@@ -149,6 +150,7 @@ export const translations = {
       freeDeliveryReturns: 'Free shipping and 14-day returns on every order.',
       remove: 'Remove',
       summary: 'Order summary',
+      unavailableRemoved: 'Some items are no longer available and were removed from your cart.',
     },
 
     // ── Coupon ──
@@ -338,6 +340,7 @@ export const translations = {
       close: 'ปิด',
       share: 'แชร์',
       linkCopied: 'คัดลอกลิงก์แล้ว',
+      item: 'รายการ',
       items: 'รายการ',
     },
 
@@ -468,6 +471,7 @@ export const translations = {
       freeDeliveryReturns: 'จัดส่งฟรี และเปลี่ยนคืนได้ภายใน 14 วันทุกคำสั่งซื้อ',
       remove: 'ลบ',
       summary: 'สรุปคำสั่งซื้อ',
+      unavailableRemoved: 'สินค้าบางรายการไม่มีจำหน่ายแล้ว จึงถูกนำออกจากตะกร้า',
     },
 
     // ── Coupon ──

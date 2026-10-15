@@ -37,7 +37,7 @@ export default function FilterSortBar({ count, sortBy, priceRange, onSortChange,
     <div>
       <div className="flex items-center justify-between gap-3 border-b border-line pb-4">
         <p className="text-[14px] text-ink-2">
-          {count !== undefined && `${count} ${t('common.items')}`}
+          {count !== undefined && `${count} ${count === 1 ? t('common.item') : t('common.items')}`}
         </p>
 
         <div className="flex items-center gap-2">

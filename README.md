@@ -13,7 +13,8 @@ Next.js admin panel and a Go REST API, with Supabase (Postgres + Storage) undern
 - Home page with category grid, a flash-sale shelf with countdown, and "popular" and accessories shelves
 - Category pages with filtering and sorting, instant search, product quick view and a side-by-side compare panel
 - Product pages with colors, storage options, specs, recommendations and customer reviews (write, edit, delete; ratings recalculate automatically)
-- Wishlist, cart, coupon codes, checkout, and order history with a status timeline (confirmed orders can be cancelled)
+- Wishlist and cart, saved to your account when you're signed in (what you picked as a guest is added at sign-in), coupon
+  codes, checkout priced by the server, and order history with a status timeline (confirmed orders can be cancelled)
 - Accounts: sign-up and password login confirmed with a 6-digit code sent by email, *Sign in with Google*, profile photo,
   a unique username with change history, and account deletion
 - Thai / English, light / dark mode, and a mobile layout with a bottom navigation bar
@@ -77,7 +78,7 @@ Supabase service-role key, so the browser never talks to the database directly.
     │   └── config/           Settings from the environment / .env
     └── supabase/
         ├── config.toml       Supabase CLI settings
-        └── migrations/       001–006, applied in order
+        └── migrations/       001–007, applied in order
 ```
 
 ## Getting started
@@ -95,7 +96,7 @@ Supabase service-role key, so the browser never talks to the database directly.
 cd backend
 supabase login
 supabase link --project-ref <your-project-ref>   # asks for the database password
-supabase db push                                  # applies migrations 001–006
+supabase db push                                  # applies migrations 001–007
 ```
 
 This creates the tables, row-level security policies, the `avatars` storage bucket, and seed data (7 products, 3 coupons).
@@ -143,9 +144,10 @@ UPDATE users SET role = 'admin' WHERE email = 'you@example.com';
 |---|---|---|
 | `PORT` | | API port (default `8080`) |
 | `APP_URL` | | Storefront origin allowed by CORS (default `http://localhost:3000`) |
+| `APP_ENV` | | `development` (default) or `production`. In production the API refuses to start unless `JWT_SECRET` is a random value of at least 32 characters |
 | `SUPABASE_URL` | ✓ | `https://<project-ref>.supabase.co` |
 | `SUPABASE_SERVICE_ROLE_KEY` | ✓ | The **legacy** `service_role` key (starts with `eyJ`) from *Project Settings → API Keys*. It bypasses row-level security, so keep it server-side only |
-| `JWT_SECRET` | ✓ | Random secret for signing sessions and hashing codes, e.g. `openssl rand -hex 32` |
+| `JWT_SECRET` | ✓ | Random secret for signing sessions and hashing codes, e.g. `openssl rand -hex 32`. Empty = a public development default, which `APP_ENV=production` refuses |
 | `GOOGLE_CLIENT_ID` | | OAuth client ID (type *Web application*). Empty = Google sign-in hidden |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM` | | Mail server for sign-in codes (Gmail: `smtp.gmail.com`, `587`, your address, an App Password, `TechXStudio <you@gmail.com>`). Empty `SMTP_HOST` = codes are printed in the API log instead (development only) |
 
@@ -170,6 +172,7 @@ For Google sign-in, add `http://localhost:3000` and `http://localhost:3001` to t
 | `004_admin.sql` | `users.role` and `admin_save_product()`, which saves a product with its colors, options and specs in one transaction |
 | `005_google_and_email_codes.sql` | Google accounts (`google_sub`, optional password) and `login_challenges` for emailed codes |
 | `006_usernames_and_avatars.sql` | Case-insensitive unique usernames, `username_history` (filled by a trigger on every rename), and the `avatars` storage bucket |
+| `007_checkout.sql` | Server-priced cart and checkout: `get_cart()`, `replace_cart()`, `add_cart_item()` and `create_order()` (prices, coupon and order in one transaction); no negative order totals; lower-case emails; sample coupons valid through 2027. It can be run again safely |
 
 Add new changes as the next numbered file and run `supabase db push`. Don't edit a migration that has already been applied.
 
@@ -188,6 +191,18 @@ Add new changes as the next numbered file and run `supabase db push`. Don't edit
 3. **Admin.** Same flows under `/api/admin/login*`, plus a role check. Every admin request re-reads `users.role`, so
    removing the role takes effect immediately.
 
+## How the cart and checkout work
+
+- **Cart and wishlist.** They live in the browser, so guests can shop. Once you're signed in, the storefront saves the
+  whole cart with `PUT /api/cart` shortly after each change, and hearts with `POST` / `DELETE /api/wishlist`. At sign-in a
+  guest cart is added to the account's cart; signing out clears this device's copy, not the account's.
+- **Prices come from the database.** The storefront sends only product, option, color and quantity (1–99 per line).
+  `cart_line_price()` in `007_checkout.sql` is the one place that decides a line's price (the option's price, less the sale
+  percent, rounded to whole baht) and whether it can be bought (active product, existing option and color).
+- **Checkout** (`POST /api/orders`) runs `create_order()`: it prices the lines, applies the coupon (never more than the
+  subtotal), records the order and its items, counts the coupon use and empties the server cart in one transaction, so a
+  failure leaves nothing half-written. No payment is taken.
+
 ## API overview
 
 All responses are JSON; errors are `{ "error": "message" }`. Routes marked 🔒 need `Authorization: Bearer <token>`,
@@ -203,7 +218,7 @@ and admin routes need an admin's token.
 | Account 🔒 | `GET` / `PUT` / `DELETE /api/auth/me` · `PUT` / `DELETE /api/auth/me/avatar` · `GET /api/auth/me/username-history` · `GET /api/auth/username-available?username=` |
 | Products | `GET /api/products?category=` · `GET /api/products/search?q=` · `GET /api/products/{id}` · `GET /api/products/curated/{flash_sale\|popular\|accessories}` |
 | Reviews | `GET /api/products/{id}/reviews` · 🔒 `POST` / `PUT` / `DELETE /api/products/{id}/reviews` |
-| Cart 🔒 | `GET` / `POST /api/cart` · `PATCH` / `DELETE /api/cart/{id}` |
+| Cart 🔒 | `GET` / `PUT` / `POST /api/cart` · `PATCH` / `DELETE /api/cart/{id}` |
 | Wishlist 🔒 | `GET` / `POST` / `DELETE /api/wishlist` |
 | Coupons | `POST /api/coupons/validate` |
 | Orders 🔒 | `GET` / `POST /api/orders` · `PATCH /api/orders/{id}` (cancel) |

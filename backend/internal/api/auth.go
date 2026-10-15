@@ -29,6 +29,7 @@ func (s *Server) signup(w http.ResponseWriter, r *http.Request) {
 	if !decodeJSON(w, r, &body) {
 		return
 	}
+	body.Email = normalizeEmail(body.Email)
 	var v validation
 	v.check(isEmail(body.Email), "Invalid email address")
 	v.check(utf8.RuneCountInString(body.Password) >= 6, "Password must be at least 6 characters")
@@ -91,6 +92,7 @@ func (s *Server) checkCredentials(w http.ResponseWriter, r *http.Request) (model
 	if !decodeJSON(w, r, &body) {
 		return models.User{}, false
 	}
+	body.Email = normalizeEmail(body.Email)
 	var v validation
 	v.check(isEmail(body.Email), "Invalid email address")
 	v.check(body.Password != "", "Please enter your password")

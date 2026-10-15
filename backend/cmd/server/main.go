@@ -23,13 +23,17 @@ import (
 func main() {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	cfg := config.Load()
+	if err := cfg.Check(); err != nil {
+		logger.Error("refusing to start", "err", err)
+		os.Exit(1)
+	}
 
 	db := supabase.New(cfg.SupabaseURL, cfg.SupabaseServiceKey)
 	if !db.Configured() {
 		logger.Warn("SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY not set — only mock curated products will work")
 	}
 	if cfg.JWTSecret == config.DefaultJWTSecret {
-		logger.Warn("JWT_SECRET not set — using the development default")
+		logger.Warn("JWT_SECRET not set — using the development default (the API won't start like this with APP_ENV=production)")
 	}
 
 	google := auth.NewGoogleVerifier(cfg.GoogleClientID)

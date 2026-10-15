@@ -4,18 +4,21 @@ import { useState } from 'react';
 import { ShoppingBag } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import CartItem from '@/components/cart/CartItem';
 import CouponInput from '@/components/cart/CouponInput';
-import useCartStore, { useCartItems, useCartTotalPrice } from '@/stores/useCartStore';
+import useCartStore, { useCartItems, useCartTotalItems, useCartTotalPrice } from '@/stores/useCartStore';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/context/LanguageContext';
 import { formatPrice, errorMessage } from '@/lib/utils';
-import type { AppliedCoupon } from '@/types';
+import type { AppliedCoupon, CartLineInput } from '@/types';
 import { toast } from 'sonner';
 import { toastIcons } from '@/components/ui/toastIcons';
 
 export default function CartPage() {
+  const router = useRouter();
   const items = useCartItems();
+  const totalItems = useCartTotalItems();
   const totalPrice = useCartTotalPrice();
   const clearCart = useCartStore((s) => s.clearCart);
   const { isLoggedIn, authFetch } = useAuth();
@@ -32,19 +35,31 @@ export default function CartPage() {
     if (!isLoggedIn) { toast.error(t('errors.loginRequired')); return; }
     setOrdering(true);
     try {
+      // Save a quantity change that's still waiting, then order exactly what's in the bag.
+      // The API prices every line itself.
+      await useCartStore.getState().flush();
+      const lines: CartLineInput[] = useCartStore.getState().items.map(
+        ({ product_id, option_label, color_name, quantity }) => ({ product_id, option_label, color_name, quantity })
+      );
       const res = await authFetch('/api/orders', {
         method: 'POST',
         body: JSON.stringify({
+          items: lines,
           shipping_address: shippingAddress.trim(),
           payment_method: paymentMethod,
           coupon_code: appliedCoupon?.code || undefined,
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      if (!res.ok) {
+        // e.g. an item was taken off sale: show the bag as the shop has it now
+        if (res.status === 400) void useCartStore.getState().refresh();
+        throw new Error(data.error);
+      }
       clearCart();
       setAppliedCoupon(null);
       toast.success(t('orders.orderSuccess'), { icon: toastIcons.celebrate });
+      router.push('/orders');
     } catch (err) { toast.error(errorMessage(err) || t('orders.orderFailed')); }
     finally { setOrdering(false); }
   };
@@ -81,7 +96,7 @@ export default function CartPage() {
           {/* Items */}
           <section aria-label={t('cart.title')}>
             <div className="flex items-center justify-between py-4">
-              <p className="text-[14px] text-ink-2">{items.length} {t('common.items')}</p>
+              <p className="text-[14px] text-ink-2">{totalItems} {totalItems === 1 ? t('common.item') : t('common.items')}</p>
               <button onClick={() => { clearCart(); toast(t('cart.cleared')); }} className="link text-[14px]">
                 {t('common.clearAll')}
               </button>

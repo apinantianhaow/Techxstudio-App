@@ -1,6 +1,8 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import useCartStore from '@/stores/useCartStore';
+import useWishlistStore from '@/stores/useWishlistStore';
 import type { AuthFetch, OtpChallenge, User } from '@/types';
 
 interface AuthResponse {
@@ -98,6 +100,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // The cart and wishlist follow the account: loaded (and merged with a guest's)
+  // once signed in. When a saved session turns out to have ended, the previous
+  // user's copies are cleared so the next person on this device doesn't see them.
+  const userId = user?.id;
+  useEffect(() => {
+    if (loading) return;
+    if (userId && token) {
+      void useCartStore.getState().attachUser(userId, authFetch);
+      void useWishlistStore.getState().attachUser(userId, authFetch);
+      return;
+    }
+    if (useCartStore.getState().owner) useCartStore.getState().detachUser({ clear: true });
+    if (useWishlistStore.getState().owner) useWishlistStore.getState().detachUser({ clear: true });
+  }, [loading, userId, token, authFetch]);
+
   const startSession = (data: AuthResponse): AuthResponse => {
     setUser(data.user);
     setToken(data.token);
@@ -121,6 +138,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     startSession(await post<AuthResponse>('/api/auth/google', { credential }, 'Google sign-in failed'));
 
   const logout = () => {
+    useCartStore.getState().detachUser({ clear: true });
+    useWishlistStore.getState().detachUser({ clear: true });
     setUser(null);
     setToken(null);
     localStorage.removeItem('techx-token');

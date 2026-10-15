@@ -26,6 +26,25 @@ function isLocale(value: string): value is Locale {
   return value in translations;
 }
 
+/** The entry at a dot-separated key in one language, or undefined. */
+function lookup(locale: Locale, key: string): unknown {
+  let value: unknown = translations[locale];
+  for (const k of key.split('.')) {
+    if (!value || typeof value !== 'object' || !(k in value)) return undefined;
+    value = (value as Record<string, unknown>)[k];
+  }
+  return value;
+}
+
+/**
+ * Translate outside React (e.g. in a store), in the language the page is
+ * showing: LanguageProvider keeps <html lang> set to the current locale.
+ */
+export function translate(key: string): string {
+  const lang = typeof document === 'undefined' ? '' : document.documentElement.lang;
+  return String(lookup(isLocale(lang) ? lang : 'en', key) ?? key);
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [locale, setLocale] = useState<Locale>('en');
 
@@ -43,20 +62,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, [locale]);
 
   const t = useCallback(
-    (<T,>(key: string, fallback?: string): T => {
-      const keys = key.split('.');
-      let value: unknown = translations[locale];
-
-      for (const k of keys) {
-        if (value && typeof value === 'object' && k in value) {
-          value = (value as Record<string, unknown>)[k];
-        } else {
-          return (fallback || key) as T;
-        }
-      }
-
-      return (value ?? fallback ?? key) as T;
-    }) as TranslateFn,
+    (<T,>(key: string, fallback?: string): T => (lookup(locale, key) ?? (fallback || key)) as T) as TranslateFn,
     [locale]
   );
 

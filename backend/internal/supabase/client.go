@@ -40,6 +40,13 @@ func IsCode(err error, code string) bool {
 	return errors.As(err, &e) && e.Code == code
 }
 
+// AsError returns the PostgREST/Postgres error inside err, if there is one.
+func AsError(err error) (*Error, bool) {
+	var e *Error
+	ok := errors.As(err, &e)
+	return e, ok
+}
+
 type Client struct {
 	restURL    string
 	storageURL string

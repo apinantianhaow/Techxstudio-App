@@ -64,6 +64,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("DELETE /api/products/{id}/reviews", s.deleteReview)
 
 	mux.HandleFunc("GET /api/cart", s.listCart)
+	mux.HandleFunc("PUT /api/cart", s.replaceCart)
 	mux.HandleFunc("POST /api/cart", s.addToCart)
 	mux.HandleFunc("PATCH /api/cart/{id}", s.updateCartItem)
 	mux.HandleFunc("DELETE /api/cart/{id}", s.deleteCartItem)
@@ -222,6 +223,10 @@ var (
 	emailPattern = regexp.MustCompile(`^[A-Za-z0-9_'+\-.]*[A-Za-z0-9_+\-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$`)
 	uuidPattern  = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`)
 )
+
+// normalizeEmail is how addresses are stored and looked up, so
+// "Ann@Example.com" and "ann@example.com" are the same account.
+func normalizeEmail(s string) string { return strings.ToLower(strings.TrimSpace(s)) }
 
 func isEmail(s string) bool {
 	return emailPattern.MatchString(s) && !strings.HasPrefix(s, ".") && !strings.Contains(s, "..")

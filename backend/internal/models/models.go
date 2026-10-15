@@ -101,28 +101,17 @@ type Review struct {
 	Users     *ReviewAuthor `json:"users,omitempty"`
 }
 
-// CartProduct is the product summary embedded in cart items.
-type CartProduct struct {
-	ID            string  `json:"id"`
-	Name          string  `json:"name"`
-	Slug          string  `json:"slug"`
-	OriginalPrice float64 `json:"original_price"`
-	SalePercent   int     `json:"sale_percent"`
-	Badge         *string `json:"badge"`
-}
-
 type CartItem struct {
-	ID          string       `json:"id"`
-	UserID      string       `json:"user_id"`
-	ProductID   string       `json:"product_id"`
-	OptionLabel *string      `json:"option_label"`
-	ColorName   *string      `json:"color_name"`
-	Quantity    int          `json:"quantity"`
-	Price       float64      `json:"price"`
-	ImageURL    *string      `json:"image_url"`
-	CreatedAt   string       `json:"created_at"`
-	UpdatedAt   string       `json:"updated_at"`
-	Products    *CartProduct `json:"products,omitempty"`
+	ID          string  `json:"id"`
+	UserID      string  `json:"user_id"`
+	ProductID   string  `json:"product_id"`
+	OptionLabel *string `json:"option_label"`
+	ColorName   *string `json:"color_name"`
+	Quantity    int     `json:"quantity"`
+	Price       float64 `json:"price"`
+	ImageURL    *string `json:"image_url"`
+	CreatedAt   string  `json:"created_at"`
+	UpdatedAt   string  `json:"updated_at"`
 }
 
 // WishlistProduct is the product summary embedded in wishlist items.

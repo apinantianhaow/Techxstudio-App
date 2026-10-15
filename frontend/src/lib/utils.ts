@@ -42,7 +42,9 @@ export function formatDateTime(date: DateInput): string {
  */
 export function calcDiscountedPrice(price: number, salePercent?: number | null): number {
   if (!salePercent) return price;
-  return Math.round(price * (1 - salePercent / 100));
+  // Multiply before dividing, like the API's cart_line_price, so a .5 rounds
+  // the same way in both places (1 - 7/100 isn't exact in floating point).
+  return Math.round((price * (100 - salePercent)) / 100);
 }
 
 /**

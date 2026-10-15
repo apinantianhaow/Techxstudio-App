@@ -3,7 +3,7 @@
 import { Minus, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ProductImage, deviceKindFor } from '@/components/product/ProductVisual';
-import useCartStore from '@/stores/useCartStore';
+import useCartStore, { MAX_LINE_QUANTITY } from '@/stores/useCartStore';
 import { useTranslation } from '@/context/LanguageContext';
 import { formatPrice } from '@/lib/utils';
 import type { CartItem as CartItemData } from '@/types';
@@ -51,8 +51,9 @@ export default function CartItem({ item, index = 0 }: { item: CartItemData; inde
               <span className="w-7 text-center text-[15px] font-semibold tabular-nums text-ink">{item.quantity}</span>
               <button
                 onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                disabled={item.quantity >= MAX_LINE_QUANTITY}
                 aria-label="+"
-                className="flex h-7 w-7 items-center justify-center rounded-full text-ink hover:bg-card"
+                className="flex h-7 w-7 items-center justify-center rounded-full text-ink hover:bg-card disabled:opacity-30"
               >
                 <Plus className="h-3.5 w-3.5" />
               </button>

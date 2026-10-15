@@ -44,7 +44,7 @@ func (s *Server) addToWishlist(w http.ResponseWriter, r *http.Request) {
 	if !decodeJSON(w, r, &body) {
 		return
 	}
-	if body.ProductID == "" {
+	if !uuidPattern.MatchString(body.ProductID) {
 		writeError(w, http.StatusBadRequest, "Please specify a product")
 		return
 	}
@@ -74,7 +74,7 @@ func (s *Server) removeFromWishlist(w http.ResponseWriter, r *http.Request) {
 	}
 
 	productID := r.URL.Query().Get("product_id")
-	if productID == "" {
+	if !uuidPattern.MatchString(productID) {
 		writeError(w, http.StatusBadRequest, "Please specify a product")
 		return
 	}
