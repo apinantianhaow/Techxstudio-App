@@ -2,6 +2,10 @@
   "css.validate": false,
   "css.lint.unknownAtRules": "ignore",
   "files.associations": {
-    "*.css": "tailwindcss"
-  }
+    "*.css": "tailwindcss",
+    "*.sql": "sql"
+  },
+  // The .sql files are PostgreSQL (Supabase): don't check them as SQL Server T-SQL.
+  // "*.sql": "sql" above keeps the Oracle extension from checking them as PL/SQL.
+  "mssql.intelliSense.enableErrorChecking": false
 }
